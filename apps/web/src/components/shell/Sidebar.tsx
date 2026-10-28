@@ -39,6 +39,7 @@ export function Sidebar({ items }: { items: NavItem[] }) {
               >
                 <Image
                   src={item.icon}
+                  loading="eager"
                   alt=""
                   width={30}
                   height={30}

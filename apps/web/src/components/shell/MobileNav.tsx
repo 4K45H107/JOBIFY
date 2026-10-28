@@ -27,6 +27,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
               >
                 <Image
                   src={item.icon}
+                  loading="eager"
                   alt=""
                   width={22}
                   height={22}

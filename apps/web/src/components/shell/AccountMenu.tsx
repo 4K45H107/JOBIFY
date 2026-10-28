@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { AuthUser } from "@jobify/shared";
+import { Avatar } from "@/components/ui/Avatar";
 import { api } from "@/lib/api/client";
 
 export function AccountMenu({ user }: { user: AuthUser }) {
@@ -51,13 +51,7 @@ export function AccountMenu({ user }: { user: AuthUser }) {
         onClick={() => setOpen((v) => !v)}
         className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chip"
       >
-        <Image
-          src="/icons/avatar.png"
-          alt=""
-          width={53}
-          height={52}
-          className="size-10 rounded-full md:size-[52px]"
-        />
+        <Avatar src={user.photoUrl} alt="" className="size-10 md:size-[52px]" />
       </button>
 
       {open && (
