@@ -10,11 +10,9 @@ import {
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 import { UPLOAD_LIMITS } from "@jobify/shared";
 import { ZodSerializerDto } from "nestjs-zod";
-import { memoryStorage } from "multer";
 import { CurrentUser, type RequestUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
 import {
@@ -27,16 +25,7 @@ import {
   SkillsUpdateDto,
 } from "./profile.dto";
 import { ProfileService } from "./profile.service";
-import { MAX_UPLOAD_BYTES, validateUpload } from "./upload";
-
-const uploadInterceptor = FileInterceptor("file", {
-  storage: memoryStorage(),
-  // Multer rejects anything larger outright; per-kind limits are checked after.
-  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
-});
-const fileBody = {
-  schema: { type: "object", properties: { file: { type: "string", format: "binary" } } },
-};
+import { fileBody, uploadInterceptor, validateUpload } from "../common/upload";
 
 @ApiTags("profile")
 @Controller()
