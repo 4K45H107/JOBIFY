@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { AuthUser } from "@jobify/shared";
+import { AccountMenu } from "./AccountMenu";
 
 /** Figma top bar: black, rounded bottom corners, logo left; search, notifications and avatar right. */
-export function TopBar({ homeHref }: { homeHref: string }) {
+export function TopBar({ homeHref, user }: { homeHref: string; user: AuthUser }) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between rounded-b-2xl bg-chrome px-4 text-chrome-fg md:h-[104px] md:rounded-b-[20px] md:px-5">
       <Link href={homeHref} className="font-brand text-3xl leading-none md:text-[40px]">
@@ -25,15 +27,7 @@ export function TopBar({ homeHref }: { homeHref: string }) {
         >
           <Image src="/icons/bell.svg" alt="" width={24} height={21} />
         </button>
-        <button type="button" aria-label="Account menu" className="rounded-full">
-          <Image
-            src="/icons/avatar.png"
-            alt=""
-            width={53}
-            height={52}
-            className="size-10 rounded-full md:size-[52px]"
-          />
-        </button>
+        <AccountMenu user={user} />
       </div>
     </header>
   );

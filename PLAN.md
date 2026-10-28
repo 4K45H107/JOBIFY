@@ -305,7 +305,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Register/login/logout, argon2 hashing, JWT access+refresh in httpOnly cookies, role guards (API)
 - [ ] Seeker profile + preferences + skills. CV/photo upload via pre-signed R2 URLs
 - [ ] Employer onboarding: create company or request to join. Admin approves/rejects
-- [ ] Screens: login, register, onboarding, `Profile` (info part), `Company Profile employer`
+- [x] Screens: login, register (web auth: /api proxy, route protection by role, session refresh in middleware, account menu)
+- [ ] Screens: onboarding, `Profile` (info part), `Company Profile employer`
 
 ### Phase 2: Jobs & discovery (weeks 3–4)
 

@@ -1,3 +1,4 @@
+import type { AuthUser } from "@jobify/shared";
 import { MobileNav } from "./MobileNav";
 import type { NavItem } from "./nav";
 import { Sidebar } from "./Sidebar";
@@ -7,15 +8,17 @@ import { TopBar } from "./TopBar";
 export function AppShell({
   nav,
   homeHref,
+  user,
   children,
 }: {
   nav: NavItem[];
   homeHref: string;
+  user: AuthUser;
   children: React.ReactNode;
 }) {
   return (
     <div className="flex h-dvh flex-col">
-      <TopBar homeHref={homeHref} />
+      <TopBar homeHref={homeHref} user={user} />
       <div className="flex min-h-0 flex-1">
         <Sidebar items={nav} />
         <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-10 md:py-8">

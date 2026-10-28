@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { Controller, Get, INestApplication, Module } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
@@ -76,7 +77,8 @@ describe("Auth (e2e)", () => {
       const refresh = cookies.find((c) => c.startsWith("jobify_refresh="))!;
       expect(access).toMatch(/HttpOnly/);
       expect(access).toMatch(/SameSite=Lax/);
-      expect(refresh).toMatch(/Path=\/api\/auth/);
+      expect(refresh).toMatch(/HttpOnly/);
+      expect(refresh).toMatch(/Path=\/;/);
 
       const stored = await prisma.user.findUniqueOrThrow({ where: { email: email("ayesha") } });
       expect(stored.passwordHash).toMatch(/^\$argon2/);
@@ -176,9 +178,31 @@ describe("Auth (e2e)", () => {
       expect(cookieValue(refreshed, "jobify_access")).toBeDefined();
     });
 
-    it("revokes every session when an old refresh token is reused", async () => {
+    it("tolerates parallel refreshes with the same token (grace window)", async () => {
+      const login = await register("parallel").expect(201);
+      const token = cookieValue(login, "jobify_refresh");
+      const server = app.getHttpServer();
+
+      const [a, b] = await Promise.all([
+        request(server).post("/api/auth/refresh").set("Cookie", `jobify_refresh=${token}`),
+        request(server).post("/api/auth/refresh").set("Cookie", `jobify_refresh=${token}`),
+      ]);
+      expect([a.status, b.status]).toEqual([204, 204]);
+      // Exactly one response rotates the refresh token; both renew access.
+      const rotated = [a, b].map((r) => cookieValue(r, "jobify_refresh")).filter(Boolean);
+      expect(rotated).toHaveLength(1);
+      expect(cookieValue(a, "jobify_access")).toBeDefined();
+      expect(cookieValue(b, "jobify_access")).toBeDefined();
+      // The rotated token still works.
+      await request(server)
+        .post("/api/auth/refresh")
+        .set("Cookie", `jobify_refresh=${rotated[0]}`)
+        .expect(204);
+    });
+
+    it("revokes every session when an old refresh token is reused after the grace window", async () => {
       const login = await register("reuse").expect(201);
-      const first = cookieValue(login, "jobify_refresh");
+      const first = cookieValue(login, "jobify_refresh")!;
       const server = app.getHttpServer();
 
       const rotated = await request(server)
@@ -186,6 +210,12 @@ describe("Auth (e2e)", () => {
         .set("Cookie", `jobify_refresh=${first}`)
         .expect(204);
       const second = cookieValue(rotated, "jobify_refresh");
+
+      // Pretend the rotation happened a minute ago.
+      await prisma.session.update({
+        where: { tokenHash: createHash("sha256").update(first).digest("hex") },
+        data: { revokedAt: new Date(Date.now() - 60_000) },
+      });
 
       // Attacker replays the stolen first token.
       await request(server)
