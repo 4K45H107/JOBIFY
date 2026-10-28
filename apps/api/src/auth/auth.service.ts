@@ -8,8 +8,16 @@ import { TokensService } from "./tokens.service";
 export interface IssuedTokens {
   userId: string;
   accessToken: string;
-  refreshToken: string;
+  /** Absent when only the access token was renewed (see REUSE_GRACE_MS). */
+  refreshToken?: string;
 }
+
+/**
+ * Parallel requests (e.g. a page load plus its prefetches) can present the same
+ * refresh token at once. Inside this window a just-rotated token still gets a
+ * new access token, but no new refresh token, instead of tripping theft detection.
+ */
+export const REUSE_GRACE_MS = 30_000;
 
 @Injectable()
 export class AuthService {
@@ -65,25 +73,47 @@ export class AuthService {
     if (!session) throw new UnauthorizedException("Session not found");
 
     if (session.revokedAt) {
-      this.logger.warn(
-        `Refresh token reuse detected for user ${session.userId}. Revoking all sessions.`,
-      );
-      await this.revokeAll(session.userId);
+      const rotatedRecently =
+        session.replacedBy !== null && Date.now() - session.revokedAt.getTime() < REUSE_GRACE_MS;
+      if (rotatedRecently && (await this.isActive(session.replacedBy!))) {
+        return {
+          userId: session.userId,
+          accessToken: await this.tokens.signAccessToken(session.user),
+        };
+      }
+      // Rotated long ago: a stolen token is being replayed. Logged-out tokens are just rejected.
+      if (session.replacedBy !== null) {
+        this.logger.warn(
+          `Refresh token reuse detected for user ${session.userId}. Revoking all sessions.`,
+        );
+        await this.revokeAll(session.userId);
+      }
       throw new UnauthorizedException("Session revoked");
     }
     if (session.expiresAt < new Date()) throw new UnauthorizedException("Session expired");
 
     const next = this.tokens.createRefreshToken();
-    // Only one concurrent refresh may rotate a given token.
-    const rotated = await this.prisma.session.updateMany({
-      where: { id: session.id, revokedAt: null },
-      data: { revokedAt: new Date(), replacedBy: next.hash },
+    // Revoke + create in one transaction. A concurrent refresh blocks on the row lock,
+    // then sees the token already rotated (count 0) with its successor committed.
+    const won = await this.prisma.$transaction(async (tx) => {
+      const rotated = await tx.session.updateMany({
+        where: { id: session.id, revokedAt: null },
+        data: { revokedAt: new Date(), replacedBy: next.hash },
+      });
+      if (rotated.count === 0) return false;
+      await tx.session.create({
+        data: {
+          userId: session.userId,
+          tokenHash: next.hash,
+          expiresAt: next.expiresAt,
+          userAgent,
+        },
+      });
+      return true;
     });
-    if (rotated.count === 0) throw new UnauthorizedException("Session revoked");
+    // Lost the race to a parallel request: take the grace path above.
+    if (!won) return this.refresh(refreshToken, userAgent);
 
-    await this.prisma.session.create({
-      data: { userId: session.userId, tokenHash: next.hash, expiresAt: next.expiresAt, userAgent },
-    });
     return {
       userId: session.userId,
       accessToken: await this.tokens.signAccessToken(session.user),
@@ -140,6 +170,11 @@ export class AuthService {
       accessToken: await this.tokens.signAccessToken(user),
       refreshToken: refresh.token,
     };
+  }
+
+  private async isActive(tokenHash: string): Promise<boolean> {
+    const successor = await this.prisma.session.findUnique({ where: { tokenHash } });
+    return !!successor && !successor.revokedAt && successor.expiresAt > new Date();
   }
 
   private async revokeAll(userId: string): Promise<void> {
