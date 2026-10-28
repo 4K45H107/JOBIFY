@@ -18,8 +18,8 @@ import type {
 } from "@jobify/shared";
 import type { Prisma } from "@jobify/db";
 import { CompanyAccessService } from "../companies/company-access.service";
-import { fileUrl } from "../files/file-keys";
 import { PrismaService } from "../prisma/prisma.service";
+import { summaryInclude, toSummary } from "./job-summary";
 import { ageOn, scoreJob } from "./recommend";
 
 interface Viewer {
@@ -27,22 +27,11 @@ interface Viewer {
   role: UserRole;
 }
 
-const summaryInclude = (viewerId: string) =>
-  ({
-    company: { select: { id: true, name: true, slug: true, logoKey: true } },
-    skills: { include: { skill: true } },
-    assessments: { select: { id: true } },
-    savedBy: { where: { userId: viewerId }, select: { userId: true } },
-    _count: { select: { applications: true } },
-  }) satisfies Prisma.JobInclude;
-
-type JobWithSummary = Prisma.JobGetPayload<{ include: ReturnType<typeof summaryInclude> }>;
-
 /** Start of today in UTC: a job with today's deadline is still open. */
-const startOfTodayUtc = () => new Date(new Date().toISOString().slice(0, 10));
+export const startOfTodayUtc = () => new Date(new Date().toISOString().slice(0, 10));
 
 /** Jobs a seeker can see and apply to. */
-const openJobs = (): Prisma.JobWhereInput => ({
+export const openJobs = (): Prisma.JobWhereInput => ({
   status: "OPEN",
   OR: [{ deadline: null }, { deadline: { gte: startOfTodayUtc() } }],
 });
@@ -377,30 +366,4 @@ export class JobsService {
     }
     return ids;
   }
-}
-
-function toSummary(job: JobWithSummary): JobSummary {
-  return {
-    id: job.id,
-    title: job.title,
-    type: job.type,
-    workplace: job.workplace,
-    country: job.country,
-    city: job.city,
-    salaryMin: job.salaryMin,
-    salaryMax: job.salaryMax,
-    status: job.status,
-    deadline: job.deadline?.toISOString().slice(0, 10) ?? null,
-    createdAt: job.createdAt.toISOString(),
-    company: {
-      id: job.company.id,
-      name: job.company.name,
-      slug: job.company.slug,
-      logoUrl: fileUrl(job.company.logoKey),
-    },
-    skills: job.skills.map((s) => s.skill.name).sort(),
-    hasAssessment: job.assessments.length > 0,
-    saved: job.savedBy.length > 0,
-    applicants: job._count.applications,
-  };
 }

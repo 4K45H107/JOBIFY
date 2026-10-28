@@ -7,6 +7,7 @@ import { setupApp } from "../src/app.setup";
 import { CurrentUser, type RequestUser } from "../src/auth/decorators/current-user.decorator";
 import { Roles } from "../src/auth/decorators/roles.decorator";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { uniqueRun } from "./helpers";
 
 @Controller("test-roles")
 class RolesTestController {
@@ -20,7 +21,7 @@ class RolesTestController {
 @Module({ controllers: [RolesTestController] })
 class RolesTestModule {}
 
-const run = Date.now().toString(36);
+const run = uniqueRun();
 const email = (name: string) => `${name}.${run}@auth-e2e.test`;
 const password = "Password123";
 
