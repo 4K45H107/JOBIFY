@@ -9,6 +9,7 @@ import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
 import { CompaniesModule } from "./companies/companies.module";
 import { FilesModule } from "./files/files.module";
+import { JobsModule } from "./jobs/jobs.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ProfileModule } from "./profile/profile.module";
@@ -36,6 +37,7 @@ import { StorageModule } from "./storage/storage.module";
     FilesModule,
     ProfileModule,
     CompaniesModule,
+    JobsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
