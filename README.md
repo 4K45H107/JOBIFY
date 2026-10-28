@@ -10,6 +10,7 @@ architecture and roadmap.
 
 ```
 apps/web          Next.js frontend
+apps/api          NestJS API (modular monolith)
 packages/shared   Zod schemas, types and enums shared across apps
 packages/tsconfig Shared TypeScript configs
 ```
@@ -22,8 +23,10 @@ Requirements: Node 22+, pnpm 10 (`corepack enable`), Docker.
 pnpm install
 cp .env.example .env
 pnpm db:up        # Postgres (host port 5433) + Redis (6379)
-pnpm dev          # web on http://localhost:3000
+pnpm dev          # web on http://localhost:3000, API on http://localhost:4000/api
 ```
+
+API docs (OpenAPI / Swagger UI) are served at http://localhost:4000/api/docs.
 
 ## Scripts
 
