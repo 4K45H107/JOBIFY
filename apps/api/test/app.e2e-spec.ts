@@ -56,7 +56,7 @@ describe("API foundation (e2e)", () => {
 
   it("GET /api/health returns ok", async () => {
     const res = await request(app.getHttpServer()).get("/api/health").expect(200);
-    expect(res.body.status).toBe("ok");
+    expect(res.body).toMatchObject({ status: "ok", database: "up" });
   });
 
   it("serves the OpenAPI document", async () => {

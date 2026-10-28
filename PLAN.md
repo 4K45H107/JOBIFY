@@ -190,11 +190,11 @@ jobify/
 │  ├─ api/            # NestJS modular monolith
 │  └─ worker/         # BullMQ processors (same codebase modules, separate process)
 ├─ packages/
+│  ├─ db/             # Prisma schema, migrations, generated client, seed
 │  ├─ shared/         # Zod schemas, DTO types, enums (roles, statuses)
 │  ├─ ui/             # design tokens + shared components from Figma
 │  ├─ api-client/     # generated from the API's OpenAPI spec
 │  └─ config/         # eslint, tsconfig, tailwind preset
-├─ prisma/            # schema + migrations + seed
 ├─ docs/              # ADRs, diagrams, screenshots
 └─ docker-compose.yml # postgres, redis, (judge0) for local dev
 ```
@@ -295,7 +295,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Monorepo scaffold (pnpm, Turborepo, TS, ESLint, Prettier), `docker-compose` (Postgres, Redis)
 - [x] Move the existing Next.js scaffold into `apps/web/` and settle on Tailwind v4 (the `feat/auth-system` pages get ported in Phase 1)
 - [x] NestJS app with config, health check, OpenAPI, global error format, request validation
-- [ ] Prisma schema v1 + migrations + **seed script**
+- [x] Prisma schema v1 + migrations + **seed script**
 - [ ] Next.js app with Tailwind + Figma design tokens + both app shells
 - [ ] CI: lint, typecheck, test, build. Deploy skeleton to Vercel + Railway + Neon
 - [ ] `.env.example`, secrets only in the hosting provider (never committed)

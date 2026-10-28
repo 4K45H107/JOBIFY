@@ -1,0 +1,4 @@
+{
+  "extends": "@jobify/tsconfig/library.json",
+  "include": ["src", "prisma", "prisma.config.ts"]
+}

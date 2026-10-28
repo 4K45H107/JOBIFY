@@ -1,0 +1,473 @@
+// Jobify data model. See PLAN.md §3 "Core data model".
+// Each block is owned by one API module, noted in its header comment.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── auth / users ────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SEEKER
+  EMPLOYER
+  ADMIN
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String?
+  role            UserRole
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  seekerProfile     SeekerProfile?
+  employerProfile   EmployerProfile?
+  jobPreference     JobPreference?
+  skills            SeekerSkill[]
+  companyMembership CompanyMember[]
+  postedJobs        Job[]                    @relation("JobPostedBy")
+  savedJobs         SavedJob[]
+  jobViews          JobView[]
+  jobAlerts         JobAlert[]
+  applications      Application[]
+  stageChanges      ApplicationStageChange[]
+  interviewsCreated Interview[]              @relation("InterviewCreatedBy")
+  notifications     Notification[]
+}
+
+enum EmploymentStatus {
+  STUDENT
+  EMPLOYED
+  UNEMPLOYED
+  FREELANCE
+}
+
+model SeekerProfile {
+  userId           String            @id
+  fullName         String
+  headline         String?
+  phone            String?
+  birthdate        DateTime?         @db.Date
+  location         String?
+  education        String?
+  about            String?
+  employmentStatus EmploymentStatus?
+  currentPosition  String?
+  experienceYears  Int?
+  cvKey            String?
+  photoKey         String?
+  updatedAt        DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmployerProfile {
+  userId      String   @id
+  fullName    String
+  designation String?
+  phone       String?
+  photoKey    String?
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Skill {
+  id      String        @id @default(cuid())
+  name    String        @unique
+  seekers SeekerSkill[]
+  jobs    JobSkill[]
+}
+
+model SeekerSkill {
+  userId  String
+  skillId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([userId, skillId])
+  @@index([skillId])
+}
+
+model JobPreference {
+  userId    String      @id
+  titles    String[]
+  locations String[]
+  jobTypes  JobType[]
+  workplace Workplace[]
+  minSalary Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── companies ───────────────────────────────────────────────────────────────
+
+enum CompanySize {
+  SIZE_1_10
+  SIZE_11_50
+  SIZE_51_200
+  SIZE_201_1000
+  SIZE_1001_10000
+  SIZE_10000_PLUS
+}
+
+model Company {
+  id           String       @id @default(cuid())
+  name         String       @unique
+  slug         String       @unique
+  industry     String?
+  size         CompanySize?
+  foundedYear  Int?
+  website      String?
+  headquarters String?
+  description  String?
+  mission      String?
+  logoKey      String?
+  coverKey     String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  members  CompanyMember[]
+  branches CompanyBranch[]
+  jobs     Job[]
+}
+
+enum CompanyRole {
+  ADMIN
+  RECRUITER
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
+model CompanyMember {
+  companyId String
+  userId    String
+  role      CompanyRole
+  status    MembershipStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, userId])
+  @@index([userId])
+}
+
+model CompanyBranch {
+  id        String @id @default(cuid())
+  companyId String
+  name      String
+  city      String
+  country   String
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// ─── jobs ────────────────────────────────────────────────────────────────────
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum Workplace {
+  ONSITE
+  REMOTE
+  HYBRID
+}
+
+enum JobStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  companyId   String
+  postedById  String
+  title       String
+  type        JobType
+  workplace   Workplace
+  country     String
+  city        String?
+  salaryMin   Int
+  salaryMax   Int
+  ageMin      Int?
+  ageMax      Int?
+  description String
+  status      JobStatus @default(OPEN)
+  deadline    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  postedBy           User                @relation("JobPostedBy", fields: [postedById], references: [id])
+  skills             JobSkill[]
+  screeningQuestions ScreeningQuestion[]
+  savedBy            SavedJob[]
+  views              JobView[]
+  applications       Application[]
+  assessments        Assessment[]
+
+  @@index([status, createdAt])
+  @@index([companyId])
+  @@index([postedById])
+}
+
+model JobSkill {
+  jobId   String
+  skillId String
+
+  job   Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, skillId])
+  @@index([skillId])
+}
+
+enum QuestionKind {
+  YES_NO
+  TEXT
+  NUMBER
+}
+
+model ScreeningQuestion {
+  id       String       @id @default(cuid())
+  jobId    String
+  prompt   String
+  kind     QuestionKind
+  required Boolean      @default(true)
+  position Int
+
+  job     Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  answers ScreeningAnswer[]
+
+  @@index([jobId])
+}
+
+model SavedJob {
+  userId    String
+  jobId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@id([userId, jobId])
+  @@index([jobId])
+}
+
+/// "Recent searches" in the Figma Activities screen: jobs the seeker opened.
+model JobView {
+  userId   String
+  jobId    String
+  viewedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@id([userId, jobId])
+  @@index([userId, viewedAt])
+}
+
+model JobAlert {
+  id             String    @id @default(cuid())
+  userId         String
+  name           String
+  query          String?
+  filters        Json      @default("{}")
+  lastNotifiedAt DateTime?
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── applications ────────────────────────────────────────────────────────────
+
+enum ApplicationStage {
+  APPLIED
+  TESTING
+  SHORTLISTED
+  INTERVIEW
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+model Application {
+  id        String           @id @default(cuid())
+  jobId     String
+  seekerId  String
+  cvKey     String
+  /// Contact details as submitted in Easy Apply step 1.
+  contact   Json
+  stage     ApplicationStage @default(APPLIED)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  job          Job                      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  seeker       User                     @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  answers      ScreeningAnswer[]
+  stageChanges ApplicationStageChange[]
+  attempts     Attempt[]
+  interviews   Interview[]
+
+  @@unique([jobId, seekerId])
+  @@index([seekerId, stage])
+  @@index([jobId, stage])
+}
+
+model ScreeningAnswer {
+  applicationId String
+  questionId    String
+  answer        String
+
+  application Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  question    ScreeningQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([applicationId, questionId])
+}
+
+model ApplicationStageChange {
+  id            String            @id @default(cuid())
+  applicationId String
+  fromStage     ApplicationStage?
+  toStage       ApplicationStage
+  changedById   String?
+  note          String?
+  createdAt     DateTime          @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedBy   User?       @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, createdAt])
+}
+
+// ─── assessments ─────────────────────────────────────────────────────────────
+
+enum AssessmentKind {
+  MCQ
+  CODING
+}
+
+model Assessment {
+  id           String         @id @default(cuid())
+  jobId        String
+  kind         AssessmentKind
+  title        String
+  timeLimitMin Int?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  job          Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  mcqQuestions McqQuestion[]
+  attempts     Attempt[]
+
+  @@unique([jobId, kind])
+}
+
+model McqQuestion {
+  id           String   @id @default(cuid())
+  assessmentId String
+  prompt       String
+  options      String[]
+  /// Never serialized to seekers. Grading happens server-side.
+  correctIndex Int
+  position     Int
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+}
+
+model Attempt {
+  id            String    @id @default(cuid())
+  assessmentId  String
+  applicationId String
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+  /// Percentage 0–100, set when graded.
+  score         Float?
+  answers       Json?
+
+  assessment  Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, applicationId])
+}
+
+// ─── interviews ──────────────────────────────────────────────────────────────
+
+enum InterviewStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Interview {
+  id            String          @id @default(cuid())
+  applicationId String
+  createdById   String
+  /// Free-text stage label, e.g. "Preli Exam" or "Final round".
+  stage         String
+  scheduledAt   DateTime
+  durationMin   Int
+  status        InterviewStatus @default(SCHEDULED)
+  roomName      String          @unique
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdBy   User        @relation("InterviewCreatedBy", fields: [createdById], references: [id])
+
+  @@index([applicationId])
+  @@index([scheduledAt])
+}
+
+// ─── notifications ───────────────────────────────────────────────────────────
+
+enum NotificationType {
+  APPLICATION_SUBMITTED
+  APPLICATION_STAGE_CHANGED
+  ASSESSMENT_ASSIGNED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_REMINDER
+  COMPANY_JOIN_REQUESTED
+  COMPANY_JOIN_DECIDED
+  JOB_ALERT_MATCH
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
