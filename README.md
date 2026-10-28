@@ -25,7 +25,7 @@ Requirements: Node 22+, pnpm 10 (`corepack enable`), Docker.
 ```bash
 pnpm install
 cp .env.example .env
-pnpm db:up        # Postgres (host port 5433) + Redis (6379)
+pnpm services:up  # Postgres (5433), Redis (6379), SeaweedFS S3 (8333)
 pnpm db:migrate   # apply migrations
 pnpm db:seed      # demo data (re-runnable)
 pnpm dev          # web on http://localhost:3000, API on http://localhost:4000/api

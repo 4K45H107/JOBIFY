@@ -35,6 +35,7 @@ jobs:
       NODE_ENV: test
       # Test-only secret; real secrets live in the hosting provider.
       JWT_ACCESS_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
+      S3_ENDPOINT: http://localhost:8333
 
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +52,14 @@ jobs:
 
       - name: Format
         run: pnpm format:check
+
+      # Service containers can't take a command, so start the S3 store here.
+      - name: Start object storage (SeaweedFS S3)
+        run: |
+          docker run -d --name seaweedfs -p 8333:8333 chrislusf/seaweedfs:latest \
+            server -s3 -dir=/data -ip.bind=0.0.0.0 -master.volumeSizeLimitMB=64
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:8333/ && exit 0; sleep 1; done
+          docker logs seaweedfs; exit 1
 
       - name: Build (also generates the Prisma client)
         run: pnpm build

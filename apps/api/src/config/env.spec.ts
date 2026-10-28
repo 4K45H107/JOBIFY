@@ -14,6 +14,11 @@ describe("validateEnv", () => {
       JWT_ACCESS_SECRET,
       ACCESS_TOKEN_TTL_SECONDS: 900,
       REFRESH_TOKEN_TTL_DAYS: 30,
+      S3_REGION: "us-east-1",
+      S3_BUCKET: "jobify",
+      S3_ACCESS_KEY_ID: "jobify",
+      S3_SECRET_ACCESS_KEY: "jobify-dev-secret",
+      S3_FORCE_PATH_STYLE: true,
     });
   });
 
