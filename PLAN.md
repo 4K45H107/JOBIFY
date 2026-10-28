@@ -325,8 +325,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Application state machine + stage history
 - [x] MCQ API: build/lock test, timed attempt without answer key, server-side grading, late attempts closed at 0
 - [x] MCQ exam screen (`MCQUser`): timed, auto-submits when time runs out
-- [ ] MCQ builder screen (`ADD MCQ`)
-- [ ] Applicants view (`Job Management`): CV viewer, score, sort/filter, stage actions
+- [x] MCQ builder screen (`ADD MCQ`) with Responses tab
+- [x] Applicants view (`Job Management`): CV viewer, score, sort/filter, stage actions
 - [x] `Activities - Applications` with status counts
 - [ ] Notifications module: in-app feed + Socket.IO push + bell badge
 

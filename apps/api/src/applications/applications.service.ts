@@ -60,6 +60,13 @@ const toHistory = (
     note: c.note,
   }));
 
+/** Contact as stored on the application, with gaps (older or seeded rows) filled from the account. */
+function contactOf(raw: unknown, name: string, email: string): Applicant["contact"] {
+  const c = (raw ?? {}) as Partial<Record<"fullName" | "email" | "phone", unknown>>;
+  const str = (v: unknown) => (typeof v === "string" ? v : "");
+  return { fullName: str(c.fullName) || name, email: str(c.email) || email, phone: str(c.phone) };
+}
+
 @Injectable()
 export class ApplicationsService {
   constructor(
@@ -237,7 +244,7 @@ export class ApplicationsService {
         id: a.id,
         stage: a.stage,
         appliedAt: a.createdAt.toISOString(),
-        contact: a.contact as Applicant["contact"],
+        contact: contactOf(a.contact, p?.fullName ?? a.seeker.email, a.seeker.email),
         cvUrl: fileUrl(a.cvKey)!,
         seeker: {
           id: a.seekerId,

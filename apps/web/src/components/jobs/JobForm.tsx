@@ -352,8 +352,7 @@ export function JobForm({
           <JobCard job={preview} showSave={false} />
         </div>
         <p className="text-sm text-fg-subtle">
-          Skill tests (MCQ) are added from the job page once it&apos;s saved. That arrives with the
-          screening task.
+          Add a skill test (MCQ) from the job&apos;s page once it&apos;s saved.
         </p>
       </aside>
     </div>
