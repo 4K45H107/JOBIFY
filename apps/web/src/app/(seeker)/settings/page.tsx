@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/ui/ComingSoon";
+import type { SeekerProfile } from "@jobify/shared";
+import { pickSection, SEEKER_SECTIONS } from "@/components/profile/sections";
+import { SeekerSettings } from "@/components/profile/SeekerSettings";
+import { serverApi } from "@/lib/api/server";
 
-export const metadata: Metadata = { title: "Settings" };
+export const metadata: Metadata = { title: "Profile" };
 
-export default function Page() {
-  return <ComingSoon title="Settings" figmaFrame="Profile" phase="Phase 1" />;
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string }>;
+}) {
+  const active = pickSection(SEEKER_SECTIONS, (await searchParams).section);
+  const profile = await serverApi<SeekerProfile>("/me/profile");
+  return <SeekerSettings key={active} initial={profile} section={active} />;
 }

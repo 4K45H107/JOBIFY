@@ -24,8 +24,22 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const employer = { id: "u1", email: "e@x.co", role: "EMPLOYER", fullName: "E", company: null };
-const seeker = { id: "u2", email: "s@x.co", role: "SEEKER", fullName: "S", company: null };
+const employer = {
+  id: "u1",
+  email: "e@x.co",
+  role: "EMPLOYER",
+  fullName: "E",
+  photoUrl: null,
+  company: null,
+};
+const seeker = {
+  id: "u2",
+  email: "s@x.co",
+  role: "SEEKER",
+  fullName: "S",
+  photoUrl: null,
+  company: null,
+};
 
 describe("LoginForm", () => {
   it("validates before calling the API", async () => {

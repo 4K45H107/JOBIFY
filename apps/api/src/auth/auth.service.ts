@@ -2,6 +2,7 @@ import { ConflictException, Injectable, Logger, UnauthorizedException } from "@n
 import type { AuthUser, LoginInput, RegisterInput } from "@jobify/shared";
 import { isUniqueConstraintError } from "@jobify/db";
 import argon2 from "argon2";
+import { fileUrl } from "../files/file-keys";
 import { PrismaService } from "../prisma/prisma.service";
 import { TokensService } from "./tokens.service";
 
@@ -133,8 +134,8 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        seekerProfile: { select: { fullName: true } },
-        employerProfile: { select: { fullName: true } },
+        seekerProfile: { select: { fullName: true, photoKey: true } },
+        employerProfile: { select: { fullName: true, photoKey: true } },
         companyMembership: {
           where: { status: { in: ["ACTIVE", "PENDING"] } },
           orderBy: { createdAt: "desc" },
@@ -151,6 +152,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       fullName: user.seekerProfile?.fullName ?? user.employerProfile?.fullName ?? null,
+      photoUrl: fileUrl(user.seekerProfile?.photoKey ?? user.employerProfile?.photoKey),
       company: membership
         ? { ...membership.company, role: membership.role, status: membership.status }
         : null,
