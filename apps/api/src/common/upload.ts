@@ -1,4 +1,6 @@
 import { BadRequestException, PayloadTooLargeException } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { memoryStorage } from "multer";
 import { UPLOAD_LIMITS } from "@jobify/shared";
 import { EXTENSIONS, sniffContentType } from "../storage/file-type";
 
@@ -22,3 +24,14 @@ export function validateUpload(
   }
   return { contentType, ext: EXTENSIONS[contentType]! };
 }
+
+/** Single "file" field, kept in memory. Multer rejects anything over the global cap outright. */
+export const uploadInterceptor = FileInterceptor("file", {
+  storage: memoryStorage(),
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
+});
+
+/** OpenAPI body for a single-file upload. */
+export const fileBody = {
+  schema: { type: "object", properties: { file: { type: "string", format: "binary" } } },
+};

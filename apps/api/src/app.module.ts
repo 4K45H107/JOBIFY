@@ -7,7 +7,9 @@ import { AuthModule } from "./auth/auth.module";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
+import { CompaniesModule } from "./companies/companies.module";
 import { FilesModule } from "./files/files.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ProfileModule } from "./profile/profile.module";
 import { StorageModule } from "./storage/storage.module";
@@ -28,10 +30,12 @@ import { StorageModule } from "./storage/storage.module";
     }),
     PrismaModule,
     StorageModule,
+    NotificationsModule,
     HealthModule,
     AuthModule,
     FilesModule,
     ProfileModule,
+    CompaniesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

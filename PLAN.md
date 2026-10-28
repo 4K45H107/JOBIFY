@@ -304,7 +304,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 - [x] Register/login/logout, argon2 hashing, JWT access+refresh in httpOnly cookies, role guards (API)
 - [x] Seeker profile + preferences + skills. CV/photo upload (API; uploads go through the API so it can check real file types, downloads use short-lived signed URLs)
-- [ ] Employer onboarding: create company or request to join. Admin approves/rejects
+- [x] Employer onboarding: create company or request to join. Admin approves/rejects (API, plus company listing/detail, editing, logo/cover, branches)
 - [x] Screens: login, register (web auth: /api proxy, route protection by role, session refresh in middleware, account menu)
 - [ ] Screens: onboarding, `Profile` (info part), `Company Profile employer`
 
