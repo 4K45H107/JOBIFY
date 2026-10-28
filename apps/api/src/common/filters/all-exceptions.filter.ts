@@ -63,14 +63,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const response = exception.getResponse();
-      const message =
+      const body =
         typeof response === "string"
-          ? response
-          : String((response as { message?: unknown }).message ?? exception.message);
+          ? { message: response }
+          : (response as { message?: unknown; details?: unknown });
       return {
         statusCode: status,
         error: statusName(status),
-        message,
+        message: String(body.message ?? exception.message),
+        // Services can attach structured details, e.g. per-question errors.
+        ...(body.details !== undefined && { details: body.details }),
       };
     }
 

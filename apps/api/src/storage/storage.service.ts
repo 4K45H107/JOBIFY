@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   CreateBucketCommand,
   DeleteObjectCommand,
   GetObjectCommand,
@@ -51,6 +52,17 @@ export class StorageService implements OnModuleInit {
   async put(key: string, body: Buffer, contentType: string): Promise<void> {
     await this.client.send(
       new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: body, ContentType: contentType }),
+    );
+  }
+
+  /** Server-side copy within the bucket (e.g. to snapshot a CV for an application). */
+  async copy(fromKey: string, toKey: string): Promise<void> {
+    await this.client.send(
+      new CopyObjectCommand({
+        Bucket: this.bucket,
+        CopySource: `${this.bucket}/${fromKey}`,
+        Key: toKey,
+      }),
     );
   }
 

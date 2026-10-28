@@ -4,8 +4,9 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { setupApp } from "../src/app.setup";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { uniqueRun } from "./helpers";
 
-const run = Date.now().toString(36);
+const run = uniqueRun();
 const email = (name: string) => `${name}.${run}@jobs-e2e.test`;
 const password = "Password123";
 const token = `Zq${run}`; // unique word to isolate this run's jobs in searches
@@ -76,7 +77,7 @@ describe("Jobs (e2e)", () => {
   });
 
   afterAll(async () => {
-    await prisma.company.deleteMany({ where: { name: { endsWith: run } } });
+    await prisma.company.deleteMany({ where: { name: { contains: run } } });
     await prisma.user.deleteMany({ where: { email: { endsWith: "@jobs-e2e.test" } } });
     await prisma.skill.deleteMany({ where: { name: `${token}Lang` } });
     await app.close();

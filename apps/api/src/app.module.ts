@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { ZodSerializerInterceptor, ZodValidationPipe } from "nestjs-zod";
+import { ApplicationsModule } from "./applications/applications.module";
 import { AuthModule } from "./auth/auth.module";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { validateEnv } from "./config/env";
@@ -38,6 +39,7 @@ import { StorageModule } from "./storage/storage.module";
     ProfileModule,
     CompaniesModule,
     JobsModule,
+    ApplicationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

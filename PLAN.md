@@ -320,8 +320,9 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 ### Phase 3: Apply & screen (weeks 5–6)
 
-- [ ] Easy Apply wizard (contact → CV → screening answers). Duplicate guard
-- [ ] Application state machine + stage history
+- [x] Easy Apply API (contact, CV snapshot, screening answers, duplicate/age/deadline guards)
+- [ ] Easy Apply wizard UI (contact → CV → screening answers)
+- [x] Application state machine + stage history
 - [ ] MCQ builder (`ADD MCQ`), timed MCQ attempt (`MCQUser`), server-side grading
 - [ ] Applicants view (`Job Management`): CV viewer, score, sort/filter, stage actions
 - [ ] `Activities - Applications` with status counts

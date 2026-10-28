@@ -4,8 +4,9 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { setupApp } from "../src/app.setup";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { uniqueRun } from "./helpers";
 
-const run = Date.now().toString(36);
+const run = uniqueRun();
 const email = (name: string) => `${name}.${run}@profile-e2e.test`;
 const password = "Password123";
 const PDF = Buffer.from("%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n");
