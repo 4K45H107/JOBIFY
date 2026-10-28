@@ -61,6 +61,20 @@ export const employerNav: NavItem[] = [
   },
 ];
 
+/**
+ * Employers without an active company only see onboarding and settings. Linking (and
+ * prefetching) pages that would redirect them made Next's router loop on the redirect.
+ */
+export const employerOnboardingNav: NavItem[] = [
+  { label: "Set up company", href: "/employer/onboarding", icon: "/icons/team.png" },
+  {
+    label: "Settings",
+    href: "/employer/settings",
+    icon: "/icons/settings.png",
+    matchPrefix: "/employer/settings",
+  },
+];
+
 export function isNavItemActive(pathname: string, item: NavItem): boolean {
   if (!item.matchPrefix) return pathname === item.href;
   return pathname === item.matchPrefix || pathname.startsWith(`${item.matchPrefix}/`);

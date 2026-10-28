@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decideRoute, safeNext } from "./routing";
+import { decideRoute, employerCompanyRedirect, safeNext } from "./routing";
 
 describe("decideRoute", () => {
   it("sends visitors without a session to login, remembering where they were going", () => {
@@ -38,5 +38,22 @@ describe("safeNext", () => {
 
   it("accepts relative paths", () => {
     expect(safeNext("/activities?tab=saved")).toBe("/activities?tab=saved");
+  });
+});
+
+describe("employerCompanyRedirect", () => {
+  it("sends employers without an active company to onboarding", () => {
+    expect(employerCompanyRedirect("/employer", null)).toBe("/employer/onboarding");
+    expect(employerCompanyRedirect("/employer/jobs/new", "PENDING")).toBe("/employer/onboarding");
+  });
+
+  it("still lets them reach onboarding and their own settings", () => {
+    expect(employerCompanyRedirect("/employer/onboarding", null)).toBeNull();
+    expect(employerCompanyRedirect("/employer/settings", "PENDING")).toBeNull();
+  });
+
+  it("moves members off onboarding and leaves other pages alone", () => {
+    expect(employerCompanyRedirect("/employer/onboarding", "ACTIVE")).toBe("/employer");
+    expect(employerCompanyRedirect("/employer/company", "ACTIVE")).toBeNull();
   });
 });

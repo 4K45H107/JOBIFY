@@ -1,7 +1,7 @@
 import { decodeJwt } from "jose";
 import { type NextRequest, NextResponse } from "next/server";
 import { UserRole } from "@jobify/shared";
-import { decideRoute } from "@/lib/auth/routing";
+import { decideRoute, PATHNAME_HEADER } from "@/lib/auth/routing";
 
 const ACCESS_COOKIE = "jobify_access";
 const REFRESH_COOKIE = "jobify_refresh";
@@ -23,11 +23,17 @@ function roleFrom(token: string | undefined): UserRole | null {
 }
 
 /** Exchanges the refresh cookie for new cookies. Returns the Set-Cookie lines, or null. */
-async function refresh(refreshToken: string): Promise<string[] | null> {
+async function refresh(
+  refreshToken: string,
+  forwardedFor: string | null,
+): Promise<string[] | null> {
   try {
     const res = await fetch(`${API_URL}/api/auth/refresh`, {
       method: "POST",
-      headers: { cookie: `${REFRESH_COOKIE}=${refreshToken}` },
+      headers: {
+        cookie: `${REFRESH_COOKIE}=${refreshToken}`,
+        ...(forwardedFor && { "x-forwarded-for": forwardedFor }),
+      },
       cache: "no-store",
     });
     return res.ok ? res.headers.getSetCookie() : null;
@@ -50,7 +56,7 @@ export async function middleware(request: NextRequest) {
 
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
   if (!role && refreshToken) {
-    refreshed = await refresh(refreshToken);
+    refreshed = await refresh(refreshToken, request.headers.get("x-forwarded-for"));
     access = refreshed ? valueOf(refreshed, ACCESS_COOKIE) : undefined;
     role = roleFrom(access);
   }
@@ -60,17 +66,19 @@ export async function middleware(request: NextRequest) {
 
   if (decision.type === "redirect") {
     response = NextResponse.redirect(new URL(decision.to, request.url));
-  } else if (refreshed) {
-    // Let this render see the new cookies too, not just the browser.
-    const headers = new Headers(request.headers);
-    request.cookies.set(ACCESS_COOKIE, access ?? "");
-    // A refresh inside the API's grace window renews only the access token.
-    const nextRefresh = valueOf(refreshed, REFRESH_COOKIE);
-    if (nextRefresh) request.cookies.set(REFRESH_COOKIE, nextRefresh);
-    headers.set("cookie", request.cookies.toString());
-    response = NextResponse.next({ request: { headers } });
   } else {
-    response = NextResponse.next();
+    const headers = new Headers(request.headers);
+    // Layouts can't read the URL, so pass it along (e.g. for employer onboarding).
+    headers.set(PATHNAME_HEADER, pathname);
+    if (refreshed) {
+      // Let this render see the new cookies too, not just the browser.
+      request.cookies.set(ACCESS_COOKIE, access ?? "");
+      // A refresh inside the API's grace window renews only the access token.
+      const nextRefresh = valueOf(refreshed, REFRESH_COOKIE);
+      if (nextRefresh) request.cookies.set(REFRESH_COOKIE, nextRefresh);
+      headers.set("cookie", request.cookies.toString());
+    }
+    response = NextResponse.next({ request: { headers } });
   }
 
   if (refreshed) {

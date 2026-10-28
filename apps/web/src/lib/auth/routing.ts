@@ -2,6 +2,25 @@ import type { UserRole } from "@jobify/shared";
 
 export const AUTH_PAGES = ["/login", "/register"];
 
+/** Request header the middleware sets with the current pathname. */
+export const PATHNAME_HEADER = "x-jobify-pathname";
+
+/** Employer pages that work before the employer belongs to a company. */
+export const EMPLOYER_PATHS_WITHOUT_COMPANY = ["/employer/onboarding", "/employer/settings"];
+
+/** Where an employer should go given their company membership, or null to stay. */
+export function employerCompanyRedirect(
+  pathname: string,
+  status: "ACTIVE" | "PENDING" | "REJECTED" | null,
+): string | null {
+  const onboarding = pathname === "/employer/onboarding";
+  if (status === "ACTIVE") return onboarding ? "/employer" : null;
+  const allowed = EMPLOYER_PATHS_WITHOUT_COMPANY.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+  return allowed ? null : "/employer/onboarding";
+}
+
 /** Where a user lands after signing in, or when they open a page meant for the other role. */
 export function homeFor(role: UserRole): string {
   return role === "EMPLOYER" ? "/employer" : "/";

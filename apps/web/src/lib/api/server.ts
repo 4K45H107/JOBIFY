@@ -1,5 +1,5 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { authUserSchema, type AuthUser } from "@jobify/shared";
 import { ApiError, type ApiErrorBody } from "./errors";
 
@@ -8,9 +8,15 @@ const API_URL = process.env.API_URL ?? "http://localhost:4000";
 /** Server-side fetch to the API, forwarding the visitor's cookies. */
 export async function serverApi<T>(path: string, init: RequestInit = {}): Promise<T> {
   const cookieHeader = (await cookies()).toString();
+  // Pass the visitor's IP on, so the API rate-limits per visitor rather than per web server.
+  const forwardedFor = (await headers()).get("x-forwarded-for");
   const res = await fetch(`${API_URL}/api${path}`, {
     ...init,
-    headers: { ...(cookieHeader && { cookie: cookieHeader }), ...init.headers },
+    headers: {
+      ...(cookieHeader && { cookie: cookieHeader }),
+      ...(forwardedFor && { "x-forwarded-for": forwardedFor }),
+      ...init.headers,
+    },
     cache: "no-store",
   });
   if (!res.ok) {

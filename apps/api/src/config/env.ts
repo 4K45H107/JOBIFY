@@ -8,6 +8,17 @@ export const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32, "JWT_ACCESS_SECRET must be at least 32 characters"),
   ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
+  /**
+   * Express "trust proxy": which hops may set X-Forwarded-For. The client IP drives rate
+   * limits, and every request arrives via the web app's proxy, so this must cover it.
+   * A hop count ("1"), "true"/"false", or names/IPs/CIDRs ("loopback", "10.0.0.0/8").
+   */
+  TRUST_PROXY: z
+    .string()
+    .default("loopback")
+    .transform((v): boolean | number | string =>
+      v === "true" ? true : v === "false" ? false : /^\d+$/.test(v) ? Number(v) : v,
+    ),
   S3_ENDPOINT: z.url().optional(),
   S3_REGION: z.string().default("us-east-1"),
   S3_BUCKET: z.string().min(1).default("jobify"),

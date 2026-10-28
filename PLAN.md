@@ -307,7 +307,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Employer onboarding: create company or request to join. Admin approves/rejects (API, plus company listing/detail, editing, logo/cover, branches)
 - [x] Screens: login, register (web auth: /api proxy, route protection by role, session refresh in middleware, account menu)
 - [x] Screens: `Profile` (seeker info, skills, CV, preferences, photo) and employer profile
-- [ ] Screens: employer onboarding, `Company Profile employer`
+- [x] Screens: employer onboarding (create / ask to join / pending), `Company Profile employer` (My Company with team approvals)
 
 ### Phase 2: Jobs & discovery (weeks 3–4)
 

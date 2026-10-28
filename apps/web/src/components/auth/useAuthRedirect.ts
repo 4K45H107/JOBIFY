@@ -10,6 +10,12 @@ export function useAuthRedirect() {
   const searchParams = useSearchParams();
 
   return (user: AuthUser) => {
+    // Employers without a company go straight to onboarding instead of bouncing off /employer.
+    if (user.role === "EMPLOYER" && user.company?.status !== "ACTIVE") {
+      router.replace("/employer/onboarding");
+      router.refresh();
+      return;
+    }
     const next = safeNext(searchParams.get("next"));
     const nextFits = next && isEmployerPath(next) === (user.role === "EMPLOYER");
     router.replace(nextFits ? next : homeFor(user.role));
