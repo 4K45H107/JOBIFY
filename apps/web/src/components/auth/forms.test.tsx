@@ -30,7 +30,7 @@ const employer = {
   role: "EMPLOYER",
   fullName: "E",
   photoUrl: null,
-  company: null,
+  company: { id: "c1", name: "Co", slug: "co", role: "ADMIN", status: "ACTIVE" },
 };
 const seeker = {
   id: "u2",
@@ -83,6 +83,15 @@ describe("LoginForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/activities"));
   });
+});
+
+it("sends an employer without a company to onboarding", async () => {
+  respond(200, { ...employer, company: null });
+  render(<LoginForm />);
+  await userEvent.type(screen.getByLabelText("Email"), "e@x.co");
+  await userEvent.type(screen.getByLabelText("Password"), "Password123");
+  await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
+  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/employer/onboarding"));
 });
 
 describe("RegisterForm", () => {

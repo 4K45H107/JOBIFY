@@ -14,6 +14,7 @@ describe("validateEnv", () => {
       JWT_ACCESS_SECRET,
       ACCESS_TOKEN_TTL_SECONDS: 900,
       REFRESH_TOKEN_TTL_DAYS: 30,
+      TRUST_PROXY: "loopback",
       S3_REGION: "us-east-1",
       S3_BUCKET: "jobify",
       S3_ACCESS_KEY_ID: "jobify",
@@ -35,6 +36,12 @@ describe("validateEnv", () => {
     expect(() => validateEnv({ ...base, DATABASE_URL: "mysql://localhost/db" })).toThrow(
       /DATABASE_URL/,
     );
+  });
+
+  it("parses TRUST_PROXY into what Express expects", () => {
+    expect(validateEnv({ ...base, TRUST_PROXY: "1" }).TRUST_PROXY).toBe(1);
+    expect(validateEnv({ ...base, TRUST_PROXY: "false" }).TRUST_PROXY).toBe(false);
+    expect(validateEnv({ ...base, TRUST_PROXY: "10.0.0.0/8" }).TRUST_PROXY).toBe("10.0.0.0/8");
   });
 
   it("requires a long JWT secret", () => {

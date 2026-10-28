@@ -37,15 +37,20 @@ export const companyCreateSchema = z.object({
   industry: optionalText(60),
   size: CompanySize.nullable().optional(),
   foundedYear: z.number().int().min(1800).max(new Date().getFullYear()).nullable().optional(),
+  /** Blank or null clears it; otherwise a full http(s) URL. */
   website: z
-    .string()
-    .trim()
-    .transform((v) => (v === "" ? null : v))
-    .pipe(
+    .union([
+      z.null(),
       z
-        .url({ protocol: /^https?$/, message: "Enter a full URL, e.g. https://example.com" })
-        .nullable(),
-    )
+        .string()
+        .trim()
+        .transform((v) => (v === "" ? null : v))
+        .pipe(
+          z
+            .url({ protocol: /^https?$/, message: "Enter a full URL, e.g. https://example.com" })
+            .nullable(),
+        ),
+    ])
     .optional(),
   headquarters: optionalText(80),
   description: optionalText(4000),
