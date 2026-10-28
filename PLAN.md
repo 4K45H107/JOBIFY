@@ -314,9 +314,9 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Employer: create/edit/close jobs, My Offerings / My Company Jobs lists (API)
 - [x] Job search API: filters, sort (latest/trending/salary), pagination. Case-insensitive matching on title, description, company and skill; full-text/trigram indexes or Meilisearch once data grows
 - [x] "For You" recommendations v1 (score by title, skills, location, type, workplace, salary; age-eligibility filter; reasons shown)
-- [ ] Companies search + company profile
+- [x] Companies search + company profile
 - [x] Saved jobs, recent views, similar jobs (API)
-- [ ] Screens: `Home`, `Explore - Jobs` (both tabs), `Explore - Companies`, `Company Profile`, job details, `Activities - Saved/Recent`
+- [x] Screens: `Home`, `Explore - Jobs` (both tabs), `Explore - Companies`, `Company Profile`, job details, `Activities - Saved/Recent`
 
 ### Phase 3: Apply & screen (weeks 5–6)
 

@@ -11,6 +11,7 @@ import {
   JobSearchQueryDto,
   JobSummaryListDto,
   JobUpdateDto,
+  PlatformStatsDto,
   RecommendedJobListDto,
 } from "./jobs.dto";
 import { JobsService } from "./jobs.service";
@@ -25,6 +26,13 @@ export class JobsController {
   @ApiOkResponse({ type: JobListDto, description: "Open jobs matching the filters." })
   search(@CurrentUser() user: RequestUser, @Query() query: JobSearchQueryDto) {
     return this.jobs.search(user, query);
+  }
+
+  @Get("stats")
+  @ZodSerializerDto(PlatformStatsDto)
+  @ApiOkResponse({ type: PlatformStatsDto, description: "Headline numbers for the home page." })
+  stats() {
+    return this.jobs.stats();
   }
 
   @Roles("SEEKER")

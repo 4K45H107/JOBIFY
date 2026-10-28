@@ -143,6 +143,8 @@ describe("Jobs (e2e)", () => {
       expect((await search("workplace=HYBRID,ONSITE")).body.total).toBe(1);
       expect((await search("location=germany")).body.items[0].title).toContain("Backend");
       expect((await search(`company=jobs co ${run}`)).body.total).toBe(2);
+      expect((await search(`companySlug=jobs-co-${run}`)).body.total).toBe(2);
+      expect((await search("companySlug=no-such-company")).body.total).toBe(0);
       expect(
         (await search("salary=100000")).body.items.map((j: { title: string }) => j.title),
       ).toEqual([`${token} Backend Engineer`]);
@@ -167,6 +169,13 @@ describe("Jobs (e2e)", () => {
       await outsider.get(`/api/jobs/${draft.id}`).expect(404);
       await colleague.get(`/api/jobs/${draft.id}`).expect(200);
     });
+  });
+
+  it("reports platform stats", async () => {
+    const res = await seeker.get("/api/stats").expect(200);
+    expect(res.body.openJobs).toBeGreaterThanOrEqual(2);
+    expect(res.body.companies).toBeGreaterThanOrEqual(2);
+    expect(res.body.seekers).toBeGreaterThanOrEqual(1);
   });
 
   describe("seeker activity", () => {

@@ -6,6 +6,7 @@ import {
   jobSearchQuerySchema,
   jobSummarySchema,
   jobUpdateSchema,
+  platformStatsSchema,
   recommendedJobSchema,
 } from "@jobify/shared";
 import { createZodDto } from "nestjs-zod";
@@ -19,3 +20,4 @@ export class JobSummaryListDto extends createZodDto(z.array(jobSummarySchema)) {
 export class JobSearchQueryDto extends createZodDto(jobSearchQuerySchema) {}
 export class EmployerJobsQueryDto extends createZodDto(employerJobsQuerySchema) {}
 export class RecommendedJobListDto extends createZodDto(z.array(recommendedJobSchema)) {}
+export class PlatformStatsDto extends createZodDto(platformStatsSchema) {}

@@ -12,6 +12,7 @@ import type {
   JobSearchQuery,
   JobSummary,
   JobUpdate,
+  PlatformStats,
   RecommendedJob,
   UserRole,
 } from "@jobify/shared";
@@ -56,7 +57,8 @@ export class JobsService {
   // ─── discovery ───────────────────────────────────────────────────────────
 
   async search(viewer: Viewer, query: JobSearchQuery): Promise<JobList> {
-    const { q, type, workplace, location, company, salary, sort, page, pageSize } = query;
+    const { q, type, workplace, location, company, companySlug, salary, sort, page, pageSize } =
+      query;
     const where: Prisma.JobWhereInput = {
       AND: [
         openJobs(),
@@ -81,6 +83,7 @@ export class JobsService {
             }
           : {},
         company ? { company: { name: { contains: company, mode: "insensitive" } } } : {},
+        companySlug ? { company: { slug: companySlug } } : {},
         salary !== undefined ? { salaryMax: { gte: salary } } : {},
       ],
     };
@@ -223,6 +226,15 @@ export class JobsService {
       .sort((a, b) => b.overlap - a.overlap)
       .slice(0, limit)
       .map(({ c }) => toSummary(c));
+  }
+
+  async stats(): Promise<PlatformStats> {
+    const [open, companies, seekers] = await this.prisma.$transaction([
+      this.prisma.job.count({ where: openJobs() }),
+      this.prisma.company.count(),
+      this.prisma.user.count({ where: { role: "SEEKER" } }),
+    ]);
+    return { openJobs: open, companies, seekers };
   }
 
   // ─── seeker activity ─────────────────────────────────────────────────────

@@ -136,6 +136,8 @@ export const jobSearchQuerySchema = z.object({
   workplace: csv(Workplace),
   location: z.string().trim().max(60).optional(),
   company: z.string().trim().max(80).optional(),
+  /** Exact company, e.g. for a company's own page. */
+  companySlug: z.string().trim().max(80).optional(),
   /** Jobs whose range reaches at least this salary. */
   salary: z.coerce.number().int().min(0).optional(),
   sort: JobSort.default("latest"),
@@ -160,3 +162,10 @@ export const employerJobsQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(50).default(20),
 });
 export type EmployerJobsQuery = z.infer<typeof employerJobsQuerySchema>;
+
+export const platformStatsSchema = z.object({
+  openJobs: z.number(),
+  companies: z.number(),
+  seekers: z.number(),
+});
+export type PlatformStats = z.infer<typeof platformStatsSchema>;
