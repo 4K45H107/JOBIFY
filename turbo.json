@@ -22,5 +22,14 @@
       "outputs": ["coverage/**"]
     }
   },
-  "globalPassThroughEnv": ["DATABASE_URL", "REDIS_URL"]
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "REDIS_URL",
+    "PORT",
+    "WEB_ORIGIN",
+    "JWT_ACCESS_SECRET",
+    "ACCESS_TOKEN_TTL_SECONDS",
+    "REFRESH_TOKEN_TTL_DAYS",
+    "THROTTLE_DISABLED"
+  ]
 }
