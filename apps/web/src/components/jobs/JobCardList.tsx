@@ -8,9 +8,14 @@ import { JobCard } from "./JobCard";
 export function JobCardList({
   jobs,
   emptyMessage,
+  hrefBase = "/jobs",
+  employerView = false,
 }: {
   jobs: JobSummary[];
   emptyMessage: React.ReactNode;
+  /** Employers open jobs under /employer/jobs. */
+  hrefBase?: string;
+  employerView?: boolean;
 }) {
   if (jobs.length === 0) {
     return (
@@ -25,9 +30,10 @@ export function JobCardList({
         <li key={job.id}>
           <JobCard
             job={job}
+            employerView={employerView}
             action={
               <Link
-                href={`/jobs/${job.id}`}
+                href={`${hrefBase}/${job.id}`}
                 className="absolute inset-0"
                 aria-label={`${job.title} at ${job.company.name}`}
               />

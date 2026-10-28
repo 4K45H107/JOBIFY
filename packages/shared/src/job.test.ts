@@ -25,6 +25,11 @@ describe("jobCreateSchema", () => {
     expect(jobCreateSchema.safeParse({ ...valid, ageMin: 30, ageMax: 20 }).success).toBe(false);
   });
 
+  it("explains a missing salary instead of 'received NaN'", () => {
+    const result = jobCreateSchema.safeParse({ ...valid, salaryMin: Number.NaN });
+    expect(result.error?.issues[0]?.message).toBe("Enter the starting salary");
+  });
+
   it("can't be created CLOSED", () => {
     expect(jobCreateSchema.safeParse({ ...valid, status: "CLOSED" }).success).toBe(false);
   });

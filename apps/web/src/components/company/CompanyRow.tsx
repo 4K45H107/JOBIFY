@@ -3,14 +3,10 @@ import { COMPANY_SIZE_LABELS, type CompanySummary } from "@jobify/shared";
 import { CompanyLogo } from "./CompanyLogo";
 
 /** Figma "Explore - Companies" row: logo, name, stats, then location / size / industry and description. */
-export function CompanyRow({ company }: { company: CompanySummary }) {
+export function CompanyRow({ company, href }: { company: CompanySummary; href: string }) {
   return (
     <article className="relative border-b border-fg/60 py-6">
-      <Link
-        href={`/companies/${company.slug}`}
-        className="absolute inset-0"
-        aria-label={company.name}
-      />
+      <Link href={href} className="absolute inset-0" aria-label={company.name} />
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <CompanyLogo

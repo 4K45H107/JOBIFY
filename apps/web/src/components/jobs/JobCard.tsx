@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { JobSummary } from "@jobify/shared";
+import type { JobStatus, JobSummary } from "@jobify/shared";
 import { CompanyLogo } from "@/components/company/CompanyLogo";
 import { cn } from "@/lib/cn";
 import { formatPlace, formatSalary, timeAgo } from "@/lib/format";
@@ -14,6 +14,7 @@ export function JobCard({
   onSavedChange,
   showSave = true,
   action,
+  employerView = false,
 }: {
   job: JobSummary;
   selected?: boolean;
@@ -25,6 +26,8 @@ export function JobCard({
    * can sit above it without nesting interactive elements.
    */
   action?: React.ReactNode;
+  /** Shows status and applicant count instead of Easy Apply (Figma Employer Home). */
+  employerView?: boolean;
 }) {
   return (
     <article
@@ -45,7 +48,7 @@ export function JobCard({
           />
           <span className="truncate text-sm tracking-label uppercase">{job.company.name}</span>
         </div>
-        {showSave && (
+        {showSave && !employerView && (
           <SaveButton
             jobId={job.id}
             initial={job.saved}
@@ -71,20 +74,48 @@ export function JobCard({
         </ul>
       )}
       <div className="mt-1 flex items-center justify-between">
-        <span className="flex items-center gap-1 font-light text-success">
-          <Image
-            src="/icons/easy-apply.png"
-            alt=""
-            width={18}
-            height={18}
-            className="size-[18px]"
-          />
-          Easy Apply
-        </span>
+        {employerView ? (
+          <span className="flex items-center gap-2 text-sm">
+            <StatusBadge status={job.status} />
+            <span className="text-fg-subtle">
+              {job.applicants} {job.applicants === 1 ? "applicant" : "applicants"}
+            </span>
+          </span>
+        ) : (
+          <span className="flex items-center gap-1 font-light text-success">
+            <Image
+              src="/icons/easy-apply.png"
+              alt=""
+              width={18}
+              height={18}
+              className="size-[18px]"
+            />
+            Easy Apply
+          </span>
+        )}
         <time dateTime={job.createdAt} className="text-sm text-fg-subtle">
           {timeAgo(job.createdAt)}
         </time>
       </div>
     </article>
+  );
+}
+
+const STATUS_STYLES: Record<JobStatus, string> = {
+  OPEN: "bg-success/20 text-fg",
+  DRAFT: "bg-surface-muted text-fg-muted",
+  CLOSED: "bg-heading-accent/15 text-heading-accent",
+};
+
+export function StatusBadge({ status }: { status: JobStatus }) {
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2.5 py-0.5 text-xs font-medium tracking-label uppercase",
+        STATUS_STYLES[status],
+      )}
+    >
+      {status.toLowerCase()}
+    </span>
   );
 }

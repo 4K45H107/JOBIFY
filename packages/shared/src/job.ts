@@ -27,8 +27,8 @@ const jobFields = z.object({
     .transform((v) => (v === "" ? null : v))
     .nullable()
     .optional(),
-  salaryMin: z.number().int().min(0).max(10_000_000),
-  salaryMax: z.number().int().min(0).max(10_000_000),
+  salaryMin: z.number({ error: "Enter the starting salary" }).int().min(0).max(10_000_000),
+  salaryMax: z.number({ error: "Enter the top of the range" }).int().min(0).max(10_000_000),
   ageMin: z.number().int().min(14).max(100).nullable().optional(),
   ageMax: z.number().int().min(14).max(100).nullable().optional(),
   description: z.string().trim().min(30, "Describe the role in at least 30 characters").max(10_000),
