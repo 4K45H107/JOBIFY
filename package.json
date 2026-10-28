@@ -14,7 +14,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d postgres redis",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @jobify/db db:migrate",
+    "db:deploy": "pnpm --filter @jobify/db db:deploy",
+    "db:seed": "pnpm --filter @jobify/db db:seed",
+    "db:reset": "pnpm --filter @jobify/db db:reset",
+    "db:studio": "pnpm --filter @jobify/db db:studio"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

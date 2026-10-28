@@ -11,6 +11,7 @@ architecture and roadmap.
 ```
 apps/web          Next.js frontend
 apps/api          NestJS API (modular monolith)
+packages/db       Prisma schema, migrations, client and seed data
 packages/shared   Zod schemas, types and enums shared across apps
 packages/tsconfig Shared TypeScript configs
 ```
@@ -23,10 +24,22 @@ Requirements: Node 22+, pnpm 10 (`corepack enable`), Docker.
 pnpm install
 cp .env.example .env
 pnpm db:up        # Postgres (host port 5433) + Redis (6379)
+pnpm db:migrate   # apply migrations
+pnpm db:seed      # demo data (re-runnable)
 pnpm dev          # web on http://localhost:3000, API on http://localhost:4000/api
 ```
 
 API docs (OpenAPI / Swagger UI) are served at http://localhost:4000/api/docs.
+
+### Demo accounts
+
+After `pnpm db:seed`, every demo account uses the password `Password123!`:
+
+| Email                 | Role                                                                  |
+| --------------------- | --------------------------------------------------------------------- |
+| `seeker@jobify.dev`   | Job seeker with applications, saved jobs and an upcoming interview    |
+| `employer@jobify.dev` | Admin of "Northwind Labs", with applicants and a pending join request |
+| `admin@jobify.dev`    | Platform admin                                                        |
 
 ## Scripts
 
