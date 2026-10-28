@@ -311,7 +311,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 ### Phase 2: Jobs & discovery (weeks 3–4)
 
-- [x] Employer: create/edit/close jobs, My Offerings / My Company Jobs lists (API)
+- [x] Employer: create/edit/close jobs, My Offerings / My Company Jobs lists (API + `Employer Home`, `AddJobs`, edit, employer Explore)
 - [x] Job search API: filters, sort (latest/trending/salary), pagination. Case-insensitive matching on title, description, company and skill; full-text/trigram indexes or Meilisearch once data grows
 - [x] "For You" recommendations v1 (score by title, skills, location, type, workplace, salary; age-eligibility filter; reasons shown)
 - [x] Companies search + company profile

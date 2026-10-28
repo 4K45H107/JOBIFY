@@ -1,8 +1,20 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/ui/ComingSoon";
+import { CompanyDirectory } from "@/components/company/CompanyDirectory";
 
-export const metadata: Metadata = { title: "Explore" };
+export const metadata: Metadata = { title: "Explore companies" };
 
-export default function Page() {
-  return <ComingSoon title="Explore" figmaFrame="Explore - Companies" phase="Phase 2" />;
+export default async function EmployerExplorePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const { q = "", page = "1" } = await searchParams;
+  return (
+    <CompanyDirectory
+      q={q}
+      page={page}
+      basePath="/employer/explore"
+      profileBase="/employer/companies"
+    />
+  );
 }

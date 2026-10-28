@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { JobDetail, JobSummary } from "@jobify/shared";
 import { api } from "@/lib/api/client";
 import { JobCard } from "./JobCard";
+import { EmployerJobActions } from "./EmployerJobActions";
 import { JobDetailPanel } from "./JobDetailPanel";
 
 export interface BrowserJob extends JobSummary {
@@ -19,11 +20,15 @@ export function JobBrowser({
   jobs,
   emptyMessage,
   onSavedChange,
+  employer = false,
 }: {
   jobs: BrowserJob[];
   emptyMessage: React.ReactNode;
   onSavedChange?: (jobId: string, saved: boolean) => void;
+  /** Employer Home: status on cards, manage actions in the panel, links into /employer. */
+  employer?: boolean;
 }) {
+  const jobHref = (id: string) => (employer ? `/employer/jobs/${id}` : `/jobs/${id}`);
   const [selectedId, setSelectedId] = useState(jobs[0]?.id ?? null);
   const [detail, setDetail] = useState<JobDetail | null>(null);
   const [error, setError] = useState(false);
@@ -57,12 +62,13 @@ export function JobBrowser({
               job={job}
               selected={job.id === selectedId}
               reasons={job.reasons}
+              employerView={employer}
               onSavedChange={(s) => onSavedChange?.(job.id, s)}
               action={
                 <>
                   {/* Mobile: open the job page. Desktop: show it in the panel. */}
                   <Link
-                    href={`/jobs/${job.id}`}
+                    href={jobHref(job.id)}
                     className="absolute inset-0 lg:hidden"
                     aria-label={job.title}
                   />
@@ -87,6 +93,11 @@ export function JobBrowser({
             key={detail.id}
             job={detail}
             onSavedChange={(s) => onSavedChange?.(detail.id, s)}
+            {...(employer && {
+              actions: <EmployerJobActions job={detail} onChanged={setDetail} />,
+              companyHref: "/employer/company",
+              fullPageHref: jobHref(detail.id),
+            })}
           />
         ) : (
           <div
