@@ -91,7 +91,8 @@ export const applicantSchema = z.object({
   id: z.string(),
   stage: ApplicationStage,
   appliedAt: z.string(),
-  contact: contactSchema,
+  /** Stored data, so plain strings: the input rules may have changed since it was saved. */
+  contact: z.object({ fullName: z.string(), email: z.string(), phone: z.string() }),
   cvUrl: z.string(),
   seeker: z.object({
     id: z.string(),

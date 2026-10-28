@@ -355,6 +355,8 @@ async function main() {
   const uploadCv = await createCvUploader();
   const seekerIds: string[] = [];
   const cvKeys = new Map<string, string>();
+  const seekerNames = new Map<string, string>();
+  const seekerEmails = new Map<string, string>();
   for (let i = 0; i < 20; i++) {
     const isDemo = i === 0;
     const fullName = isDemo ? "Ayesha Rahman" : faker.person.fullName();
@@ -413,6 +415,8 @@ async function main() {
       },
     });
     seekerIds.push(user.id);
+    seekerNames.set(user.id, fullName);
+    seekerEmails.set(user.id, user.email);
     if (uploadCv) {
       const cvKey = await uploadCv(user.id, [
         fullName,
@@ -471,7 +475,8 @@ async function main() {
           seekerId,
           cvKey: cvKeys.get(seekerId) ?? "",
           contact: {
-            email: `applicant${s}@example.com`,
+            fullName: seekerNames.get(seekerId) ?? "Applicant",
+            email: seekerEmails.get(seekerId) ?? `applicant${s}@example.com`,
             phone: faker.phone.number({ style: "international" }),
           },
           stage: finalStage,

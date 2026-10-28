@@ -268,3 +268,67 @@ describe("Applications (e2e)", () => {
     });
   });
 });
+
+describe("Applicants with incomplete stored contact (e2e)", () => {
+  it("are listed with gaps filled from the account instead of failing the whole list", async () => {
+    process.env.THROTTLE_DISABLED = "true";
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const app = moduleRef.createNestApplication({ logger: false });
+    setupApp(app);
+    await app.init();
+    const prisma = app.get(PrismaService);
+    const tag = uniqueRun();
+    const boss = request.agent(app.getHttpServer());
+    await boss
+      .post("/api/auth/register")
+      .send({
+        fullName: "Legacy Boss",
+        email: `boss.${tag}@legacy-e2e.test`,
+        password: "Password123",
+        role: "EMPLOYER",
+      })
+      .expect(201);
+    await boss
+      .post("/api/companies")
+      .send({ name: `Legacy Co ${tag}` })
+      .expect(201);
+    const job = await boss
+      .post("/api/jobs")
+      .send({
+        title: "Legacy role",
+        type: "FULL_TIME",
+        workplace: "REMOTE",
+        country: "Bangladesh",
+        salaryMin: 1,
+        salaryMax: 2,
+        description: "A job with an application stored in an older shape.",
+      })
+      .expect(201);
+    const seeker = await prisma.user.create({
+      data: {
+        email: `seeker.${tag}@legacy-e2e.test`,
+        role: "SEEKER",
+        seekerProfile: { create: { fullName: "Old Applicant" } },
+      },
+    });
+    await prisma.application.create({
+      data: {
+        jobId: job.body.id,
+        seekerId: seeker.id,
+        cvKey: "users/x/cv/00000000-0000-0000-0000-000000000000.pdf",
+        contact: { phone: "1" },
+      },
+    });
+
+    const res = await boss.get(`/api/jobs/${job.body.id}/applications`).expect(200);
+    expect(res.body[0].contact).toEqual({
+      fullName: "Old Applicant",
+      email: `seeker.${tag}@legacy-e2e.test`,
+      phone: "1",
+    });
+
+    await prisma.company.deleteMany({ where: { name: { contains: tag } } });
+    await prisma.user.deleteMany({ where: { email: { endsWith: "@legacy-e2e.test" } } });
+    await app.close();
+  });
+});
