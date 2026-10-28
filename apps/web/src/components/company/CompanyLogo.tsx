@@ -11,8 +11,9 @@ export function CompanyLogo({
   className?: string;
 }) {
   if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // Logos come from /api/files (signed redirect), which next/image can't optimise.
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={`${name} logo`}
