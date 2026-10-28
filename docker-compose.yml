@@ -1,4 +1,4 @@
-# Local development services. Start with `pnpm db:up`.
+# Local development services. Start with `pnpm services:up`.
 services:
   postgres:
     image: postgres:16-alpine
@@ -26,5 +26,21 @@ services:
       timeout: 5s
       retries: 10
 
+  # S3-compatible object storage for CVs, photos and logos (Cloudflare R2 in production).
+  # Runs without S3 auth locally; the API creates the bucket on startup.
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    command: server -s3 -dir=/data -ip.bind=0.0.0.0 -master.volumeSizeLimitMB=64
+    ports:
+      - "${S3_PORT:-8333}:8333"
+    volumes:
+      - seaweedfs-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8333/ || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
 volumes:
   postgres-data:
+  seaweedfs-data:

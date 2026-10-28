@@ -7,7 +7,10 @@ import { AuthModule } from "./auth/auth.module";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
+import { FilesModule } from "./files/files.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { ProfileModule } from "./profile/profile.module";
+import { StorageModule } from "./storage/storage.module";
 
 @Module({
   imports: [
@@ -24,8 +27,11 @@ import { PrismaModule } from "./prisma/prisma.module";
       skipIf: () => process.env.THROTTLE_DISABLED === "true",
     }),
     PrismaModule,
+    StorageModule,
     HealthModule,
     AuthModule,
+    FilesModule,
+    ProfileModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

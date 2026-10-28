@@ -23,6 +23,7 @@ import {
   Workplace,
 } from "../src/generated/prisma/client";
 import { createPrismaClient } from "../src/index";
+import { createCvUploader } from "./seed-files";
 
 config({ path: path.resolve(__dirname, "../../../.env"), quiet: true });
 
@@ -350,8 +351,10 @@ async function main() {
     assessmentByJob.set(job.id, a.id);
   }
 
-  // Seekers
+  // Seekers, each with a generated one-page PDF CV in object storage
+  const uploadCv = await createCvUploader();
   const seekerIds: string[] = [];
+  const cvKeys = new Map<string, string>();
   for (let i = 0; i < 20; i++) {
     const isDemo = i === 0;
     const fullName = isDemo ? "Ayesha Rahman" : faker.person.fullName();
@@ -389,7 +392,6 @@ async function main() {
               probability: 0.6,
             }),
             experienceYears: faker.number.int({ min: 0, max: 10 }),
-            cvKey: `seed/cv/${i}.pdf`,
           },
         },
         jobPreference: {
@@ -411,6 +413,16 @@ async function main() {
       },
     });
     seekerIds.push(user.id);
+    if (uploadCv) {
+      const cvKey = await uploadCv(user.id, [
+        fullName,
+        isDemo ? "Frontend Developer" : template.title,
+        `Email: ${user.email}`,
+        "Experience: generated demo CV for the Jobify seed data.",
+      ]);
+      await prisma.seekerProfile.update({ where: { userId: user.id }, data: { cvKey } });
+      cvKeys.set(user.id, cvKey);
+    }
   }
 
   // Saved jobs and recently viewed jobs
@@ -457,7 +469,7 @@ async function main() {
         data: {
           jobId: job.id,
           seekerId,
-          cvKey: `seed/cv/${s}.pdf`,
+          cvKey: cvKeys.get(seekerId) ?? "",
           contact: {
             email: `applicant${s}@example.com`,
             phone: faker.phone.number({ style: "international" }),
