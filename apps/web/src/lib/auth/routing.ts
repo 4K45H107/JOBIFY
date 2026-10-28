@@ -6,7 +6,11 @@ export const AUTH_PAGES = ["/login", "/register"];
 export const PATHNAME_HEADER = "x-jobify-pathname";
 
 /** Employer pages that work before the employer belongs to a company. */
-export const EMPLOYER_PATHS_WITHOUT_COMPANY = ["/employer/onboarding", "/employer/settings"];
+export const EMPLOYER_PATHS_WITHOUT_COMPANY = [
+  "/employer/onboarding",
+  "/employer/settings",
+  "/employer/notifications",
+];
 
 /** Where an employer should go given their company membership, or null to stay. */
 export function employerCompanyRedirect(

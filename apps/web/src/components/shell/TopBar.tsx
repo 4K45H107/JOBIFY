@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { AuthUser } from "@jobify/shared";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { AccountMenu } from "./AccountMenu";
 
 /** Figma top bar: black, rounded bottom corners, logo left; search, notifications and avatar right. */
@@ -22,13 +23,9 @@ export function TopBar({ homeHref, user }: { homeHref: string; user: AuthUser })
           <span className="hidden text-2xl md:inline">Search</span>
           <span className="sr-only md:hidden">Search</span>
         </Link>
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="transition-opacity hover:opacity-80"
-        >
-          <Image src="/icons/bell.svg" alt="" width={24} height={21} />
-        </button>
+        <NotificationBell
+          allHref={user.role === "EMPLOYER" ? "/employer/notifications" : "/notifications"}
+        />
         <AccountMenu user={user} />
       </div>
     </header>

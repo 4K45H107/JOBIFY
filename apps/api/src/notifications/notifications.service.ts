@@ -1,13 +1,30 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  describeNotification,
+  type Notification,
+  type NotificationFeed,
+  type UserRole,
+} from "@jobify/shared";
 import type { NotificationType, Prisma } from "@jobify/db";
+import { Subject } from "rxjs";
 import { PrismaService } from "../prisma/prisma.service";
 
+type Row = Prisma.NotificationGetPayload<object>;
+
+export interface NotificationEvent {
+  userId: string;
+  row: Row;
+}
+
 /**
- * Other modules record notifications through this service only.
- * The feed, unread counts and realtime push come with the notifications task in Phase 3.
+ * The single way modules record notifications. New rows are also pushed to an
+ * in-process bus that feeds the live stream. With several API instances this
+ * becomes Redis pub/sub (the worker task).
  */
 @Injectable()
 export class NotificationsService {
+  readonly events$ = new Subject<NotificationEvent>();
+
   constructor(private readonly prisma: PrismaService) {}
 
   async notify(
@@ -16,8 +33,63 @@ export class NotificationsService {
     payload: Prisma.InputJsonObject,
   ): Promise<void> {
     if (userIds.length === 0) return;
-    await this.prisma.notification.createMany({
+    const rows = await this.prisma.notification.createManyAndReturn({
       data: userIds.map((userId) => ({ userId, type, payload })),
     });
+    for (const row of rows) this.events$.next({ userId: row.userId, row });
   }
+
+  async feed(
+    userId: string,
+    role: UserRole,
+    cursor: string | undefined,
+    limit: number,
+  ): Promise<NotificationFeed> {
+    const rows = await this.prisma.notification.findMany({
+      where: { userId },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: limit + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+    });
+    const page = rows.slice(0, limit);
+    return {
+      items: page.map((r) => toNotification(r, role)),
+      unread: await this.unreadCount(userId),
+      nextCursor: rows.length > limit ? page.at(-1)!.id : null,
+    };
+  }
+
+  unreadCount(userId: string): Promise<number> {
+    return this.prisma.notification.count({ where: { userId, readAt: null } });
+  }
+
+  async markRead(userId: string, id: string): Promise<void> {
+    const updated = await this.prisma.notification.updateMany({
+      where: { id, userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    if (
+      updated.count === 0 &&
+      !(await this.prisma.notification.findFirst({ where: { id, userId } }))
+    ) {
+      throw new NotFoundException("Notification not found");
+    }
+  }
+
+  async markAllRead(userId: string): Promise<void> {
+    await this.prisma.notification.updateMany({
+      where: { userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+  }
+}
+
+export function toNotification(row: Row, role: UserRole): Notification {
+  return {
+    id: row.id,
+    type: row.type,
+    ...describeNotification(row.type, (row.payload ?? {}) as Record<string, unknown>, role),
+    readAt: row.readAt?.toISOString() ?? null,
+    createdAt: row.createdAt.toISOString(),
+  };
 }

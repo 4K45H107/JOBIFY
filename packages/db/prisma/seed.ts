@@ -557,7 +557,7 @@ async function main() {
       {
         userId: demoEmployerId,
         type: NotificationType.COMPANY_JOIN_REQUESTED,
-        payload: { name: "Tanvir Hasan", designation: "Recruiter" },
+        payload: { name: "Tanvir Hasan", designation: "Recruiter", company: companies[0]!.name },
       },
       {
         userId: demoEmployerId,
