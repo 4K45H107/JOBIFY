@@ -105,7 +105,7 @@ export function scoreJob(seeker: SeekerSignals, job: JobSignals): Score {
 
 export function ageOn(birthdate: Date | null, today = new Date()): number | null {
   if (!birthdate) return null;
-  let age = today.getUTCFullYear() - birthdate.getUTCFullYear();
+  const age = today.getUTCFullYear() - birthdate.getUTCFullYear();
   const beforeBirthday =
     today.getUTCMonth() < birthdate.getUTCMonth() ||
     (today.getUTCMonth() === birthdate.getUTCMonth() &&
