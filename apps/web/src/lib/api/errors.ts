@@ -3,7 +3,8 @@ export interface ApiErrorBody {
   statusCode: number;
   error: string;
   message: string;
-  details?: { path: string; message: string }[];
+  /** Validation issues (array) or per-field messages keyed by id (e.g. screening questions). */
+  details?: { path: string; message: string }[] | Record<string, string>;
 }
 
 export class ApiError extends Error {

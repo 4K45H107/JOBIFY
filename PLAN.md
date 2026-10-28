@@ -321,12 +321,13 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 ### Phase 3: Apply & screen (weeks 5–6)
 
 - [x] Easy Apply API (contact, CV snapshot, screening answers, duplicate/age/deadline guards)
-- [ ] Easy Apply wizard UI (contact → CV → screening answers)
+- [x] Easy Apply wizard UI (contact → CV → screening answers)
 - [x] Application state machine + stage history
 - [x] MCQ API: build/lock test, timed attempt without answer key, server-side grading, late attempts closed at 0
-- [ ] MCQ screens: builder (`ADD MCQ`) and exam (`MCQUser`)
+- [x] MCQ exam screen (`MCQUser`): timed, auto-submits when time runs out
+- [ ] MCQ builder screen (`ADD MCQ`)
 - [ ] Applicants view (`Job Management`): CV viewer, score, sort/filter, stage actions
-- [ ] `Activities - Applications` with status counts
+- [x] `Activities - Applications` with status counts
 - [ ] Notifications module: in-app feed + Socket.IO push + bell badge
 
 ### Phase 4: Interviews (week 7)
