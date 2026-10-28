@@ -323,7 +323,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Easy Apply API (contact, CV snapshot, screening answers, duplicate/age/deadline guards)
 - [ ] Easy Apply wizard UI (contact → CV → screening answers)
 - [x] Application state machine + stage history
-- [ ] MCQ builder (`ADD MCQ`), timed MCQ attempt (`MCQUser`), server-side grading
+- [x] MCQ API: build/lock test, timed attempt without answer key, server-side grading, late attempts closed at 0
+- [ ] MCQ screens: builder (`ADD MCQ`) and exam (`MCQUser`)
 - [ ] Applicants view (`Job Management`): CV viewer, score, sort/filter, stage actions
 - [ ] `Activities - Applications` with status counts
 - [ ] Notifications module: in-app feed + Socket.IO push + bell badge
