@@ -25,6 +25,8 @@
   --chip: #71d1fb; /* active pill tab */
   --chip-fg: #2c2d2f;
   --success: #00d080; /* Easy Apply */
+  --selected: #1b2275; /* bar on the selected job card */
+  --hero: #2f4ce0; /* Home "Your Job Searching starts here" */
   --icon-filter: none;
 }
 
@@ -50,6 +52,8 @@
     --chip: #3aa9d8;
     --chip-fg: #0b0b0c;
     --success: #2ee6a0;
+    --selected: #8fa2ff;
+    --hero: #8fa2ff;
     --icon-filter: invert(1);
   }
 }
@@ -75,6 +79,8 @@
   --chip: #3aa9d8;
   --chip-fg: #0b0b0c;
   --success: #2ee6a0;
+  --selected: #8fa2ff;
+  --hero: #8fa2ff;
   --icon-filter: invert(1);
 }
 
@@ -102,6 +108,8 @@
   --color-chip: var(--chip);
   --color-chip-fg: var(--chip-fg);
   --color-success: var(--success);
+  --color-selected: var(--selected);
+  --color-hero: var(--hero);
 
   /* Figma labels use 0.08em tracking (1.28px at 16px). */
   --tracking-label: 0.08em;
