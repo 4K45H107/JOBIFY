@@ -12,11 +12,13 @@ import { createZodDto } from "nestjs-zod";
 import request from "supertest";
 import { z } from "zod";
 import { AppModule } from "../src/app.module";
+import { Public } from "../src/auth/decorators/public.decorator";
 import { setupApp } from "../src/app.setup";
 
 class EchoDto extends createZodDto(z.object({ name: z.string().min(2) })) {}
 
 // Test-only routes that exercise validation and error formatting.
+@Public()
 @Controller("test")
 class TestController {
   @Post("echo")

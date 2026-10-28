@@ -1,6 +1,7 @@
 import { INestApplication } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { cleanupOpenApiDoc } from "nestjs-zod";
 import type { Env } from "./config/env";
@@ -13,6 +14,7 @@ export function setupApp(app: INestApplication): void {
 
   app.setGlobalPrefix(API_PREFIX);
   app.use(helmet());
+  app.use(cookieParser());
   app.enableCors({ origin: config.get("WEB_ORIGIN", { infer: true }), credentials: true });
   app.enableShutdownHooks();
 
@@ -22,6 +24,7 @@ export function setupApp(app: INestApplication): void {
       .setTitle("Jobify API")
       .setDescription("REST API for the Jobify hiring platform.")
       .setVersion("0.1.0")
+      .addCookieAuth("jobify_access")
       .build(),
   );
   SwaggerModule.setup(`${API_PREFIX}/docs`, app, cleanupOpenApiDoc(document), {

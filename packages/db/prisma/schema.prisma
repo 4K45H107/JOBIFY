@@ -41,6 +41,7 @@ model User {
   stageChanges      ApplicationStageChange[]
   interviewsCreated Interview[]              @relation("InterviewCreatedBy")
   notifications     Notification[]
+  sessions          Session[]
 }
 
 enum EmploymentStatus {
@@ -470,4 +471,24 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, readAt, createdAt])
+}
+
+// ─── auth sessions ───────────────────────────────────────────────────────────
+
+/// One row per refresh token. Rotated on every refresh. A reused (revoked)
+/// token revokes the whole family, which logs out every device for that user.
+model Session {
+  id         String    @id @default(cuid())
+  userId     String
+  /// SHA-256 of the opaque refresh token. The raw token only ever lives in the cookie.
+  tokenHash  String    @unique
+  userAgent  String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  replacedBy String?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

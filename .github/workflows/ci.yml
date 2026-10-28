@@ -33,6 +33,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://jobify:jobify@localhost:5432/jobify
       NODE_ENV: test
+      # Test-only secret; real secrets live in the hosting provider.
+      JWT_ACCESS_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
 
     steps:
       - uses: actions/checkout@v4
