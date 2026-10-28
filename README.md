@@ -1,5 +1,7 @@
 # Jobify
 
+[![CI](https://github.com/4K45H107/JOBIFY/actions/workflows/ci.yml/badge.svg)](https://github.com/4K45H107/JOBIFY/actions/workflows/ci.yml)
+
 A hiring platform with two sides. Job seekers discover jobs, apply, take skill tests and join interviews.
 Employers post jobs, screen applicants and run interviews, all in one app.
 
@@ -50,3 +52,5 @@ After `pnpm db:seed`, every demo account uses the password `Password123!`:
 | `pnpm typecheck` | TypeScript, no emit         |
 | `pnpm test`      | Unit tests                  |
 | `pnpm format`    | Prettier                    |
+
+CI (GitHub Actions) runs format, build, migrations + seed, lint, typecheck and tests against Postgres on every pull request, plus a gitleaks secret scan.

@@ -296,7 +296,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] NestJS app with config, health check, OpenAPI, global error format, request validation
 - [x] Prisma schema v1 + migrations + **seed script**
 - [x] Next.js app with Tailwind + Figma design tokens + both app shells
-- [ ] CI: lint, typecheck, test, build. Deploy skeleton to Vercel + Railway + Neon
+- [x] CI: lint, typecheck, test, build (GitHub Actions + gitleaks secret scan)
+- [ ] Deploy skeleton to Vercel + Railway + Neon (needs the owner's hosting accounts)
 - [ ] `.env.example`, secrets only in the hosting provider (never committed)
 
 ### Phase 1: Auth & profiles (week 2)
