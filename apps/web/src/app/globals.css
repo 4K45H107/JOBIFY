@@ -1,1 +1,118 @@
 @import "tailwindcss";
+
+/*
+ * Design tokens from the JOBIFY Figma file (Page 1).
+ * Semantic names map to CSS variables so dark mode only swaps values.
+ */
+:root {
+  --bg: #ffffff;
+  --fg: #000000;
+  --fg-muted: #2c2d2f;
+  --fg-subtle: #6b6b6b;
+  --chrome: #000000; /* top bar */
+  --chrome-fg: #ffffff;
+  --sidebar: #a8a8a8;
+  --sidebar-fg: #000000;
+  --surface-muted: #f0f0f0; /* active segmented tab */
+  --surface-grey: #f5f5f7;
+  --border: #bbbaba;
+  --track: #d9d9d9;
+  --primary: #1f1d1d; /* filled pill button */
+  --primary-fg: #fcfcff;
+  --outline: #272934; /* outlined button */
+  --heading-accent: #ba5042; /* TRENDING / LATEST */
+  --link: #2967b0; /* FILTERS heading, links */
+  --chip: #71d1fb; /* active pill tab */
+  --chip-fg: #2c2d2f;
+  --success: #00d080; /* Easy Apply */
+  --icon-filter: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121214;
+    --fg: #f4f4f5;
+    --fg-muted: #d4d4d8;
+    --fg-subtle: #a1a1aa;
+    --chrome: #000000;
+    --chrome-fg: #ffffff;
+    --sidebar: #2a2a2e;
+    --sidebar-fg: #f4f4f5;
+    --surface-muted: #232327;
+    --surface-grey: #1b1b1f;
+    --border: #3f3f46;
+    --track: #3f3f46;
+    --primary: #f4f4f5;
+    --primary-fg: #121214;
+    --outline: #d4d4d8;
+    --heading-accent: #e07a6b;
+    --link: #6ea8ec;
+    --chip: #3aa9d8;
+    --chip-fg: #0b0b0c;
+    --success: #2ee6a0;
+    --icon-filter: invert(1);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #121214;
+  --fg: #f4f4f5;
+  --fg-muted: #d4d4d8;
+  --fg-subtle: #a1a1aa;
+  --chrome: #000000;
+  --chrome-fg: #ffffff;
+  --sidebar: #2a2a2e;
+  --sidebar-fg: #f4f4f5;
+  --surface-muted: #232327;
+  --surface-grey: #1b1b1f;
+  --border: #3f3f46;
+  --track: #3f3f46;
+  --primary: #f4f4f5;
+  --primary-fg: #121214;
+  --outline: #d4d4d8;
+  --heading-accent: #e07a6b;
+  --link: #6ea8ec;
+  --chip: #3aa9d8;
+  --chip-fg: #0b0b0c;
+  --success: #2ee6a0;
+  --icon-filter: invert(1);
+}
+
+@theme inline {
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-brand: var(--font-baloo), var(--font-outfit), sans-serif;
+
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-chrome: var(--chrome);
+  --color-chrome-fg: var(--chrome-fg);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-grey: var(--surface-grey);
+  --color-border: var(--border);
+  --color-track: var(--track);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-outline: var(--outline);
+  --color-heading-accent: var(--heading-accent);
+  --color-link: var(--link);
+  --color-chip: var(--chip);
+  --color-chip-fg: var(--chip-fg);
+  --color-success: var(--success);
+
+  /* Figma labels use 0.08em tracking (1.28px at 16px). */
+  --tracking-label: 0.08em;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Black line-art icons from Figma; inverted in dark mode. */
+.icon-themed {
+  filter: var(--icon-filter);
+}

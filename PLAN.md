@@ -192,7 +192,6 @@ jobify/
 ├─ packages/
 │  ├─ db/             # Prisma schema, migrations, generated client, seed
 │  ├─ shared/         # Zod schemas, DTO types, enums (roles, statuses)
-│  ├─ ui/             # design tokens + shared components from Figma
 │  ├─ api-client/     # generated from the API's OpenAPI spec
 │  └─ config/         # eslint, tsconfig, tailwind preset
 ├─ docs/              # ADRs, diagrams, screenshots
@@ -279,7 +278,7 @@ The Figma file has 26 frames on Page 1. Two layout shells cover everything:
 ### Process
 
 1. Pull design tokens (colours, type scale, radii, spacing) from Figma into `packages/config/tailwind` + CSS variables. Support light and dark.
-2. Build shared components first (`packages/ui`): AppShell, Sidebar, TopBar, JobCard, CompanyCard, FilterPanel, Tabs, Stepper, StatCard, ApplicantRow, NotificationItem, EmptyState.
+2. Build shared components first (`apps/web/src/components`; promote to a `packages/ui` package only if a second app needs them): AppShell, Sidebar, TopBar, JobCard, CompanyCard, FilterPanel, Tabs, Stepper, StatCard, ApplicantRow, NotificationItem, EmptyState.
 3. Build screens against a mocked API (MSW) so the frontend isn't blocked on the backend.
 4. Use the Figma MCP (`get_design_context` per frame) to generate a reference, then adapt it to the shared components rather than pasting it in.
 5. Make it responsive. The Figma frames are 1440px desktop only, so define tablet and mobile breakpoints ourselves.
@@ -296,7 +295,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Move the existing Next.js scaffold into `apps/web/` and settle on Tailwind v4 (the `feat/auth-system` pages get ported in Phase 1)
 - [x] NestJS app with config, health check, OpenAPI, global error format, request validation
 - [x] Prisma schema v1 + migrations + **seed script**
-- [ ] Next.js app with Tailwind + Figma design tokens + both app shells
+- [x] Next.js app with Tailwind + Figma design tokens + both app shells
 - [ ] CI: lint, typecheck, test, build. Deploy skeleton to Vercel + Railway + Neon
 - [ ] `.env.example`, secrets only in the hosting provider (never committed)
 
