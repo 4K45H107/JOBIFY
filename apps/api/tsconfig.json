@@ -1,0 +1,17 @@
+{
+  "extends": "@jobify/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "isolatedModules": false,
+    "declaration": false,
+    "incremental": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src"]
+}

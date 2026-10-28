@@ -294,7 +294,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 - [x] Monorepo scaffold (pnpm, Turborepo, TS, ESLint, Prettier), `docker-compose` (Postgres, Redis)
 - [x] Move the existing Next.js scaffold into `apps/web/` and settle on Tailwind v4 (the `feat/auth-system` pages get ported in Phase 1)
-- [ ] NestJS app with config, health check, OpenAPI, global error format, request validation
+- [x] NestJS app with config, health check, OpenAPI, global error format, request validation
 - [ ] Prisma schema v1 + migrations + **seed script**
 - [ ] Next.js app with Tailwind + Figma design tokens + both app shells
 - [ ] CI: lint, typecheck, test, build. Deploy skeleton to Vercel + Railway + Neon

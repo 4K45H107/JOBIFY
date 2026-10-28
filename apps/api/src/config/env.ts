@@ -1,0 +1,18 @@
+import { z } from "zod";
+
+export const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  PORT: z.coerce.number().int().positive().default(4000),
+  WEB_ORIGIN: z.url().default("http://localhost:3000"),
+});
+
+export type Env = z.infer<typeof envSchema>;
+
+/** Validates process env at boot so a misconfigured deploy fails fast. */
+export function validateEnv(raw: Record<string, unknown>): Env {
+  const result = envSchema.safeParse(raw);
+  if (!result.success) {
+    throw new Error(`Invalid environment variables:\n${z.prettifyError(result.error)}`);
+  }
+  return result.data;
+}
