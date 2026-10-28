@@ -4,6 +4,7 @@ Rebuild of Jobify, the CSE408 (BUET, 2024) team project, as a deployed portfolio
 Original code: https://github.com/4K45H107/CSE408_JOBIFY
 
 ## Source of truth
+
 - **Roadmap:** `PLAN.md` covers features (P0/P1/P2), architecture and phased tasks. Work through the
   Phase checklist tasks **one at a time, in order**. Tick the checkbox in `PLAN.md` as part of the
   task's PR once it's done.
@@ -19,6 +20,7 @@ Original code: https://github.com/4K45H107/CSE408_JOBIFY
   `PLAN.md` in the same PR.
 
 ## Git & GitHub workflow
+
 - `main` is the integration branch. Every roadmap task gets its own branch off an up-to-date `main`
   (e.g. `chore/monorepo-setup`, `feature/auth-api`, `feature/explore-jobs-ui`, `fix/...`).
   (`development` and `feat/auth-system` are older branches. Don't build on them. Port anything
@@ -46,6 +48,7 @@ Original code: https://github.com/4K45H107/CSE408_JOBIFY
   (`git push -u origin <branch>`). `main` is updated on GitHub by merging the PR.
 
 ## Engineering rules
+
 - TypeScript everywhere. Validation schemas (Zod) and shared types live in `packages/shared`.
 - Never commit secrets. Only `.env.example` goes in git, and real values live in the hosting provider.
 - Every API endpoint is authenticated and authorized (role + ownership). Assessment answer keys
