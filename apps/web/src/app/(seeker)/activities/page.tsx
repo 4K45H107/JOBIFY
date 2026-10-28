@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { JobSummary } from "@jobify/shared";
+import type { JobSummary, MyApplications } from "@jobify/shared";
+import { MyApplicationsView } from "@/components/activities/MyApplicationsView";
 import { SavedJobs } from "@/components/activities/SavedJobs";
 import { JobBrowser } from "@/components/jobs/JobBrowser";
 import { ComingSoon } from "@/components/ui/ComingSoon";
@@ -55,7 +56,7 @@ export default async function ActivitiesPage({
         <ComingSoon title="Job alerts" figmaFrame="Activities - Job Alerts" phase="Phase 5" />
       )}
       {tab === "applications" && (
-        <ComingSoon title="Applications" figmaFrame="Activities - Applications" phase="Phase 3" />
+        <MyApplicationsView initial={await serverApi<MyApplications>("/me/applications")} />
       )}
     </div>
   );
