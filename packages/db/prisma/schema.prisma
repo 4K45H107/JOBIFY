@@ -428,17 +428,19 @@ enum InterviewStatus {
 }
 
 model Interview {
-  id            String          @id @default(cuid())
-  applicationId String
-  createdById   String
+  id             String          @id @default(cuid())
+  applicationId  String
+  createdById    String
   /// Free-text stage label, e.g. "Preli Exam" or "Final round".
-  stage         String
-  scheduledAt   DateTime
-  durationMin   Int
-  status        InterviewStatus @default(SCHEDULED)
-  roomName      String          @unique
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  stage          String
+  scheduledAt    DateTime
+  durationMin    Int
+  status         InterviewStatus @default(SCHEDULED)
+  roomName       String          @unique
+  /// Set by the worker once the "starting soon" reminder has gone out.
+  reminderSentAt DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   createdBy   User        @relation("InterviewCreatedBy", fields: [createdById], references: [id])

@@ -19,6 +19,9 @@ export const envSchema = z.object({
     .transform((v): boolean | number | string =>
       v === "true" ? true : v === "false" ? false : /^\d+$/.test(v) ? Number(v) : v,
     ),
+  LIVEKIT_URL: z.string().default("ws://localhost:7880"),
+  LIVEKIT_API_KEY: z.string().default("devkey"),
+  LIVEKIT_API_SECRET: z.string().default("secret"),
   S3_ENDPOINT: z.url().optional(),
   S3_REGION: z.string().default("us-east-1"),
   S3_BUCKET: z.string().min(1).default("jobify"),
