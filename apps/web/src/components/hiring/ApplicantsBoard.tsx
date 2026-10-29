@@ -10,6 +10,7 @@ import {
   STAGE_TRANSITIONS,
 } from "@jobify/shared";
 import { STAGE_LABELS, StageBadge } from "@/components/activities/StageBadge";
+import { ScheduleDialog } from "@/components/interviews/ScheduleDialog";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api/client";
@@ -20,7 +21,6 @@ import { EMPLOYMENT_LABELS } from "@/lib/labels";
 
 const ACTION_LABELS: Partial<Record<ApplicationStage, string>> = {
   SHORTLISTED: "Shortlist",
-  INTERVIEW: "Move to interview",
   OFFER: "Make offer",
   REJECTED: "Reject",
 };
@@ -154,6 +154,8 @@ function ApplicantRow({
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<ApplicationStage | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [scheduling, setScheduling] = useState(false);
+  const [scheduled, setScheduled] = useState<string | null>(null);
 
   const move = async (to: ApplicationStage) => {
     if (to === "REJECTED" && !confirm(`Reject ${a.seeker.fullName}? They'll be notified.`)) return;
@@ -214,20 +216,44 @@ function ApplicantRow({
           <Button size="sm" variant="outline" onClick={onViewCv}>
             View CV
           </Button>
-          {STAGE_TRANSITIONS[a.stage].map((to) => (
-            <Button
-              key={to}
-              size="sm"
-              variant={to === "REJECTED" ? "ghost" : "primary"}
-              disabled={busy !== null}
-              onClick={() => move(to)}
-            >
-              {busy === to ? "…" : (ACTION_LABELS[to] ?? STAGE_LABELS[to])}
+          {(a.stage === "SHORTLISTED" || a.stage === "INTERVIEW") && (
+            <Button size="sm" onClick={() => setScheduling(true)}>
+              {a.stage === "INTERVIEW" ? "Schedule another" : "Schedule interview"}
             </Button>
-          ))}
+          )}
+          {/* Moving to INTERVIEW happens by scheduling one, so it isn't a separate button. */}
+          {STAGE_TRANSITIONS[a.stage]
+            .filter((to) => to !== "INTERVIEW")
+            .map((to) => (
+              <Button
+                key={to}
+                size="sm"
+                variant={to === "REJECTED" ? "ghost" : "primary"}
+                disabled={busy !== null}
+                onClick={() => move(to)}
+              >
+                {busy === to ? "…" : (ACTION_LABELS[to] ?? STAGE_LABELS[to])}
+              </Button>
+            ))}
         </div>
       </div>
       {error && <p className="mt-2 text-sm text-heading-accent">{error}</p>}
+      {scheduled && <p className="mt-2 text-sm text-success">{scheduled}</p>}
+      {scheduling && (
+        <ScheduleDialog
+          title={`Schedule interview · ${a.seeker.fullName}`}
+          applicationId={a.id}
+          onClose={() => setScheduling(false)}
+          onDone={(interview) => {
+            setScheduling(false);
+            setScheduled(
+              `${interview.stage} scheduled for ${new Date(interview.scheduledAt).toLocaleString()}.`,
+            );
+            onChange({ ...a, stage: "INTERVIEW" });
+            router.refresh();
+          }}
+        />
+      )}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
