@@ -21,13 +21,15 @@ packages/tsconfig Shared TypeScript configs
 
 ## Getting started
 
+**Full guide with all demo accounts and troubleshooting: [`docs/RUNNING_LOCALLY.md`](docs/RUNNING_LOCALLY.md).**
+
 Requirements: Node 22+, pnpm 10 (`corepack enable`), Docker.
 
 ```bash
 pnpm install
 cp .env.example .env
 pnpm services:up  # Postgres (5433), Redis (6379), SeaweedFS S3 (8333), LiveKit (7880)
-pnpm db:migrate   # apply migrations
+pnpm db:deploy    # create the database tables
 pnpm db:seed      # demo data (re-runnable)
 pnpm dev          # web on :3000, API on :4000/api, worker
 ```
