@@ -16,6 +16,7 @@ import { JobsModule } from "./jobs/jobs.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ProfileModule } from "./profile/profile.module";
+import { RedisModule } from "./redis/redis.module";
 import { StorageModule } from "./storage/storage.module";
 
 @Module({
@@ -34,6 +35,7 @@ import { StorageModule } from "./storage/storage.module";
     }),
     PrismaModule,
     StorageModule,
+    RedisModule,
     NotificationsModule,
     HealthModule,
     AuthModule,

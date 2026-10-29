@@ -1,0 +1,32 @@
+{
+  "name": "@jobify/worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Background jobs: interview reminders (and later job alerts and emails).",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@jobify/db": "workspace:*",
+    "@jobify/shared": "workspace:*",
+    "bullmq": "^5.58.0",
+    "dotenv": "^17.2.2",
+    "ioredis": "^5.7.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@jobify/tsconfig": "workspace:*",
+    "@types/node": "^22",
+    "eslint": "^9",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.43.0",
+    "vitest": "^3.2.4"
+  }
+}

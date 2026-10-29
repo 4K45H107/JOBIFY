@@ -124,3 +124,17 @@ export function describeNotification(
       };
   }
 }
+
+/** Redis pub/sub channel that carries new notification rows to every API instance. */
+export const NOTIFICATIONS_CHANNEL = "jobify:notifications";
+
+/** What goes over NOTIFICATIONS_CHANNEL: the stored row, JSON-encoded. */
+export const notificationRowSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  type: NotificationType,
+  payload: z.record(z.string(), z.unknown()),
+  readAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type NotificationRow = z.infer<typeof notificationRowSchema>;

@@ -5,6 +5,8 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   WEB_ORIGIN: z.url().default("http://localhost:3000"),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  /** Pub/sub for live notifications across API instances and from the worker. Optional locally. */
+  REDIS_URL: z.url({ protocol: /^rediss?$/ }).optional(),
   JWT_ACCESS_SECRET: z.string().min(32, "JWT_ACCESS_SECRET must be at least 32 characters"),
   ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
