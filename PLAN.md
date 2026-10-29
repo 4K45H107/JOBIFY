@@ -332,9 +332,11 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 ### Phase 4: Interviews (week 7)
 
-- [ ] Schedule dialog (date/time/duration/stage). Clash check
+- [x] Interviews API: schedule (date/time/duration/round), clash check, reschedule/cancel/complete, lists per role
+- [ ] Schedule dialog UI
 - [ ] Interview lists for both roles with countdown
-- [ ] LiveKit room: server-issued tokens, opens only near the scheduled time, employer ends it
+- [x] LiveKit room tokens: server-issued, only for the two parties, only from 10 min before to 15 min after
+- [ ] Interview room UI (LiveKit)
 - [ ] Worker: email + in-app reminders (24h / 15min)
 
 ### Phase 5: Retention & polish (week 8)

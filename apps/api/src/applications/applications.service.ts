@@ -313,6 +313,21 @@ export class ApplicationsService {
     return updated!;
   }
 
+  /**
+   * Used by interview scheduling: moves the application to INTERVIEW if it isn't
+   * there yet. No separate stage notification, since the interview one covers it.
+   */
+  async advanceToInterview(applicationId: string, byUserId: string): Promise<void> {
+    const application = await this.prisma.application.findUniqueOrThrow({
+      where: { id: applicationId },
+    });
+    if (application.stage === "INTERVIEW") return;
+    if (!canMoveTo(application.stage, "INTERVIEW")) {
+      throw new ConflictException("Shortlist the applicant before scheduling an interview");
+    }
+    await this.moveStage(applicationId, application.stage, "INTERVIEW", byUserId, null);
+  }
+
   // ─── helpers ─────────────────────────────────────────────────────────────
 
   /** Optimistic transition: fails if someone else moved the application first. */
