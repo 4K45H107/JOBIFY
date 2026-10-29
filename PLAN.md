@@ -337,7 +337,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Interview lists for both roles with countdown
 - [x] LiveKit room tokens: server-issued, only for the two parties, only from 10 min before to 15 min after
 - [x] Interview room UI (LiveKit prebuilt conference; employer can end it)
-- [ ] Worker: email + in-app reminders (24h / 15min)
+- [x] Worker (BullMQ): in-app interview reminders 15 min before, delivered live via Redis pub/sub
+- [ ] Email reminders (with the email task)
 
 ### Phase 5: Retention & polish (week 8)
 

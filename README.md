@@ -13,6 +13,7 @@ architecture and roadmap.
 ```
 apps/web          Next.js frontend
 apps/api          NestJS API (modular monolith)
+apps/worker       Background jobs (BullMQ): interview reminders
 packages/db       Prisma schema, migrations, client and seed data
 packages/shared   Zod schemas, types and enums shared across apps
 packages/tsconfig Shared TypeScript configs
@@ -25,10 +26,10 @@ Requirements: Node 22+, pnpm 10 (`corepack enable`), Docker.
 ```bash
 pnpm install
 cp .env.example .env
-pnpm services:up  # Postgres (5433), Redis (6379), SeaweedFS S3 (8333)
+pnpm services:up  # Postgres (5433), Redis (6379), SeaweedFS S3 (8333), LiveKit (7880)
 pnpm db:migrate   # apply migrations
 pnpm db:seed      # demo data (re-runnable)
-pnpm dev          # web on http://localhost:3000, API on http://localhost:4000/api
+pnpm dev          # web on :3000, API on :4000/api, worker
 ```
 
 API docs (OpenAPI / Swagger UI) are served at http://localhost:4000/api/docs.
