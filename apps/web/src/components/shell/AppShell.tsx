@@ -21,7 +21,9 @@ export function AppShell({
       <TopBar homeHref={homeHref} user={user} />
       <div className="flex min-h-0 flex-1">
         <Sidebar items={nav} />
-        <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-10 md:py-8">
+        {/* relative: absolutely positioned children (e.g. sr-only labels) stay inside the scroll area
+            instead of stretching the window, which would scroll the header away. */}
+        <main className="relative min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-10 md:py-8">
           {children}
         </main>
       </div>
