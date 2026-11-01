@@ -5,6 +5,9 @@
 A hiring platform with two sides. Job seekers discover jobs, apply, take skill tests and join interviews.
 Employers post jobs, screen applicants and run interviews, all in one app.
 
+**Live demo: https://jobify-hire.vercel.app** (sign in as `seeker@jobify.dev` or `employer@jobify.dev`,
+password `Password123!`). The first visit can take up to a minute if the free API server was asleep.
+
 A rebuild of the 2024 CSE408 (BUET) team project. See [`PLAN.md`](PLAN.md) for the features,
 architecture and roadmap.
 

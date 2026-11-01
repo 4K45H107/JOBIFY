@@ -3,9 +3,9 @@
 How Jobify runs in production: which service handles which part, why it was picked, and exactly how
 it was set up. Everything runs on **free tiers**.
 
-> Status: **Neon** (database + files) and **Render Key Value** (Redis) are set up. The API on
-> Render, the web app on Vercel, LiveKit Cloud and the keep-awake ping are configured in the repo
-> and documented below, waiting to be created.
+> **Live:** https://jobify-hire.vercel.app (API: https://jobify-api-g2kn.onrender.com/api/health).
+> Every part is set up except the keep-awake ping (section 5). Demo logins: see
+> [RUNNING_LOCALLY.md](RUNNING_LOCALLY.md#4-demo-accounts) (password `Password123!`).
 
 ## Overview
 
@@ -25,10 +25,10 @@ flowchart LR
 | -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------- |
 | Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done    |
 | File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done    |
-| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ⏳ Planned |
-| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ⏳ Planned |
+| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done    |
+| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done    |
 | Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done    |
-| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ⏳ Planned |
+| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done    |
 | Keep the API awake         | **cron-job.org**               | Render's free tier sleeps after 15 idle minutes; a ping every 10 minutes keeps reminders running                  | ⏳ Planned |
 
 ---
@@ -253,15 +253,15 @@ keeps using Docker Redis.
 **Create it from the Blueprint:** _New › Blueprint_ → connect the `4K45H107/JOBIFY` repo → Render
 reads `render.yaml` and asks for the secret settings:
 
-| Setting                                                | Value                                                                             |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                         | Neon **pooled** string (`DATABASE_URL` in `.env.neon`)                            |
-| `DATABASE_URL_UNPOOLED`                                | Neon **direct** string (used by migrations during the build)                      |
-| `REDIS_URL`                                            | `jobify-redis`'s Internal Key Value URL                                           |
-| `S3_ENDPOINT`                                          | `AWS_ENDPOINT_URL_S3` from `.env.neon`                                            |
-| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`             | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` from `.env.neon`                     |
-| `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | From the LiveKit Cloud project                                                    |
-| `WEB_ORIGIN`                                           | The Vercel URL. Put `https://jobify.vercel.app` first and correct it after step 3 |
+| Setting                                                | Value                                                                                                                       |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                         | Neon **pooled** string (`DATABASE_URL` in `.env.neon`)                                                                      |
+| `DATABASE_URL_UNPOOLED`                                | Neon **direct** string (used by migrations during the build)                                                                |
+| `REDIS_URL`                                            | `jobify-redis`'s Internal Key Value URL                                                                                     |
+| `S3_ENDPOINT`                                          | `AWS_ENDPOINT_URL_S3` from `.env.neon`                                                                                      |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`             | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` from `.env.neon`                                                               |
+| `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | From the LiveKit Cloud project                                                                                              |
+| `WEB_ORIGIN`                                           | The Vercel URL, `https://jobify-hire.vercel.app`. Any valid URL works until Vercel exists; set the real one after section 3 |
 
 These come from `render.yaml` and need no input: `NODE_ENV=production`, `NODE_VERSION=22`,
 `TRUST_PROXY=true` (requests pass through Vercel and Render's load balancer), `S3_REGION`,
@@ -283,16 +283,28 @@ Render waits for `GET /api/health` to answer before sending traffic to a new ver
 **Check it:** `https://<service>.onrender.com/api/health` returns `{"status":"ok","database":"up"}`,
 and the logs show `[worker] running: interview reminders every minute`.
 
-### How it was verified before deploying
+### What was created
 
-The exact build and start commands were run in a fresh clone with `NODE_ENV=production`, against
-Neon and a local Redis:
+| Item      | Value                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Blueprint | `jobify`, from `render.yaml` on `main`                                                                                         |
+| Service   | `jobify-api`, free plan, Singapore: **https://jobify-api-g2kn.onrender.com** (`jobify-api` was taken, so Render added `-g2kn`) |
+| Key Value | `jobify-redis`, free plan, Singapore, `noeviction`                                                                             |
+| Deploys   | Automatically on every push to `main`                                                                                          |
+
+### How it was verified
+
+Before deploying, the exact build and start commands were run in a fresh clone with
+`NODE_ENV=production`, against Neon and a local Redis:
 
 - install, build and migrations succeeded. The first migration attempt failed once while Neon was
   waking up, which is why the build retries it.
 - `/api/health` answered `database: up` and the worker logged its schedule.
 - `SIGTERM` stopped both programs cleanly and the script exited.
 - When one program failed to start, the script stopped the other and exited.
+
+After deploying: the first build succeeded, `/api/health` returned `database: up`, demo logins work,
+and the worker sent a live interview reminder (see [End-to-end check](#end-to-end-check-of-the-live-site)).
 
 ## 3. Vercel: web app
 
@@ -304,14 +316,17 @@ login cookies stay on the web app's own domain.
 
 ### How to set it up
 
-_Add New › Project_ → import `4K45H107/JOBIFY` → set:
+_Add New › Project_ → import `4K45H107/JOBIFY`. Vercel detects both `apps/api` (NestJS) and
+`apps/web` and offers to deploy them together as "Services": **don't**. The API runs on Render; on
+Vercel it would become short-lived functions, which breaks live notifications and can't run the
+worker. Instead set:
 
 | Setting                    | Value                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------ |
 | Root Directory             | `apps/web`                                                                     |
 | Framework                  | Next.js (detected)                                                             |
 | Build and install commands | Leave as they are: [`apps/web/vercel.json`](../apps/web/vercel.json) sets them |
-| Environment variable       | `API_URL` = `https://<service>.onrender.com` (no trailing slash)               |
+| Environment variable       | `API_URL` = `https://jobify-api-g2kn.onrender.com` (no trailing slash)         |
 
 `API_URL` is baked into the build (it's where `/api` is proxied), so after changing it, **redeploy**.
 Then set `WEB_ORIGIN` on Render to the Vercel URL.
@@ -319,10 +334,103 @@ Then set `WEB_ORIGIN` on Render to the Vercel URL.
 `vercel.json` installs the whole workspace and builds the web app with its shared package
 (`turbo run build --filter=@jobify/web`). This was checked in a fresh clone with only `API_URL` set.
 
-## 4. LiveKit Cloud
+### What was created
 
-_Not set up yet._
+| Item    | Value                                                                                                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project | `jobify`, Hobby plan, from `main`                                                                                                                                      |
+| Domain  | **https://jobify-hire.vercel.app**, added under _Settings › Domains_ (free `vercel.app` name; the project also keeps Vercel's generated `jobify-sandy-six.vercel.app`) |
+| Deploys | Production on every push to `main`; a preview build for every pull request (shown as a PR check)                                                                       |
+
+After the domain was chosen, `WEB_ORIGIN` on Render was set to `https://jobify-hire.vercel.app`.
+
+### Server time zone
+
+Vercel renders pages on servers in **UTC**, while visitors see their own time zone. Text that
+depends on the viewer's clock, time zone or locale (interview times, "3h ago", countdowns) is
+therefore filled in only in the browser, through `ClientTime` and `useHydrated`
+(`apps/web/src/components/ui/ClientTime.tsx`). Rendering it on the server too caused React
+hydration errors on the interview pages (fixed in PR #30).
+
+## 4. LiveKit Cloud: video interviews
+
+### Why LiveKit Cloud
+
+The app already uses LiveKit (a local server in Docker for development). LiveKit Cloud is the hosted
+version: no server to run, no UDP or firewall issues, and a free Build plan. The API only creates
+short-lived room tokens with the API key and secret; browsers connect to LiveKit directly.
+
+### How it was set up
+
+1. Signed up at [cloud.livekit.io](https://cloud.livekit.io) and created the project `jobify`. The
+   onboarding questions are optional (answered "Web app" and "Video conferencing").
+2. **Region: Europe.** Only US and Europe were offered; Europe is closer to Bangladesh. Calls are
+   still routed through LiveKit's nearest edge servers.
+3. **Agent observability: off.** It records LiveKit Agents (AI bots) sessions; Jobify has none, and
+   leaving it off avoids storing interview data.
+4. _Settings › API keys › Create key_. The **secret is shown only once**: copy it before closing
+   the dialog. (The first key's secret was lost, so it was revoked and a new key created.)
+5. Put the three values on Render (`jobify-api` › Environment):
+
+| Setting              | Value                                 |
+| -------------------- | ------------------------------------- |
+| `LIVEKIT_URL`        | `wss://jobify-bxha3jvq.livekit.cloud` |
+| `LIVEKIT_API_KEY`    | the key (`API…`)                      |
+| `LIVEKIT_API_SECRET` | the secret                            |
+
+Nothing else is needed from LiveKit: no Agents, telephony, Egress or recording.
+
+### How it was verified
+
+- Before putting the key on Render, it was checked against LiveKit's server API: creating, listing
+  and deleting a room all succeeded (they fail with a wrong key or secret).
+- On the live site, the seeker and the employer each got a join token for the same room, on the
+  `wss://jobify-bxha3jvq.livekit.cloud` URL, signed with the new key.
+- In the dashboard, _Sessions_ lists the rooms that were actually joined.
 
 ## 5. cron-job.org: keep the API awake
 
-_Not set up yet._ Plan: `GET https://<service>.onrender.com/api/health` every 10 minutes.
+### Why
+
+Render's free web service sleeps after 15 minutes without traffic. While it sleeps, the worker
+inside it stops too, so interview reminders would be missed, and the next visitor waits about a
+minute for it to wake up. A ping every 10 minutes keeps it awake. One service running all month is
+about 744 hours, within the free 750.
+
+### How to set it up
+
+[cron-job.org](https://cron-job.org) (free) → _Create cronjob_:
+
+| Field    | Value                                             |
+| -------- | ------------------------------------------------- |
+| URL      | `https://jobify-api-g2kn.onrender.com/api/health` |
+| Schedule | Every 10 minutes                                  |
+
+Check it under the job's history: each run should be `200`.
+
+_Status: to do._
+
+---
+
+## End-to-end check of the live site
+
+Run against https://jobify-hire.vercel.app after everything was deployed:
+
+| Check                                  | Result                                                                                                                       |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Open `/` signed out                    | Redirects to `/login`                                                                                                        |
+| `/api/health` through the Vercel proxy | `{"status":"ok","database":"up"}`                                                                                            |
+| Sign in as seeker and as employer      | 200; Chrome shows Home with "For you" jobs, 60 jobs and 8 companies                                                          |
+| Upload a CV, then open it              | 201, then a redirect to a signed Neon Storage URL; the downloaded file is byte-identical; 401 without a session              |
+| Live notification                      | The employer schedules an interview; the seeker's open stream receives "Interview scheduled" about 2 s later, through Vercel |
+| Worker                                 | The seeker's stream also receives "Interview starting soon" from the worker on Render                                        |
+| Video room                             | Seeker and employer get tokens for the same LiveKit room                                                                     |
+| Times                                  | No hydration errors with a UTC server and a browser in Asia/Dhaka (after PR #30)                                             |
+
+The test interviews were cancelled afterwards. To reset all demo data, see
+[Day-to-day tasks](#day-to-day-tasks) in the Neon section.
+
+## Where the settings live
+
+All production values are kept in the git-ignored `.env.production` on the owner's machine (and in
+a password manager), and in each provider's dashboard. Nothing secret is committed.
