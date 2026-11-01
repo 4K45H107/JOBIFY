@@ -19,7 +19,8 @@
     "db:deploy": "pnpm --filter @jobify/db db:deploy",
     "db:seed": "pnpm --filter @jobify/db db:seed",
     "db:reset": "pnpm --filter @jobify/db db:reset",
-    "db:studio": "pnpm --filter @jobify/db db:studio"
+    "db:studio": "pnpm --filter @jobify/db db:studio",
+    "start:backend": "node scripts/start-backend.mjs"
   },
   "devDependencies": {
     "@neon/config": "^1.10.0",
