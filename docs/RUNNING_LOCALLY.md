@@ -19,7 +19,7 @@ cd jobify
 corepack enable          # makes the right pnpm version available
 pnpm install
 cp .env.example .env     # local defaults; works as-is
-pnpm services:up         # starts Postgres, Redis, SeaweedFS (S3) and LiveKit in Docker
+pnpm services:up         # starts Postgres, Redis, SeaweedFS (S3), LiveKit and Mailpit in Docker
 pnpm db:deploy           # creates the database tables
 pnpm db:seed             # demo companies, jobs, people, applications, tests and interviews
 ```
@@ -32,12 +32,13 @@ pnpm dev
 
 This starts three processes:
 
-| What               | URL                                               |
-| ------------------ | ------------------------------------------------- |
-| Web app            | http://localhost:3000                             |
-| API                | http://localhost:4000/api                         |
-| API docs (Swagger) | http://localhost:4000/api/docs                    |
-| Worker             | no URL; it sends interview reminders every minute |
+| What               | URL                                             |
+| ------------------ | ----------------------------------------------- |
+| Web app            | http://localhost:3000                           |
+| API                | http://localhost:4000/api                       |
+| API docs (Swagger) | http://localhost:4000/api/docs                  |
+| Worker             | no URL; it sends interview reminders and emails |
+| Mailpit (emails)   | http://localhost:8025                           |
 
 Open http://localhost:3000 and sign in with one of the demo accounts below.
 
@@ -93,6 +94,13 @@ or "I'm hiring".
 3. The room opens 10 minutes before the start. Both people click **Join** under _Interviews_ to
    meet in the LiveKit room. The employer can **End interview**.
 
+**See the emails (Mailpit)**
+
+Every email the app sends locally lands in Mailpit at http://localhost:8025; nothing leaves your
+machine. Schedule an interview as `employer@jobify.dev` and the seeker's "Interview scheduled"
+email appears within a couple of seconds. Each email's footer links to _Settings › Email
+notifications_ and to a one-click unsubscribe page.
+
 **Company onboarding**
 
 - Register a new employer: you'll be asked to create a company or ask to join one.
@@ -112,14 +120,15 @@ or "I'm hiring".
 
 ## 7. Ports and services
 
-| Service            | Port                                                           | Change it with (in `.env`)             |
-| ------------------ | -------------------------------------------------------------- | -------------------------------------- |
-| Postgres           | 5433 (not 5432, to avoid clashing with another local Postgres) | `POSTGRES_PORT` + `DATABASE_URL`       |
-| Redis              | 6379                                                           | `REDIS_PORT` + `REDIS_URL`             |
-| SeaweedFS (S3 API) | 8333                                                           | `S3_PORT` + `S3_ENDPOINT`              |
-| LiveKit            | 7880 (plus 7881, 7882/udp)                                     | `LIVEKIT_PORT` + `LIVEKIT_URL`         |
-| Web                | 3000                                                           | `apps/web/package.json`                |
-| API                | 4000                                                           | `PORT` (and `API_URL` for the web app) |
+| Service            | Port                                                           | Change it with (in `.env`)                          |
+| ------------------ | -------------------------------------------------------------- | --------------------------------------------------- |
+| Postgres           | 5433 (not 5432, to avoid clashing with another local Postgres) | `POSTGRES_PORT` + `DATABASE_URL`                    |
+| Redis              | 6379                                                           | `REDIS_PORT` + `REDIS_URL`                          |
+| SeaweedFS (S3 API) | 8333                                                           | `S3_PORT` + `S3_ENDPOINT`                           |
+| LiveKit            | 7880 (plus 7881, 7882/udp)                                     | `LIVEKIT_PORT` + `LIVEKIT_URL`                      |
+| Mailpit            | 8025 (inbox), 1025 (SMTP)                                      | `MAILPIT_UI_PORT`, `MAILPIT_SMTP_PORT` + `SMTP_URL` |
+| Web                | 3000                                                           | `apps/web/package.json`                             |
+| API                | 4000                                                           | `PORT` (and `API_URL` for the web app)              |
 
 ## 8. Troubleshooting
 

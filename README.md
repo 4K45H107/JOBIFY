@@ -16,9 +16,10 @@ architecture and roadmap.
 ```
 apps/web          Next.js frontend
 apps/api          NestJS API (modular monolith)
-apps/worker       Background jobs (BullMQ): interview reminders, see docs/WORKER.md
+apps/worker       Background jobs (BullMQ): interview reminders and emails, see docs/WORKER.md
 packages/db       Prisma schema, migrations, client and seed data
 packages/shared   Zod schemas, types and enums shared across apps
+packages/email    Email templates (React Email), sending (Brevo / SMTP), unsubscribe tokens
 packages/tsconfig Shared TypeScript configs
 ```
 

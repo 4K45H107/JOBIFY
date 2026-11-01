@@ -1,12 +1,13 @@
 # The background worker (`apps/worker`)
 
 `apps/worker` is a separate background program that runs alongside the web app and the API.
-Right now it has one job: **reminding both people shortly before an interview starts**. Job-alert
-digests and emails will move here later.
+It has two jobs: **reminding both people shortly before an interview starts**, and **sending the
+emails** for notifications. Job-alert digests will move here later.
 
 - Code: [`apps/worker/src`](../apps/worker/src)
 - Started by `pnpm dev`. On its own: `pnpm --filter @jobify/worker dev`.
-- Needs `DATABASE_URL` and `REDIS_URL` (see `.env.example`).
+- Needs `DATABASE_URL`, `REDIS_URL` and `JWT_ACCESS_SECRET`, plus the email settings (see
+  `.env.example`).
 
 ## Why it's a separate program
 
@@ -145,16 +146,28 @@ what hosting platforms send on deploys.
 In the live deployment the worker runs inside the API's free Render service
 ([`scripts/start-backend.mjs`](../scripts/start-backend.mjs)), so it **sleeps when the API sleeps**
 after 15 idle minutes, and reminders pause until the next visit. See
-[Known limitations](DEPLOYMENT.md#5-known-limitations-sleeping-on-the-free-tier).
+[Known limitations](DEPLOYMENT.md#6-known-limitations-sleeping-on-the-free-tier).
+
+## Sending emails
+
+Every notification can also become an email. When the API (or the reminder job) creates a
+notification, it adds a job to the `email` queue; the worker picks it up and:
+
+1. Checks whether to send: email on, a type this role gets, not turned off in the person's
+   settings, and not a demo account when the provider is real (Brevo).
+2. **Claims** the notification's `EmailLog` row (unique per notification), the same idea as the
+   reminder claim: a duplicate job or a second worker finds the row and stops.
+3. Renders the email (`packages/email`, React Email; the text comes from the same
+   `describeNotification` the bell uses) and sends it: Brevo in production, Mailpit locally.
+4. Marks the row `SENT`, or `SKIPPED` / `FAILED` with the reason.
+
+A failed send is retried twice (after 30 s, then 1 min). Queuing instead of sending in the API
+means a slow or failing email provider never holds up a click in the app. Setup and the Brevo
+account: [DEPLOYMENT.md](DEPLOYMENT.md#5-brevo-email).
 
 ## What it will do next
 
-The plan (Phase 5) assigns these jobs to the worker, because they're also scheduled or slow:
-
 - **Job alerts:** a daily digest of new jobs matching a seeker's saved searches.
-- **Emails:** "application received", "interview scheduled" and reminder emails, with automatic
-  retries if the email provider is down. A slow email service then never holds up a click in the
-  app.
 
 ---
 

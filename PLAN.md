@@ -153,7 +153,7 @@ It goes to a sandboxed runner (self-hosted **Judge0** or a hosted equivalent). T
                    │ (Prisma)  │ │ cache/ │ │ (BullMQ)       │ reminders, grading
                    └───────────┘ │ queues │ └─┬──────────────┘
                                  └────────┘   │
-        External:  Object storage (Neon/S3) · Email (Resend) · Video (LiveKit)
+        External:  Object storage (Neon/S3) · Email (Brevo) · Video (LiveKit)
                    Code runner (Judge0, isolated) · OAuth (Google/GitHub)
 ```
 
@@ -176,7 +176,7 @@ It goes to a sandboxed runner (self-hosted **Judge0** or a hosted equivalent). T
 | Video                | **LiveKit** (Cloud free tier) — Agora as fallback                                                                                                | Open source, good React SDK, server-issued tokens                   |
 | Whiteboard           | **tldraw** (or Excalidraw) synced via Yjs                                                                                                        | P2                                                                  |
 | Code editor / runner | **Monaco** + **Judge0**                                                                                                                          | P2                                                                  |
-| Email                | **Resend** + React Email templates                                                                                                               |                                                                     |
+| Email                | **Brevo** (free plan, no domain needed) + React Email templates; Mailpit locally                                                                 |                                                                     |
 | Testing              | Vitest (unit), Supertest (API e2e), Playwright (UI e2e)                                                                                          |                                                                     |
 | CI/CD                | GitHub Actions: lint, typecheck, test, build. Preview deploys                                                                                    |                                                                     |
 | Hosting              | Web → **Vercel** · API + worker → **Render** · DB + files → **Neon** · Redis → **Render Key Value** · Video → **LiveKit Cloud**                  | Free/cheap tiers                                                    |
@@ -338,12 +338,12 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] LiveKit room tokens: server-issued, only for the two parties, only from 10 min before to 15 min after
 - [x] Interview room UI (LiveKit prebuilt conference; employer can end it)
 - [x] Worker (BullMQ): in-app interview reminders 15 min before, delivered live via Redis pub/sub
-- [ ] Email reminders (with the email task)
+- [x] Email reminders (interview reminders also go out by email)
 
 ### Phase 5: Retention & polish (week 8)
 
 - [ ] Job Alerts (saved searches + daily digest via worker)
-- [ ] Email templates for all key events. Notification preferences
+- [x] Email for all key events (React Email, sent by the worker through Brevo; Mailpit locally). Email preferences per type, one-click unsubscribe
 - [ ] Profile dashboard stats + weekly activity chart
 - [ ] Global header search
 - [ ] Empty/loading/error states, accessibility pass, responsive layouts

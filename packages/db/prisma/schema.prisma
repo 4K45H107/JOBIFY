@@ -25,6 +25,8 @@ model User {
   passwordHash    String?
   role            UserRole
   emailVerifiedAt DateTime?
+  /// Seeded demo account with a made-up address: never sent real email.
+  isDemo          Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -42,6 +44,8 @@ model User {
   interviewsCreated Interview[]              @relation("InterviewCreatedBy")
   notifications     Notification[]
   sessions          Session[]
+  emailPreferences  EmailPreference[]
+  emailLogs         EmailLog[]
 }
 
 enum EmploymentStatus {
@@ -470,9 +474,53 @@ model Notification {
   readAt    DateTime?
   createdAt DateTime         @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailLog EmailLog?
 
   @@index([userId, readAt, createdAt])
+}
+
+// ─── email ───────────────────────────────────────────────────────────────────
+
+/// A user's choice for one kind of email. No row means the default: on.
+model EmailPreference {
+  userId    String
+  type      NotificationType
+  enabled   Boolean
+  updatedAt DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, type])
+}
+
+enum EmailStatus {
+  SENDING
+  SENT
+  SKIPPED
+  FAILED
+}
+
+/// The email for one notification. The unique notificationId makes sending idempotent:
+/// a duplicate job or a second worker finds the row and stops.
+model EmailLog {
+  id             String           @id @default(cuid())
+  notificationId String           @unique
+  userId         String
+  type           NotificationType
+  to             String
+  status         EmailStatus
+  /// Why it was skipped or failed.
+  reason         String?
+  /// Message id from the email provider.
+  providerId     String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 // ─── auth sessions ───────────────────────────────────────────────────────────

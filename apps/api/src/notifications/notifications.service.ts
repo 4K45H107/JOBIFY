@@ -9,6 +9,7 @@ import {
 } from "@jobify/shared";
 import type { NotificationType, Prisma } from "@jobify/db";
 import { Subject } from "rxjs";
+import { EmailQueueService } from "../email/email-queue.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { RedisService } from "../redis/redis.module";
 
@@ -23,7 +24,8 @@ export interface NotificationEvent {
  * The single way the API records notifications. New rows go out on Redis
  * pub/sub (NOTIFICATIONS_CHANNEL), and every API instance relays the ones for
  * its connected users to their live streams. The worker publishes the same way.
- * Without Redis (REDIS_URL unset) rows are pushed in-process.
+ * Without Redis (REDIS_URL unset) rows are pushed in-process. Each row is also
+ * queued for an email, which the worker sends if the user wants that kind.
  */
 @Injectable()
 export class NotificationsService implements OnModuleInit {
@@ -33,6 +35,7 @@ export class NotificationsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
+    private readonly emailQueue: EmailQueueService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -71,6 +74,7 @@ export class NotificationsService implements OnModuleInit {
       data: userIds.map((userId) => ({ userId, type, payload })),
     });
     for (const row of rows) await this.publish(row);
+    await this.emailQueue.enqueue(rows.map((r) => r.id));
   }
 
   private async publish(row: Row): Promise<void> {

@@ -42,6 +42,11 @@
     "TRUST_PROXY",
     "LIVEKIT_URL",
     "LIVEKIT_API_KEY",
-    "LIVEKIT_API_SECRET"
+    "LIVEKIT_API_SECRET",
+    "EMAIL_ENABLED",
+    "SMTP_URL",
+    "MAIL_FROM",
+    "BREVO_API_KEY",
+    "EMAIL_TIME_ZONE"
   ]
 }

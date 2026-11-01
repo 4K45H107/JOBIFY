@@ -568,6 +568,10 @@ async function main() {
     ] satisfies Prisma.NotificationCreateManyInput[],
   });
 
+  // Every seeded address is made up (some on real domains), so the worker never emails them
+  // through a real provider. Locally they still show up in Mailpit.
+  await prisma.user.updateMany({ data: { isDemo: true } });
+
   console.log(
     `Seeded ${companies.length} companies, ${jobs.length} jobs, ${seekerIds.length} seekers, ` +
       `${applicationCount} applications, ${assessed.length} assessments.\n` +

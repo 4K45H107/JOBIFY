@@ -11,6 +11,12 @@ describe("decideRoute", () => {
     expect(decideRoute("/login", "", null)).toEqual({ type: "allow" });
   });
 
+  it("opens the unsubscribe page to everyone", () => {
+    for (const role of [null, "SEEKER", "EMPLOYER"] as const) {
+      expect(decideRoute("/unsubscribe", "?token=x", role)).toEqual({ type: "allow" });
+    }
+  });
+
   it("keeps signed-in users off the auth pages", () => {
     expect(decideRoute("/login", "", "SEEKER")).toEqual({ type: "redirect", to: "/" });
     expect(decideRoute("/register", "", "EMPLOYER")).toEqual({ type: "redirect", to: "/employer" });
