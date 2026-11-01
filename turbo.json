@@ -24,6 +24,7 @@
   },
   "globalPassThroughEnv": [
     "DATABASE_URL",
+    "DATABASE_URL_UNPOOLED",
     "REDIS_URL",
     "PORT",
     "WEB_ORIGIN",

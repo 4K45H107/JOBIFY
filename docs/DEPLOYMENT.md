@@ -3,8 +3,9 @@
 How Jobify runs in production: which service handles which part, why it was picked, and exactly how
 it was set up. Everything runs on **free tiers**.
 
-> Status: **Neon (database + file storage) is set up.** The other services are planned and will be
-> filled in here as each one is set up.
+> Status: **Neon** (database + files) and **Render Key Value** (Redis) are set up. The API on
+> Render, the web app on Vercel, LiveKit Cloud and the keep-awake ping are configured in the repo
+> and documented below, waiting to be created.
 
 ## Overview
 
@@ -14,21 +15,21 @@ flowchart LR
     Vercel -- "/api proxy" --> Render["Render<br/>apps/api + apps/worker"]
     Render --> NeonPG[("Neon Postgres")]
     Render --> NeonS3[("Neon Object Storage<br/>bucket: jobify")]
-    Render <--> Redis[("Redis Cloud")]
+    Render <--> Redis[("Render Key Value<br/>(Redis)")]
     Browser -. "video" .-> LiveKit["LiveKit Cloud"]
     Render -. "room tokens" .-> LiveKit
     Cron["cron-job.org"] -. "ping every 10 min" .-> Render
 ```
 
-| Stage                      | Service                        | Why this one                                                                                                    | Status     |
-| -------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------- | ---------- |
-| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                              | ✅ Done    |
-| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed          | ✅ Done    |
-| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                   | ⏳ Planned |
-| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                            | ⏳ Planned |
-| Redis (BullMQ + pub/sub)   | **Redis Cloud** (free)         | No limit on commands. BullMQ checks Redis all day, which would use up a per-command free plan such as Upstash's | ⏳ Planned |
-| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                 | ⏳ Planned |
-| Keep the API awake         | **cron-job.org**               | Render's free tier sleeps after 15 idle minutes; a ping every 10 minutes keeps reminders running                | ⏳ Planned |
+| Stage                      | Service                        | Why this one                                                                                                      | Status     |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------- |
+| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done    |
+| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done    |
+| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ⏳ Planned |
+| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ⏳ Planned |
+| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done    |
+| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ⏳ Planned |
+| Keep the API awake         | **cron-job.org**               | Render's free tier sleeps after 15 idle minutes; a ping every 10 minutes keeps reminders running                  | ⏳ Planned |
 
 ---
 
@@ -199,22 +200,129 @@ check). It's harmless.
 
 ---
 
-## 2. Render: API and worker
+## 2. Render: API, worker and Redis
 
-_Not set up yet._
+### Why Render
+
+- The API keeps connections open for live notifications (Server-Sent Events) and the worker runs
+  all the time, so both need a host that runs **long-lived Node processes**. Serverless hosts such
+  as Vercel Functions stop a request after a time limit.
+- The **free web service** runs one always-on process (750 hours a month) and builds straight from
+  GitHub on every push to `main`.
+- **Render Key Value** (Redis-compatible) has a free plan in the same account and region, reached
+  over Render's private network.
+
+### What we use from Render
+
+| Render product    | Used | What for                                                                                          |
+| ----------------- | ---- | ------------------------------------------------------------------------------------------------- |
+| Web Service       | Yes  | `jobify-api`: the API **and** the worker, free plan                                               |
+| Key Value         | Yes  | `jobify-redis`: BullMQ's queue and the notification channel, free plan                            |
+| Background Worker | No   | Not on the free plan. The worker runs inside the web service instead (below)                      |
+| Postgres          | No   | Neon is the database                                                                              |
+| Cron Jobs         | No   | Not on the free plan. The worker schedules its own jobs, and cron-job.org keeps the service awake |
+| Static Site       | No   | The web app is on Vercel                                                                          |
+
+**Why the API and worker share one service:** the free plan has no background workers, and two
+always-on free services would need about 1,440 hours a month against the 750 allowed. So
+[`scripts/start-backend.mjs`](../scripts/start-backend.mjs) starts both as separate programs in one
+container. If either one stops, it stops the other and exits, so Render restarts both. Stop
+signals from Render reach both, so each finishes its current work before a deploy.
+
+The service is described in [`render.yaml`](../render.yaml) (a Render Blueprint): build and start
+commands, region, health check and every setting.
+
+### Key Value (`jobify-redis`)
+
+Created by hand in the dashboard (_New › Key Value_):
+
+| Field            | Value                            | Why                                                                                    |
+| ---------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
+| Name             | `jobify-redis`                   |                                                                                        |
+| Region           | **Singapore**                    | Must match the web service: private networking only works within a region              |
+| Maxmemory policy | **`noeviction`**                 | BullMQ requires it. `allkeys-lru` would silently delete queue data when memory is full |
+| Plan             | **Free** (25 MB, 50 connections) | The app uses about 5 connections and very little memory                                |
+| Persistence      | None (free plan)                 | Nothing durable lives in Redis: the worker recreates its schedule on start             |
+
+Its **Internal Key Value URL** (`redis://red-…:6379`, from the instance's _Connect_ menu) is the
+web service's `REDIS_URL`. It only works from Render services in the same region; local development
+keeps using Docker Redis.
+
+### Web service (`jobify-api`)
+
+**Create it from the Blueprint:** _New › Blueprint_ → connect the `4K45H107/JOBIFY` repo → Render
+reads `render.yaml` and asks for the secret settings:
+
+| Setting                                                | Value                                                                             |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                         | Neon **pooled** string (`DATABASE_URL` in `.env.neon`)                            |
+| `DATABASE_URL_UNPOOLED`                                | Neon **direct** string (used by migrations during the build)                      |
+| `REDIS_URL`                                            | `jobify-redis`'s Internal Key Value URL                                           |
+| `S3_ENDPOINT`                                          | `AWS_ENDPOINT_URL_S3` from `.env.neon`                                            |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`             | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` from `.env.neon`                     |
+| `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | From the LiveKit Cloud project                                                    |
+| `WEB_ORIGIN`                                           | The Vercel URL. Put `https://jobify.vercel.app` first and correct it after step 3 |
+
+These come from `render.yaml` and need no input: `NODE_ENV=production`, `NODE_VERSION=22`,
+`TRUST_PROXY=true` (requests pass through Vercel and Render's load balancer), `S3_REGION`,
+`S3_BUCKET=jobify`, `S3_FORCE_PATH_STYLE=true`, and `JWT_ACCESS_SECRET`, which Render generates.
+
+What Render then does on every push to `main`:
+
+```bash
+# build
+corepack pnpm install --frozen-lockfile --prod=false   # devDependencies are needed to build
+corepack pnpm turbo run build --filter=@jobify/api --filter=@jobify/worker
+corepack pnpm db:deploy   # migrations (no pre-deploy step on the free plan); retried once
+# start
+node scripts/start-backend.mjs
+```
+
+Render waits for `GET /api/health` to answer before sending traffic to a new version.
+
+**Check it:** `https://<service>.onrender.com/api/health` returns `{"status":"ok","database":"up"}`,
+and the logs show `[worker] running: interview reminders every minute`.
+
+### How it was verified before deploying
+
+The exact build and start commands were run in a fresh clone with `NODE_ENV=production`, against
+Neon and a local Redis:
+
+- install, build and migrations succeeded. The first migration attempt failed once while Neon was
+  waking up, which is why the build retries it.
+- `/api/health` answered `database: up` and the worker logged its schedule.
+- `SIGTERM` stopped both programs cleanly and the script exited.
+- When one program failed to start, the script stopped the other and exited.
 
 ## 3. Vercel: web app
 
+### Why Vercel
+
+Vercel is made by the Next.js team and runs the web app with no configuration; the Hobby plan is
+free for personal projects. The browser only talks to Vercel: `/api/*` is proxied to Render, so the
+login cookies stay on the web app's own domain.
+
+### How to set it up
+
+_Add New › Project_ → import `4K45H107/JOBIFY` → set:
+
+| Setting                    | Value                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| Root Directory             | `apps/web`                                                                     |
+| Framework                  | Next.js (detected)                                                             |
+| Build and install commands | Leave as they are: [`apps/web/vercel.json`](../apps/web/vercel.json) sets them |
+| Environment variable       | `API_URL` = `https://<service>.onrender.com` (no trailing slash)               |
+
+`API_URL` is baked into the build (it's where `/api` is proxied), so after changing it, **redeploy**.
+Then set `WEB_ORIGIN` on Render to the Vercel URL.
+
+`vercel.json` installs the whole workspace and builds the web app with its shared package
+(`turbo run build --filter=@jobify/web`). This was checked in a fresh clone with only `API_URL` set.
+
+## 4. LiveKit Cloud
+
 _Not set up yet._
 
-## 4. Redis Cloud
+## 5. cron-job.org: keep the API awake
 
-_Not set up yet._
-
-## 5. LiveKit Cloud
-
-_Not set up yet._
-
-## 6. cron-job.org: keep the API awake
-
-_Not set up yet._
+_Not set up yet._ Plan: `GET https://<service>.onrender.com/api/health` every 10 minutes.

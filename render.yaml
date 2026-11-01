@@ -1,0 +1,62 @@
+# Render Blueprint: the API and the background worker as one free web service.
+# Settings marked `sync: false` are secrets: Render asks for them when the Blueprint is created.
+# See docs/DEPLOYMENT.md.
+services:
+  - type: web
+    name: jobify-api
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    # devDependencies are needed to build, so they're installed despite NODE_ENV=production.
+    # Migrations run during the build: the free plan has no pre-deploy step. They retry once,
+    # since the first connection can fail while an idle Neon database wakes up.
+    buildCommand: >-
+      corepack pnpm install --frozen-lockfile --prod=false &&
+      corepack pnpm turbo run build --filter=@jobify/api --filter=@jobify/worker &&
+      (corepack pnpm db:deploy || (sleep 10 && corepack pnpm db:deploy))
+    startCommand: node scripts/start-backend.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: COREPACK_ENABLE_DOWNLOAD_PROMPT
+        value: "0"
+      # Requests reach the API through Vercel's proxy and Render's load balancer.
+      - key: TRUST_PROXY
+        value: "true"
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: WEB_ORIGIN
+        sync: false
+      # Neon: pooled connection for the app, direct one for migrations
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      # Render Key Value (internal URL)
+      - key: REDIS_URL
+        sync: false
+      # Neon Object Storage
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_REGION
+        value: ap-southeast-1
+      - key: S3_BUCKET
+        value: jobify
+      - key: S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      # LiveKit Cloud
+      - key: LIVEKIT_URL
+        sync: false
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false

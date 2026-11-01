@@ -179,7 +179,7 @@ It goes to a sandboxed runner (self-hosted **Judge0** or a hosted equivalent). T
 | Email                | **Resend** + React Email templates                                                                                                               |                                                                     |
 | Testing              | Vitest (unit), Supertest (API e2e), Playwright (UI e2e)                                                                                          |                                                                     |
 | CI/CD                | GitHub Actions: lint, typecheck, test, build. Preview deploys                                                                                    |                                                                     |
-| Hosting              | Web → **Vercel** · API + worker → **Render** · DB + files → **Neon** · Redis → **Redis Cloud** · Video → **LiveKit Cloud**                       | Free/cheap tiers                                                    |
+| Hosting              | Web → **Vercel** · API + worker → **Render** · DB + files → **Neon** · Redis → **Render Key Value** · Video → **LiveKit Cloud**                  | Free/cheap tiers                                                    |
 
 ### Repository layout
 
