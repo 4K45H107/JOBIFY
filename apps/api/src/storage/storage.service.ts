@@ -12,7 +12,7 @@ import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { Env } from "../config/env";
 
-/** Thin wrapper over any S3-compatible store (SeaweedFS locally, Cloudflare R2 in production). */
+/** Thin wrapper over any S3-compatible store (SeaweedFS locally, Neon Object Storage in production). */
 @Injectable()
 export class StorageService implements OnModuleInit {
   private readonly logger = new Logger(StorageService.name);
@@ -34,7 +34,7 @@ export class StorageService implements OnModuleInit {
     });
   }
 
-  /** Local dev convenience: create the bucket if it's missing. Production buckets are provisioned by hand. */
+  /** Local dev convenience: create the bucket if it's missing. Production buckets are declared in neon.ts. */
   async onModuleInit(): Promise<void> {
     if (this.isProduction) return;
     try {

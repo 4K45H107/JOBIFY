@@ -22,6 +22,7 @@
     "db:studio": "pnpm --filter @jobify/db db:studio"
   },
   "devDependencies": {
+    "@neon/config": "^1.10.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.6"
   }
