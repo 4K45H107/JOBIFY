@@ -15,6 +15,8 @@ export interface BrowserJob extends JobSummary {
 /**
  * Figma master–detail: cards on the left, the selected job on the right.
  * On small screens the cards link to the full job page instead.
+ * On large screens it takes the rest of its page's height (the page must be `lg:h-full`): only
+ * the list and the panel scroll, not the page around them.
  */
 export function JobBrowser({
   jobs,
@@ -54,8 +56,8 @@ export function JobBrowser({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <ul className="flex flex-col lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto lg:pr-2">
+    <div className="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:grid-rows-[minmax(0,1fr)]">
+      <ul className="flex flex-col lg:min-h-0 lg:overflow-y-auto lg:pr-2">
         {jobs.map((job) => (
           <li key={job.id}>
             <JobCard
@@ -85,7 +87,7 @@ export function JobBrowser({
           </li>
         ))}
       </ul>
-      <div className="hidden lg:block lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto">
+      <div className="hidden lg:block lg:min-h-0 lg:overflow-y-auto">
         {error ? (
           <p className="text-fg-subtle">Couldn&apos;t load this job.</p>
         ) : detail && detail.id === selectedId ? (

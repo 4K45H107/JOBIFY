@@ -8,6 +8,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { PillTabs } from "@/components/ui/SegmentedTabs";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { serverApi } from "@/lib/api/server";
+import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = { title: "Explore jobs" };
 
@@ -18,7 +19,11 @@ export default async function ExploreJobsPage({ searchParams }: { searchParams: 
   const tab = params.tab === "search" ? "search" : "for-you";
 
   return (
-    <div className="flex flex-col gap-6">
+    // For You is a master–detail view that fills the screen; Search scrolls as one page.
+    <div
+      data-fill={tab === "for-you" || undefined}
+      className={cn("flex flex-col gap-6", tab === "for-you" && "lg:min-h-0 lg:flex-1")}
+    >
       <PillTabs
         tabs={[
           { label: "For You", href: "/explore/jobs", active: tab === "for-you" },

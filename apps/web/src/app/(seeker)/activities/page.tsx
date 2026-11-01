@@ -7,6 +7,7 @@ import { JobBrowser } from "@/components/jobs/JobBrowser";
 import { ComingSoon } from "@/components/ui/ComingSoon";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { serverApi } from "@/lib/api/server";
+import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = { title: "Activities" };
 
@@ -28,7 +29,10 @@ export default async function ActivitiesPage({
   const tab: TabId = TABS.find((t) => t.id === requested)?.id ?? "saved";
 
   return (
-    <div className="flex flex-col gap-6">
+    // Saved and Recent are master–detail views that fill the screen.
+    <div
+      className={cn("flex flex-col gap-6", (tab === "saved" || tab === "recent") && "lg:h-full")}
+    >
       <SegmentedTabs
         className="max-w-3xl"
         tabs={TABS.map((t) => ({
