@@ -29,6 +29,9 @@ importers:
       '@jobify/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@jobify/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@jobify/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -56,6 +59,9 @@ importers:
       argon2:
         specifier: ^0.44.0
         version: 0.44.0
+      bullmq:
+        specifier: ^5.81.5
+        version: 5.81.5
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
@@ -242,7 +248,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared
       bullmq:
-        specifier: ^5.58.0
+        specifier: ^5.81.5
         version: 5.81.5
       dotenv:
         specifier: ^17.2.2

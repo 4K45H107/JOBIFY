@@ -11,27 +11,29 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.888.0",
+    "@aws-sdk/s3-request-presigner": "^3.888.0",
     "@jobify/db": "workspace:*",
+    "@jobify/email": "workspace:*",
     "@jobify/shared": "workspace:*",
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.6",
+    "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "^11.1.6",
     "@nestjs/swagger": "^11.2.0",
+    "@nestjs/throttler": "^6.4.0",
+    "argon2": "^0.44.0",
+    "bullmq": "^5.81.5",
+    "cookie-parser": "^1.4.7",
     "helmet": "^8.1.0",
+    "ioredis": "^5.7.0",
+    "livekit-server-sdk": "^2.13.3",
+    "multer": "^2.0.2",
     "nestjs-zod": "^5.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "zod": "^4.1.5",
-    "@nestjs/jwt": "^11.0.0",
-    "@nestjs/throttler": "^6.4.0",
-    "argon2": "^0.44.0",
-    "cookie-parser": "^1.4.7",
-    "@aws-sdk/client-s3": "^3.888.0",
-    "@aws-sdk/s3-request-presigner": "^3.888.0",
-    "multer": "^2.0.2",
-    "livekit-server-sdk": "^2.13.3",
-    "ioredis": "^5.7.0"
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
@@ -39,7 +41,9 @@
     "@nestjs/cli": "^11.0.10",
     "@nestjs/testing": "^11.1.6",
     "@swc/core": "^1.13.5",
+    "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22",
     "@types/supertest": "^6.0.3",
     "eslint": "^9",
@@ -47,8 +51,6 @@
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.43.0",
     "unplugin-swc": "^1.5.7",
-    "vitest": "^3.2.4",
-    "@types/cookie-parser": "^1.4.9",
-    "@types/multer": "^2.0.0"
+    "vitest": "^3.2.4"
   }
 }

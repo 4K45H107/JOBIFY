@@ -15,7 +15,7 @@
     "@jobify/db": "workspace:*",
     "@jobify/email": "workspace:*",
     "@jobify/shared": "workspace:*",
-    "bullmq": "^5.58.0",
+    "bullmq": "^5.81.5",
     "dotenv": "^17.2.2",
     "ioredis": "^5.7.0",
     "zod": "^4.1.5"

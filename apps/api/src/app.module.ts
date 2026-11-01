@@ -10,6 +10,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
 import { CompaniesModule } from "./companies/companies.module";
+import { EmailModule } from "./email/email.module";
 import { FilesModule } from "./files/files.module";
 import { InterviewsModule } from "./interviews/interviews.module";
 import { JobsModule } from "./jobs/jobs.module";
@@ -36,6 +37,7 @@ import { StorageModule } from "./storage/storage.module";
     PrismaModule,
     StorageModule,
     RedisModule,
+    EmailModule,
     NotificationsModule,
     HealthModule,
     AuthModule,

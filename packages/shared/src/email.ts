@@ -85,6 +85,9 @@ export const emailPreferenceSchema = z.object({
 });
 export type EmailPreference = z.infer<typeof emailPreferenceSchema>;
 
+export const emailPreferencesSchema = z.object({ preferences: z.array(emailPreferenceSchema) });
+export type EmailPreferences = z.infer<typeof emailPreferencesSchema>;
+
 export const emailPreferenceUpdateSchema = z.object({
   preferences: z
     .array(z.object({ type: NotificationType, enabled: z.boolean() }))

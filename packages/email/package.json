@@ -15,6 +15,13 @@
       "default": "./dist/tokens.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "tokens": [
+        "./dist/tokens.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "build": "tsup src/index.ts src/tokens.ts --format cjs --dts --clean",
     "typecheck": "tsc --noEmit",
