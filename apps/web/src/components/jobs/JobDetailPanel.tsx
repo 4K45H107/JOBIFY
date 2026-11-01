@@ -6,7 +6,8 @@ import { useState } from "react";
 import type { JobDetail } from "@jobify/shared";
 import { CompanyLogo } from "@/components/company/CompanyLogo";
 import { cn } from "@/lib/cn";
-import { formatDate, formatPlace, formatSalary, timeAgo } from "@/lib/format";
+import { formatDate, formatPlace, formatSalary } from "@/lib/format";
+import { ClientTime } from "@/components/ui/ClientTime";
 import { JOB_TYPE_LABELS, WORKPLACE_LABELS } from "@/lib/labels";
 import { SaveButton } from "./SaveButton";
 
@@ -62,7 +63,9 @@ export function JobDetailPanel({
         </div>
         <div>
           <dt className="text-fg-subtle">Posted</dt>
-          <dd className="font-medium">{timeAgo(job.createdAt)} ago</dd>
+          <dd className="font-medium">
+            <ClientTime iso={job.createdAt} format="ago" /> ago
+          </dd>
         </div>
         <div>
           <dt className="text-fg-subtle">Apply by</dt>

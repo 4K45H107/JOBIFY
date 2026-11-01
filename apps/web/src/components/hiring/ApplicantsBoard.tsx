@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
-import { formatDate, timeAgo } from "@/lib/format";
+import { formatDate } from "@/lib/format";
+import { ClientTime } from "@/components/ui/ClientTime";
 import { EMPLOYMENT_LABELS } from "@/lib/labels";
 
 const ACTION_LABELS: Partial<Record<ApplicationStage, string>> = {
@@ -196,7 +197,7 @@ function ApplicantRow({
           <p className="text-sm text-fg-muted">
             {a.seeker.experienceYears !== null && `${a.seeker.experienceYears} yrs experience · `}
             {a.seeker.location && `${a.seeker.location} · `}
-            Applied {timeAgo(a.appliedAt)} ago ({formatDate(a.appliedAt)})
+            Applied <ClientTime iso={a.appliedAt} format="ago" /> ago ({formatDate(a.appliedAt)})
           </p>
           {hasTest && (
             <p className="mt-1 text-sm">

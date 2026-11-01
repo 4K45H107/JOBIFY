@@ -6,7 +6,8 @@ import { type MyApplication, type MyApplications, WITHDRAWABLE } from "@jobify/s
 import { CompanyLogo } from "@/components/company/CompanyLogo";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api/client";
-import { formatPlace, formatSalary, timeAgo } from "@/lib/format";
+import { formatPlace, formatSalary } from "@/lib/format";
+import { ClientTime } from "@/components/ui/ClientTime";
 import { STAGE_LABELS, StageBadge } from "./StageBadge";
 
 /** Figma "Activities - Applications": total on the right, groups by status. */
@@ -115,7 +116,9 @@ function ApplicationRow({
           </p>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-sm">
             <StageBadge stage={a.stage} />
-            <span className="text-fg-subtle">Applied {timeAgo(a.appliedAt)} ago</span>
+            <span className="text-fg-subtle">
+              Applied <ClientTime iso={a.appliedAt} format="ago" /> ago
+            </span>
             {a.test.state === "SUBMITTED" && (
               <span className="text-fg-subtle">· Test score {a.test.score}%</span>
             )}

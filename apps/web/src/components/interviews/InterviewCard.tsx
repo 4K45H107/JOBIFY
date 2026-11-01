@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import type { Interview } from "@jobify/shared";
 import { CompanyLogo } from "@/components/company/CompanyLogo";
 import { cn } from "@/lib/cn";
-import { formatWhen, untilLabel } from "@/lib/time";
+import { untilLabel } from "@/lib/time";
+import { useHydrated } from "@/lib/use-hydrated";
+import { ClientTime } from "@/components/ui/ClientTime";
 
 /** Figma "Interviews": role, round, countdown ("2 hrs Remaining"), Details and Join. */
 export function InterviewCard({
@@ -20,6 +22,7 @@ export function InterviewCard({
   actions?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const hydrated = useHydrated();
   const [label, setLabel] = useState(() => untilLabel(i.scheduledAt, i.endsAt));
   useEffect(() => {
     const timer = setInterval(() => setLabel(untilLabel(i.scheduledAt, i.endsAt)), 30_000);
@@ -41,7 +44,7 @@ export function InterviewCard({
             {i.stage} · {viewer === "SEEKER" ? i.company.name : i.seeker.fullName}
           </p>
           <p className="text-sm text-fg-subtle">
-            {formatWhen(i.scheduledAt)} · {i.durationMin} min
+            <ClientTime iso={i.scheduledAt} format="when" /> · {i.durationMin} min
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -59,7 +62,7 @@ export function InterviewCard({
               ? "Cancelled"
               : i.status === "COMPLETED"
                 ? "Completed"
-                : label}
+                : hydrated && label}
           </span>
           <button
             type="button"
