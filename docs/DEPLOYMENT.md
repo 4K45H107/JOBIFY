@@ -4,7 +4,8 @@ How Jobify runs in production: which service handles which part, why it was pick
 it was set up. Everything runs on **free tiers**.
 
 > **Live:** https://jobify-hire.vercel.app (API: https://jobify-api-g2kn.onrender.com/api/health).
-> Every part is set up except the keep-awake ping (section 5). Demo logins: see
+> Every part is set up. The free API server sleeps when idle, so the first visit can be slow (see
+> [Known limitations](#5-known-limitations-sleeping-on-the-free-tier)). Demo logins: see
 > [RUNNING_LOCALLY.md](RUNNING_LOCALLY.md#4-demo-accounts) (password `Password123!`).
 
 ## Overview
@@ -18,18 +19,17 @@ flowchart LR
     Render <--> Redis[("Render Key Value<br/>(Redis)")]
     Browser -. "video" .-> LiveKit["LiveKit Cloud"]
     Render -. "room tokens" .-> LiveKit
-    Cron["cron-job.org"] -. "ping every 10 min" .-> Render
 ```
 
-| Stage                      | Service                        | Why this one                                                                                                      | Status     |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------- |
-| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done    |
-| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done    |
-| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done    |
-| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done    |
-| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done    |
-| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done    |
-| Keep the API awake         | **cron-job.org**               | Render's free tier sleeps after 15 idle minutes; a ping every 10 minutes keeps reminders running                  | ⏳ Planned |
+| Stage                      | Service                        | Why this one                                                                                                      | Status      |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------- |
+| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done     |
+| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done     |
+| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done     |
+| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done     |
+| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done     |
+| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done     |
+| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 5                | ➖ Not used |
 
 ---
 
@@ -214,14 +214,14 @@ check). It's harmless.
 
 ### What we use from Render
 
-| Render product    | Used | What for                                                                                          |
-| ----------------- | ---- | ------------------------------------------------------------------------------------------------- |
-| Web Service       | Yes  | `jobify-api`: the API **and** the worker, free plan                                               |
-| Key Value         | Yes  | `jobify-redis`: BullMQ's queue and the notification channel, free plan                            |
-| Background Worker | No   | Not on the free plan. The worker runs inside the web service instead (below)                      |
-| Postgres          | No   | Neon is the database                                                                              |
-| Cron Jobs         | No   | Not on the free plan. The worker schedules its own jobs, and cron-job.org keeps the service awake |
-| Static Site       | No   | The web app is on Vercel                                                                          |
+| Render product    | Used | What for                                                                     |
+| ----------------- | ---- | ---------------------------------------------------------------------------- |
+| Web Service       | Yes  | `jobify-api`: the API **and** the worker, free plan                          |
+| Key Value         | Yes  | `jobify-redis`: BullMQ's queue and the notification channel, free plan       |
+| Background Worker | No   | Not on the free plan. The worker runs inside the web service instead (below) |
+| Postgres          | No   | Neon is the database                                                         |
+| Cron Jobs         | No   | Not on the free plan. The worker schedules its own jobs                      |
+| Static Site       | No   | The web app is on Vercel                                                     |
 
 **Why the API and worker share one service:** the free plan has no background workers, and two
 always-on free services would need about 1,440 hours a month against the 750 allowed. So
@@ -388,27 +388,46 @@ Nothing else is needed from LiveKit: no Agents, telephony, Egress or recording.
   `wss://jobify-bxha3jvq.livekit.cloud` URL, signed with the new key.
 - In the dashboard, _Sessions_ lists the rooms that were actually joined.
 
-## 5. cron-job.org: keep the API awake
+## 5. Known limitations: sleeping on the free tier
 
-### Why
+### What happens
 
-Render's free web service sleeps after 15 minutes without traffic. While it sleeps, the worker
-inside it stops too, so interview reminders would be missed, and the next visitor waits about a
-minute for it to wake up. A ping every 10 minutes keeps it awake. One service running all month is
-about 744 hours, within the free 750.
+Render's free web service **sleeps after 15 minutes without traffic**, and wakes on the next
+request. Neon's database then sleeps too, 5 minutes later. This is accepted, with two consequences:
 
-### How to set it up
+| Effect                                                                                                                             | Impact                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cold start**: the first visit after a quiet spell waits about 30–60 s while Render starts the API (plus about a second for Neon) | A visitor opening the demo link may see a slow first page, and the very first server-rendered page may time out once before a reload works. Later requests are fast                                                                     |
+| **Interview reminders pause** while it sleeps: the worker runs inside the same service                                             | A reminder due while nobody uses the site isn't sent. While anyone is on the site, their open notification stream keeps the service awake, so reminders work during real use. Nothing is lost: interviews and notifications are in Neon |
 
-[cron-job.org](https://cron-job.org) (free) → _Create cronjob_:
+**Tip:** before sharing the link (in an application or an interview), open
+https://jobify-hire.vercel.app or `https://jobify-api-g2kn.onrender.com/api/health` a minute ahead
+to wake it up.
 
-| Field    | Value                                             |
-| -------- | ------------------------------------------------- |
-| URL      | `https://jobify-api-g2kn.onrender.com/api/health` |
-| Schedule | Every 10 minutes                                  |
+### Why there's no keep-awake ping
 
-Check it under the job's history: each run should be `200`.
+A free [cron-job.org](https://cron-job.org) job pinging `/api/health` every 10 minutes would keep
+Render awake all month, about 744 of Render's 750 free hours. It was **deliberately not set up**:
 
-_Status: to do._
+- **Neon would never sleep either.** While the API is awake, the worker queries the database every
+  minute for upcoming interviews, so Neon stays active. Measured on the first day: about
+  0.25 compute units while active. Around the clock that is roughly 730 h × 0.25 ≈ **180
+  compute-unit hours a month**, above Neon's free monthly compute allowance (check the current
+  figure at [neon.com/pricing](https://neon.com/pricing) or in the console under _Usage_). Running out
+  would suspend the database until the month resets, which is far worse than a slow first visit.
+- **A portfolio demo is used in short bursts**, during which the service is awake anyway.
+
+### If it's ever needed
+
+- **A narrow schedule** avoids the compute problem: e.g. weekdays 10:00–18:00 (Asia/Dhaka), every
+  10 minutes, is about 40 hours of uptime a month. cron-job.org → _Create cronjob_ → URL
+  `https://jobify-api-g2kn.onrender.com/api/health` → custom schedule. Check the job's history shows
+  `200`.
+- **Paid plans** remove the limitation: Render's paid instances don't sleep, and a separate worker
+  service could run on its own.
+- **Lighter worker polling** would let Neon sleep while the API is up: schedule each reminder as a
+  BullMQ delayed job instead of querying every minute (see the alternatives in
+  [WORKER.md](WORKER.md#alternatives-we-could-have-used)).
 
 ---
 
