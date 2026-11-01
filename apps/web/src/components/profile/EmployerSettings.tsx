@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
+  type EmailPreference,
   type EmployerProfile,
   type EmployerProfileUpdate,
   employerProfileUpdateSchema,
@@ -18,6 +19,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { FileButton } from "@/components/ui/FileButton";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
+import { EmailPreferencesSection } from "./EmailPreferencesSection";
 import { EMPLOYER_SECTIONS, type EmployerSectionId } from "./sections";
 import { SettingsLayout } from "./SettingsLayout";
 
@@ -33,10 +35,13 @@ export function EmployerSettings({
   initial,
   section,
   companyName,
+  emailPreferences,
 }: {
   initial: EmployerProfile;
   section: EmployerSectionId;
   companyName: string | null;
+  /** Loaded by the page only for the email section. */
+  emailPreferences?: EmailPreference[];
 }) {
   const router = useRouter();
   const [profile, setProfile] = useState(initial);
@@ -165,6 +170,8 @@ export function EmployerSettings({
             </form>
           )}
         </Card>
+      ) : section === "email" ? (
+        emailPreferences && <EmailPreferencesSection initial={emailPreferences} />
       ) : (
         <Card>
           <CardHeader title="Account settings" />
@@ -179,7 +186,7 @@ export function EmployerSettings({
             </div>
           </dl>
           <p className="mt-6 text-sm text-fg-subtle">
-            Password change and email verification come with the email task.
+            Password change and email verification come with the account security update.
           </p>
         </Card>
       )}

@@ -82,7 +82,7 @@ describe("Email preferences and unsubscribe (e2e)", () => {
       .post("/api/email/unsubscribe")
       .send({ token })
       .expect(200);
-    expect(res.body).toEqual({ label: "Skill tests" });
+    expect(res.body).toEqual({ label: "Skill tests", settingsHref: "/settings?section=email" });
 
     // Mail apps' one-click unsubscribe: token in the query string, no body.
     const oneClick = unsubscribeToken(seekerId, "INTERVIEW_SCHEDULED", secret);

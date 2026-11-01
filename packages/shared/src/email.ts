@@ -98,7 +98,11 @@ export type EmailPreferenceUpdate = z.infer<typeof emailPreferenceUpdateSchema>;
 
 export const unsubscribeSchema = z.object({ token: z.string().min(10).max(500) });
 
-export const unsubscribeResultSchema = z.object({ label: z.string() });
+export const unsubscribeResultSchema = z.object({
+  label: z.string(),
+  /** The user's own email settings page. */
+  settingsHref: z.string(),
+});
 export type UnsubscribeResult = z.infer<typeof unsubscribeResultSchema>;
 
 /** Settings text for a type, or a generic label for types the role doesn't list. */

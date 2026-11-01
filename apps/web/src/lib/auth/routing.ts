@@ -2,6 +2,9 @@ import type { UserRole } from "@jobify/shared";
 
 export const AUTH_PAGES = ["/login", "/register"];
 
+/** Open to everyone, signed in or not (links from emails). */
+export const PUBLIC_PAGES = ["/unsubscribe"];
+
 /** Request header the middleware sets with the current pathname. */
 export const PATHNAME_HEADER = "x-jobify-pathname";
 
@@ -52,6 +55,7 @@ export function decideRoute(
   search: string,
   role: UserRole | null,
 ): RouteDecision {
+  if (PUBLIC_PAGES.includes(pathname)) return { type: "allow" };
   const isAuthPage = AUTH_PAGES.includes(pathname);
 
   if (!role) {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { EmployerProfile } from "@jobify/shared";
+import type { EmailPreferences, EmployerProfile } from "@jobify/shared";
 import { EmployerSettings } from "@/components/profile/EmployerSettings";
 import { EMPLOYER_SECTIONS, pickSection } from "@/components/profile/sections";
 import { getCurrentUser, serverApi } from "@/lib/api/server";
@@ -12,10 +12,19 @@ export default async function EmployerSettingsPage({
   searchParams: Promise<{ section?: string }>;
 }) {
   const active = pickSection(EMPLOYER_SECTIONS, (await searchParams).section);
-  const [profile, user] = await Promise.all([
+  const [profile, user, email] = await Promise.all([
     serverApi<EmployerProfile>("/me/employer-profile"),
     getCurrentUser(),
+    active === "email" ? serverApi<EmailPreferences>("/me/email-preferences") : null,
   ]);
   const company = user?.company?.status === "ACTIVE" ? user.company.name : null;
-  return <EmployerSettings key={active} initial={profile} section={active} companyName={company} />;
+  return (
+    <EmployerSettings
+      key={active}
+      initial={profile}
+      section={active}
+      companyName={company}
+      emailPreferences={email?.preferences}
+    />
+  );
 }

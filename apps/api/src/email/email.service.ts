@@ -68,6 +68,9 @@ export class EmailService {
       create: { userId: parsed.userId, type: parsed.type, enabled: false },
       update: { enabled: false },
     });
-    return { label: emailTypeLabel(user.role, parsed.type) };
+    return {
+      label: emailTypeLabel(user.role, parsed.type),
+      settingsHref: `${user.role === "EMPLOYER" ? "/employer/settings" : "/settings"}?section=email`,
+    };
   }
 }
