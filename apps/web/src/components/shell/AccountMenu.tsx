@@ -51,7 +51,12 @@ export function AccountMenu({ user }: { user: AuthUser }) {
         onClick={() => setOpen((v) => !v)}
         className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chip"
       >
-        <Avatar src={user.photoUrl} alt="" className="size-9 md:size-10" />
+        <Avatar
+          src={user.photoUrl}
+          name={user.fullName ?? user.email}
+          alt=""
+          className="size-9 md:size-10"
+        />
       </button>
 
       {open && (
