@@ -4,11 +4,11 @@ import type { AuthUser } from "@jobify/shared";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { AccountMenu } from "./AccountMenu";
 
-/** Figma top bar: black, rounded bottom corners, logo left; search, notifications and avatar right. */
+/** Figma top bar: black, logo left; search, notifications and avatar right. */
 export function TopBar({ homeHref, user }: { homeHref: string; user: AuthUser }) {
   const searchHref = user.role === "EMPLOYER" ? "/employer/explore" : "/explore/jobs?tab=search";
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between rounded-b-2xl bg-chrome px-4 text-chrome-fg md:h-[72px] md:rounded-b-[20px] md:px-6">
+    <header className="flex h-14 shrink-0 items-center justify-between bg-chrome px-4 text-chrome-fg md:h-[72px] md:px-6">
       <Link href={homeHref} className="font-brand text-2xl leading-none md:text-[32px]">
         Jobify.
       </Link>

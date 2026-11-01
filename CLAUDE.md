@@ -21,14 +21,15 @@ Original code: https://github.com/4K45H107/CSE408_JOBIFY
 
 ## Git & GitHub workflow
 
-- `main` is the integration branch. Every roadmap task gets its own branch off an up-to-date `main`
-  (e.g. `chore/monorepo-setup`, `feature/auth-api`, `feature/explore-jobs-ui`, `fix/...`).
+- `main` is the integration branch. Each **batch of related work** (one roadmap task, or several
+  small related fixes such as a round of UI fixes) gets its own branch off an up-to-date `main`
+  (e.g. `feature/job-alerts`, `fix/ui-polish`).
   (`development` and `feat/auth-system` are older branches. Don't build on them. Port anything
   useful from them into a new task branch.)
-- For each task: implement → test (lint, typecheck, build, run tests, exercise the endpoints/UI) →
-  commit → review the diff → commit review fixes if any → push the branch → open a GitHub pull
-  request into `main` → merge the PR on GitHub only when the work is done and verified → pull `main`
-  locally.
+- **Don't push after every change.** Within a batch: implement → test (lint, typecheck, build, run
+  tests, exercise the endpoints/UI) → commit **locally**, one commit per change → next change. Only
+  when the whole batch is finished: review the branch's diff → commit review fixes → push the branch
+  once → open one GitHub pull request into `main` → merge it on GitHub when verified → pull `main`.
 - Never merge feature branches into `main` locally. Every merge goes through a PR so it stays in
   GitHub history. Merge with a merge commit (`gh pr merge --merge`), not squash or rebase.
 - PR title: the proper name of the task. PR description: what the problem or feature was, how it was
@@ -44,8 +45,8 @@ Original code: https://github.com/4K45H107/CSE408_JOBIFY
   `Co-Authored-By` trailer, no "Generated with Claude Code" lines.
 - Before committing, confirm `git config user.email` in the repo is the personal one, not the work
   account.
-- Keep the remote (`origin`, GitHub) up to date: push each feature branch with its commits
-  (`git push -u origin <branch>`). `main` is updated on GitHub by merging the PR.
+- Push each batch's branch once it's finished (`git push -u origin <branch>`). `main` is updated on
+  GitHub by merging the PR.
 
 ## Engineering rules
 
