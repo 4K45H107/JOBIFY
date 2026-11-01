@@ -297,8 +297,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Prisma schema v1 + migrations + **seed script**
 - [x] Next.js app with Tailwind + Figma design tokens + both app shells
 - [x] CI: lint, typecheck, test, build (GitHub Actions + gitleaks secret scan)
-- [ ] Deploy skeleton to Vercel + Render + Neon (needs the owner's hosting accounts). Neon done: Postgres + `jobify` bucket (`neon.ts`), migrated and seeded
-- [ ] `.env.example`, secrets only in the hosting provider (never committed)
+- [x] Deploy to Vercel + Render + Neon + LiveKit Cloud, all free tiers: https://jobify-hire.vercel.app (see `docs/DEPLOYMENT.md`)
+- [x] `.env.example`, secrets only in the hosting provider (never committed)
 
 ### Phase 1: Auth & profiles (week 2)
 
