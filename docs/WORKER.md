@@ -142,6 +142,11 @@ the message shape that both sides validate.
 It stops cleanly on `SIGTERM`/`SIGINT` (finishes the current job, closes connections), which is
 what hosting platforms send on deploys.
 
+In the live deployment the worker runs inside the API's free Render service
+([`scripts/start-backend.mjs`](../scripts/start-backend.mjs)), so it **sleeps when the API sleeps**
+after 15 idle minutes, and reminders pause until the next visit. See
+[Known limitations](DEPLOYMENT.md#5-known-limitations-sleeping-on-the-free-tier).
+
 ## What it will do next
 
 The plan (Phase 5) assigns these jobs to the worker, because they're also scheduled or slow:
