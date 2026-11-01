@@ -28,25 +28,37 @@ export default async function HomePage() {
 
           <form
             action="/explore/jobs"
-            className="flex w-full max-w-xl overflow-hidden rounded-full bg-[#c9c3c3] text-[#2c2d2f]"
+            className="flex w-full max-w-xl overflow-hidden rounded-full bg-search text-search-fg"
           >
             <input type="hidden" name="tab" value="search" />
             <label className="flex flex-1 items-center gap-2 px-4">
-              <Image src="/icons/search.png" alt="" width={24} height={24} />
+              <Image
+                src="/icons/search.png"
+                alt=""
+                width={24}
+                height={24}
+                className="icon-themed"
+              />
               <span className="sr-only">Job title, skill or company</span>
               <input
                 name="q"
                 placeholder="your preferred job"
-                className="h-12 w-full bg-transparent text-sm placeholder:text-[#4a4a4a] focus:outline-none"
+                className="h-12 w-full bg-transparent text-sm placeholder:text-search-fg/75 focus:outline-none"
               />
             </label>
             <label className="flex w-40 items-center gap-2 border-l border-bg px-3">
-              <Image src="/icons/location.png" alt="" width={16} height={16} />
+              <Image
+                src="/icons/location.png"
+                alt=""
+                width={16}
+                height={16}
+                className="icon-themed"
+              />
               <span className="sr-only">Location</span>
               <input
                 name="location"
                 placeholder="location"
-                className="h-12 w-full bg-transparent text-sm placeholder:text-[#4a4a4a] focus:outline-none"
+                className="h-12 w-full bg-transparent text-sm placeholder:text-search-fg/75 focus:outline-none"
               />
             </label>
             <button type="submit" className="sr-only">
@@ -78,7 +90,7 @@ export default async function HomePage() {
           width={538}
           height={225}
           priority
-          className="icon-themed mx-auto w-full max-w-md mix-blend-multiply dark:mix-blend-normal"
+          className="icon-themed mx-auto w-full max-w-md mix-blend-multiply dark:mix-blend-screen"
         />
       </section>
 

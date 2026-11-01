@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AuthUser } from "@jobify/shared";
 import { Avatar } from "@/components/ui/Avatar";
 import { api } from "@/lib/api/client";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export function AccountMenu({ user }: { user: AuthUser }) {
   const router = useRouter();
@@ -73,6 +74,10 @@ export function AccountMenu({ user }: { user: AuthUser }) {
                 {user.company.status === "PENDING" && " · pending approval"}
               </p>
             )}
+          </div>
+          <div className="border-b border-border px-4 py-3">
+            <p className="mb-2 text-sm text-fg-subtle">Theme</p>
+            <ThemeSwitcher />
           </div>
           <button
             type="button"

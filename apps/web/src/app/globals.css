@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* `dark:` follows the chosen theme (<html data-theme>, see lib/theme.ts), not only the OS:
+   Dark always, System when the OS is dark, Light never. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]), :root:not([data-theme]) *) {
+      @slot;
+    }
+  }
+}
+
 /*
  * Design tokens from the JOBIFY Figma file (Page 1).
  * Semantic names map to CSS variables so dark mode only swaps values.
@@ -27,7 +40,10 @@
   --success: #00d080; /* Easy Apply */
   --selected: #1b2275; /* bar on the selected job card */
   --hero: #2f4ce0; /* Home "Your Job Searching starts here" */
+  --search: #c9c3c3; /* Home search bar */
+  --search-fg: #2c2d2f;
   --icon-filter: none;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,7 +70,10 @@
     --success: #2ee6a0;
     --selected: #8fa2ff;
     --hero: #8fa2ff;
+    --search: #2a2a2e;
+    --search-fg: #e4e4e7;
     --icon-filter: invert(1);
+    color-scheme: dark;
   }
 }
 
@@ -81,7 +100,10 @@
   --success: #2ee6a0;
   --selected: #8fa2ff;
   --hero: #8fa2ff;
+  --search: #2a2a2e;
+  --search-fg: #e4e4e7;
   --icon-filter: invert(1);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -110,6 +132,8 @@
   --color-success: var(--success);
   --color-selected: var(--selected);
   --color-hero: var(--hero);
+  --color-search: var(--search);
+  --color-search-fg: var(--search-fg);
 
   /* Figma labels use 0.08em tracking (1.28px at 16px). */
   --tracking-label: 0.08em;
