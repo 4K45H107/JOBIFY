@@ -2,7 +2,8 @@ import Image from "next/image";
 import type { JobStatus, JobSummary } from "@jobify/shared";
 import { CompanyLogo } from "@/components/company/CompanyLogo";
 import { cn } from "@/lib/cn";
-import { formatPlace, formatSalary, timeAgo } from "@/lib/format";
+import { formatPlace, formatSalary } from "@/lib/format";
+import { ClientTime } from "@/components/ui/ClientTime";
 import { WORKPLACE_LABELS } from "@/lib/labels";
 import { SaveButton } from "./SaveButton";
 
@@ -93,9 +94,7 @@ export function JobCard({
             Easy Apply
           </span>
         )}
-        <time dateTime={job.createdAt} className="text-sm text-fg-subtle">
-          {timeAgo(job.createdAt)}
-        </time>
+        <ClientTime iso={job.createdAt} format="ago" className="text-sm text-fg-subtle" />
       </div>
     </article>
   );

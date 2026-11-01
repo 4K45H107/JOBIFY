@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Notification } from "@jobify/shared";
 import { cn } from "@/lib/cn";
-import { timeAgo } from "@/lib/format";
+import { ClientTime } from "@/components/ui/ClientTime";
 
 export function NotificationList({
   items,
@@ -40,9 +40,11 @@ export function NotificationList({
               <span className={cn("block", !n.readAt && "font-medium")}>{n.title}</span>
               <span className="block text-sm text-fg-muted">{n.body}</span>
             </span>
-            <time dateTime={n.createdAt} className="shrink-0 text-xs text-fg-subtle">
-              {timeAgo(n.createdAt)}
-            </time>
+            <ClientTime
+              iso={n.createdAt}
+              format="ago"
+              className="shrink-0 text-xs text-fg-subtle"
+            />
             {!n.readAt && <span className="sr-only">(unread)</span>}
           </Link>
         </li>
