@@ -36,6 +36,8 @@ pnpm dev          # web on :3000, API on :4000/api, worker
 
 API docs (OpenAPI / Swagger UI) are served at http://localhost:4000/api/docs.
 
+Production setup (which service runs what, and how each was configured): [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 ### Demo accounts
 
 After `pnpm db:seed`, every demo account uses the password `Password123!`:
