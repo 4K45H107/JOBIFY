@@ -17,11 +17,13 @@ async function main() {
   const queue = new Queue(QUEUE, { connection });
   const emailQueue = new Queue(EMAIL_QUEUE, { connection });
   const mailer = createMailer(env);
+  // In production only Brevo can deliver (there is no Mailpit), so no key means no email.
+  const missingKey = env.NODE_ENV === "production" && !env.BREVO_API_KEY;
   const emailDeps = {
     prisma,
     mailer,
     config: {
-      enabled: env.EMAIL_ENABLED,
+      enabled: env.EMAIL_ENABLED && !missingKey,
       webOrigin: env.WEB_ORIGIN,
       secret: env.JWT_ACCESS_SECRET,
       timeZone: env.EMAIL_TIME_ZONE,
@@ -80,7 +82,7 @@ async function main() {
 
   console.log(
     `[worker] running: interview reminders every minute; emails via ${mailer.provider}` +
-      (env.EMAIL_ENABLED ? "" : " (turned off)"),
+      (!env.EMAIL_ENABLED ? " (turned off)" : missingKey ? " (off: BREVO_API_KEY not set)" : ""),
   );
 
   const shutdown = async () => {

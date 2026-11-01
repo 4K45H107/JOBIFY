@@ -5,7 +5,7 @@ it was set up. Everything runs on **free tiers**.
 
 > **Live:** https://jobify-hire.vercel.app (API: https://jobify-api-g2kn.onrender.com/api/health).
 > Every part is set up. The free API server sleeps when idle, so the first visit can be slow (see
-> [Known limitations](#5-known-limitations-sleeping-on-the-free-tier)). Demo logins: see
+> [Known limitations](#6-known-limitations-sleeping-on-the-free-tier)). Demo logins: see
 > [RUNNING_LOCALLY.md](RUNNING_LOCALLY.md#4-demo-accounts) (password `Password123!`).
 
 ## Overview
@@ -19,17 +19,19 @@ flowchart LR
     Render <--> Redis[("Render Key Value<br/>(Redis)")]
     Browser -. "video" .-> LiveKit["LiveKit Cloud"]
     Render -. "room tokens" .-> LiveKit
+    Render -. "emails (worker)" .-> Brevo["Brevo<br/>email"]
 ```
 
-| Stage                      | Service                        | Why this one                                                                                                      | Status      |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------- |
-| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done     |
-| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done     |
-| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done     |
-| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done     |
-| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done     |
-| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done     |
-| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 5                | ➖ Not used |
+| Stage                      | Service                        | Why this one                                                                                                      | Status                 |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done                |
+| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done                |
+| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done                |
+| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done                |
+| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done                |
+| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done                |
+| Email                      | **Brevo** (free plan)          | About 300 emails a day for free, and needs no domain: a verified Gmail sender is enough                           | ⏳ Needs the Brevo key |
+| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 6                | ➖ Not used            |
 
 ---
 
@@ -261,6 +263,7 @@ reads `render.yaml` and asks for the secret settings:
 | `S3_ENDPOINT`                                          | `AWS_ENDPOINT_URL_S3` from `.env.neon`                                                                                      |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`             | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` from `.env.neon`                                                               |
 | `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | From the LiveKit Cloud project                                                                                              |
+| `BREVO_API_KEY`, `MAIL_FROM`                           | From Brevo, see [section 5](#5-brevo-email). Without the key, email is off                                                  |
 | `WEB_ORIGIN`                                           | The Vercel URL, `https://jobify-hire.vercel.app`. Any valid URL works until Vercel exists; set the real one after section 3 |
 
 These come from `render.yaml` and need no input: `NODE_ENV=production`, `NODE_VERSION=22`,
@@ -388,7 +391,59 @@ Nothing else is needed from LiveKit: no Agents, telephony, Egress or recording.
   `wss://jobify-bxha3jvq.livekit.cloud` URL, signed with the new key.
 - In the dashboard, _Sessions_ lists the rooms that were actually joined.
 
-## 5. Known limitations: sleeping on the free tier
+## 5. Brevo: email
+
+### Why Brevo
+
+The worker emails people about their applications, tests, interviews and join requests. Brevo's
+free plan sends about **300 emails a day** and, unlike Resend's free plan, works without owning a
+domain: a single verified sender address is enough. Templates, the queue and retries live in the
+app (`packages/email`, `apps/worker`), so the provider is only the last step and easy to swap.
+
+### How it works
+
+```mermaid
+flowchart LR
+    Event["API creates a notification<br/>(or the worker: reminders)"] --> Queue[["Redis queue: email"]]
+    Queue --> Worker["Worker: check settings,<br/>render, send, log"]
+    Worker -- "production" --> Brevo["Brevo API"]
+    Worker -- "locally" --> Mailpit["Mailpit<br/>localhost:8025"]
+```
+
+- One email job per notification; the `EmailLog` table makes sending idempotent (a duplicate job
+  sends nothing) and records skips and failures with the reason.
+- Three tries, retried after 30 s and 1 min, if Brevo is briefly down.
+- **Seeded demo accounts never get real email.** Their addresses are made up (some on real domains
+  such as gmail.com), so the worker skips them whenever the provider is Brevo. Locally they still
+  show up in Mailpit.
+- Every email has a footer link to the email settings and a signed one-click unsubscribe link, plus
+  the `List-Unsubscribe` headers mail apps use for their own unsubscribe button.
+- Interview times are shown in `EMAIL_TIME_ZONE` (Asia/Dhaka), named in the email ("GMT+6").
+
+### How to set it up
+
+1. Sign up at [brevo.com](https://www.brevo.com) on the free plan.
+2. _Settings › Senders, domains & dedicated IPs › Senders › Add a sender_: from name `Jobify`, from
+   email the address to send from (e.g. your Gmail). Click the confirmation link Brevo emails you.
+3. _Settings › SMTP & API › API keys › Generate a new API key_. It is shown only once.
+4. On Render (`jobify-api` › Environment): `BREVO_API_KEY` = the key, `MAIL_FROM` =
+   `Jobify <the-sender-address>`. Save and deploy.
+5. Check the worker's log line: `emails via brevo`. Without the key it says
+   `(off: BREVO_API_KEY not set)` and no email is attempted.
+
+**Deliverability:** sending "from" a free address such as `@gmail.com` through another service
+fails Gmail's sender authentication (SPF/DKIM/DMARC), so some emails may land in spam. A domain
+of your own, verified in Brevo, fixes that; it's optional for a demo.
+
+### How to test it
+
+Register a new account with an address you own (demo accounts are skipped), then trigger an email:
+for example apply to a job as a seeker (the employer gets "New applicant"), or ask to join a
+company. Brevo's _Transactional › Logs_ shows what was sent.
+
+_Status: waiting for the Brevo key on Render._
+
+## 6. Known limitations: sleeping on the free tier
 
 ### What happens
 

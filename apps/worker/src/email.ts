@@ -64,7 +64,7 @@ export async function sendNotificationEmail(
     where: { userId_type: { userId: n.userId, type: n.type } },
   });
   const reason = !config.enabled
-    ? "Email is turned off (EMAIL_ENABLED=false)"
+    ? "Email is turned off"
     : !EMAIL_TYPES[n.user.role].some((t) => t.type === n.type)
       ? "Not an email type for this role"
       : preference?.enabled === false

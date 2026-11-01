@@ -6,6 +6,7 @@ config({ path: path.resolve(__dirname, "../../../.env"), quiet: true });
 
 export const env = z
   .object({
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
     REDIS_URL: z.url({ protocol: /^rediss?$/ }).default("redis://localhost:6379"),
     /** Links in emails point here. */
