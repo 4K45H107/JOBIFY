@@ -316,7 +316,7 @@ function MembersCard({ initial, onChange }: { initial: CompanyMember[]; onChange
           <ul className="flex flex-col gap-3">
             {pending.map((m) => (
               <li key={m.userId} className="flex flex-wrap items-center gap-3">
-                <Avatar src={m.photoUrl} alt="" className="size-10" />
+                <Avatar src={m.photoUrl} name={m.fullName} alt="" className="size-10" />
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">{m.fullName}</span>
                   <span className="block text-sm text-fg-subtle">
@@ -337,7 +337,7 @@ function MembersCard({ initial, onChange }: { initial: CompanyMember[]; onChange
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {active.map((m) => (
           <li key={m.userId} className="flex items-center gap-3">
-            <Avatar src={m.photoUrl} alt="" className="size-10" />
+            <Avatar src={m.photoUrl} name={m.fullName} alt="" className="size-10" />
             <span className="min-w-0">
               <span className="block truncate font-medium">{m.fullName}</span>
               <span className="block truncate text-sm text-fg-subtle">

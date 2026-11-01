@@ -33,7 +33,12 @@ export function SettingsLayout({
   return (
     <div className="-mx-4 -my-6 flex min-h-[calc(100%+3rem)] flex-col md:-mx-10 md:-my-8 md:min-h-[calc(100%+4rem)] lg:flex-row">
       <aside className="flex flex-col items-center gap-4 bg-sidebar/60 px-6 py-8 text-center lg:w-[260px] lg:shrink-0">
-        <Avatar src={photoUrl} alt={`${name}'s photo`} className="size-32 md:size-[140px]" />
+        <Avatar
+          src={photoUrl}
+          name={name}
+          alt={`${name}'s photo`}
+          className="size-32 md:size-[140px]"
+        />
         {photoAction}
         <div>
           <p className="text-xl font-medium tracking-label uppercase">{name}</p>

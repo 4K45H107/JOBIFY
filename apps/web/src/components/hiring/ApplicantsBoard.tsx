@@ -185,7 +185,12 @@ function ApplicantRow({
   return (
     <li className="border-b border-fg/60 py-4">
       <div className="flex flex-wrap items-start gap-4">
-        <Avatar src={a.seeker.photoUrl} alt="" className="size-12 shrink-0" />
+        <Avatar
+          src={a.seeker.photoUrl}
+          name={a.seeker.fullName}
+          alt=""
+          className="size-12 shrink-0"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-lg font-medium">{a.seeker.fullName}</p>
