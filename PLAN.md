@@ -153,33 +153,33 @@ It goes to a sandboxed runner (self-hosted **Judge0** or a hosted equivalent). T
                    │ (Prisma)  │ │ cache/ │ │ (BullMQ)       │ reminders, grading
                    └───────────┘ │ queues │ └─┬──────────────┘
                                  └────────┘   │
-        External:  Object storage (R2/S3) · Email (Resend) · Video (LiveKit)
+        External:  Object storage (Neon/S3) · Email (Resend) · Video (LiveKit)
                    Code runner (Judge0, isolated) · OAuth (Google/GitHub)
 ```
 
 ### Tech stack
 
-| Layer                | Choice                                                                                                                                       | Why                                                                 |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Monorepo             | **pnpm workspaces + Turborepo**                                                                                                              | Shared types and config, one repo, cached builds                    |
-| Language             | **TypeScript** everywhere                                                                                                                    | Shared DTOs/types between web and api                               |
-| Frontend             | **Next.js (App Router)** + **Tailwind** + **shadcn/ui**                                                                                      | Matches the 2024 stack, quick to build Figma screens                |
-| Data fetching        | **TanStack Query** + typed API client generated from OpenAPI                                                                                 | Typed end to end                                                    |
-| Forms / validation   | **react-hook-form + Zod** (schemas shared in `packages/shared`)                                                                              | Same validation on client and server                                |
-| Backend              | **NestJS**                                                                                                                                   | Built-in module system fits a modular monolith. Guards, DI, OpenAPI |
-| Database             | **PostgreSQL + Prisma**                                                                                                                      | Relational data. Replaces the unindexed Mongo string IDs from 2024  |
-| Search               | Postgres full-text + trigram (MVP) → Meilisearch (later, if needed)                                                                          | Start simple                                                        |
-| Queue / cache        | **Redis + BullMQ**                                                                                                                           | Emails, alert digests, interview reminders                          |
-| Realtime             | **Server-Sent Events** from the API, proxied by the web app so cookies stay first-party (Redis pub/sub once there are several API instances) | Notifications                                                       |
-| Auth                 | Own JWT (access + refresh) in **httpOnly cookies**, argon2 hashing, OAuth via Passport                                                       | Fixes the 2024 localStorage/plaintext problems                      |
-| File storage         | **Cloudflare R2** (S3 API) in production, SeaweedFS locally. Uploads go through the API (type and size checked), downloads via signed URLs   | CVs, photos, logos                                                  |
-| Video                | **LiveKit** (Cloud free tier) — Agora as fallback                                                                                            | Open source, good React SDK, server-issued tokens                   |
-| Whiteboard           | **tldraw** (or Excalidraw) synced via Yjs                                                                                                    | P2                                                                  |
-| Code editor / runner | **Monaco** + **Judge0**                                                                                                                      | P2                                                                  |
-| Email                | **Resend** + React Email templates                                                                                                           |                                                                     |
-| Testing              | Vitest (unit), Supertest (API e2e), Playwright (UI e2e)                                                                                      |                                                                     |
-| CI/CD                | GitHub Actions: lint, typecheck, test, build. Preview deploys                                                                                |                                                                     |
-| Hosting              | Web → **Vercel** · API + worker → **Railway/Render/Fly** · DB → **Neon** · Redis → **Upstash**                                               | Free/cheap tiers                                                    |
+| Layer                | Choice                                                                                                                                           | Why                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| Monorepo             | **pnpm workspaces + Turborepo**                                                                                                                  | Shared types and config, one repo, cached builds                    |
+| Language             | **TypeScript** everywhere                                                                                                                        | Shared DTOs/types between web and api                               |
+| Frontend             | **Next.js (App Router)** + **Tailwind** + **shadcn/ui**                                                                                          | Matches the 2024 stack, quick to build Figma screens                |
+| Data fetching        | **TanStack Query** + typed API client generated from OpenAPI                                                                                     | Typed end to end                                                    |
+| Forms / validation   | **react-hook-form + Zod** (schemas shared in `packages/shared`)                                                                                  | Same validation on client and server                                |
+| Backend              | **NestJS**                                                                                                                                       | Built-in module system fits a modular monolith. Guards, DI, OpenAPI |
+| Database             | **PostgreSQL + Prisma**                                                                                                                          | Relational data. Replaces the unindexed Mongo string IDs from 2024  |
+| Search               | Postgres full-text + trigram (MVP) → Meilisearch (later, if needed)                                                                              | Start simple                                                        |
+| Queue / cache        | **Redis + BullMQ**                                                                                                                               | Emails, alert digests, interview reminders                          |
+| Realtime             | **Server-Sent Events** from the API, proxied by the web app so cookies stay first-party (Redis pub/sub once there are several API instances)     | Notifications                                                       |
+| Auth                 | Own JWT (access + refresh) in **httpOnly cookies**, argon2 hashing, OAuth via Passport                                                           | Fixes the 2024 localStorage/plaintext problems                      |
+| File storage         | **Neon Object Storage** (S3 API) in production, SeaweedFS locally. Uploads go through the API (type and size checked), downloads via signed URLs | CVs, photos, logos                                                  |
+| Video                | **LiveKit** (Cloud free tier) — Agora as fallback                                                                                                | Open source, good React SDK, server-issued tokens                   |
+| Whiteboard           | **tldraw** (or Excalidraw) synced via Yjs                                                                                                        | P2                                                                  |
+| Code editor / runner | **Monaco** + **Judge0**                                                                                                                          | P2                                                                  |
+| Email                | **Resend** + React Email templates                                                                                                               |                                                                     |
+| Testing              | Vitest (unit), Supertest (API e2e), Playwright (UI e2e)                                                                                          |                                                                     |
+| CI/CD                | GitHub Actions: lint, typecheck, test, build. Preview deploys                                                                                    |                                                                     |
+| Hosting              | Web → **Vercel** · API + worker → **Render** · DB + files → **Neon** · Redis → **Redis Cloud** · Video → **LiveKit Cloud**                       | Free/cheap tiers                                                    |
 
 ### Repository layout
 
@@ -297,7 +297,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Prisma schema v1 + migrations + **seed script**
 - [x] Next.js app with Tailwind + Figma design tokens + both app shells
 - [x] CI: lint, typecheck, test, build (GitHub Actions + gitleaks secret scan)
-- [ ] Deploy skeleton to Vercel + Railway + Neon (needs the owner's hosting accounts)
+- [ ] Deploy skeleton to Vercel + Render + Neon (needs the owner's hosting accounts). Neon done: Postgres + `jobify` bucket (`neon.ts`), migrated and seeded
 - [ ] `.env.example`, secrets only in the hosting provider (never committed)
 
 ### Phase 1: Auth & profiles (week 2)
