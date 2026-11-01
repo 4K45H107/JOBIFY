@@ -17,7 +17,7 @@ export default async function EmployerHomePage({
   const jobs = await serverApi<JobList>(`/employer/jobs?scope=${scope}&pageSize=50`);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 lg:h-full">
       <SegmentedTabs
         tabs={[
           { label: "My Company Jobs", href: "/employer", active: scope === "company" },

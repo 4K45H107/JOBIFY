@@ -40,7 +40,7 @@ export function InterviewRoom({
   };
 
   return (
-    <div className="flex h-[calc(100dvh-10rem)] min-h-[480px] flex-col gap-3">
+    <div className="flex h-full min-h-[480px] flex-col gap-3">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl">
           <span className="font-semibold">Meeting title:</span> {interview.company.name}{" "}
