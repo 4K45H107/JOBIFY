@@ -88,7 +88,11 @@ export function describeNotification(
       };
     case "INTERVIEW_SCHEDULED":
       return {
-        title: "Interview scheduled",
+        title: payload.cancelled
+          ? "Interview cancelled"
+          : payload.rescheduled
+            ? "Interview rescheduled"
+            : "Interview scheduled",
         body: `${job} at ${company}.`,
         href: employer ? "/employer/interviews" : "/interviews",
       };

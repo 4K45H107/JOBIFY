@@ -1,0 +1,40 @@
+{
+  "name": "@jobify/email",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Email templates (React Email), rendering, sending (Brevo or SMTP) and unsubscribe tokens.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "require": "./dist/tokens.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/tokens.ts --format cjs --dts --clean",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@jobify/shared": "workspace:*",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.2.0",
+    "nodemailer": "^10.3.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@jobify/tsconfig": "workspace:*",
+    "@types/node": "^22",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^19",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

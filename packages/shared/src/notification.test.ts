@@ -32,6 +32,18 @@ describe("describeNotification", () => {
     );
   });
 
+  it("says when an interview was rescheduled or cancelled", () => {
+    expect(describeNotification("INTERVIEW_SCHEDULED", {}, "SEEKER").title).toBe(
+      "Interview scheduled",
+    );
+    expect(describeNotification("INTERVIEW_SCHEDULED", { rescheduled: true }, "SEEKER").title).toBe(
+      "Interview rescheduled",
+    );
+    expect(describeNotification("INTERVIEW_SCHEDULED", { cancelled: true }, "SEEKER").title).toBe(
+      "Interview cancelled",
+    );
+  });
+
   it("never throws on old or partial payloads", () => {
     for (const type of NotificationType.options) {
       const n = describeNotification(type, {}, "SEEKER");
