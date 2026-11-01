@@ -4,9 +4,26 @@ import type { UserRole } from "./roles";
 
 /** BullMQ queue the API and the worker add email jobs to. One job per notification. */
 export const EMAIL_QUEUE = "email";
+export const EMAIL_JOB_NAME = "notification";
 
 export const emailJobSchema = z.object({ notificationId: z.string() });
 export type EmailJob = z.infer<typeof emailJobSchema>;
+
+/**
+ * BullMQ options for an email job (plain data, so this package doesn't depend on BullMQ).
+ * The notification id as job id drops duplicates while a job is queued; three tries in all
+ * (retried after 30 s, then 1 min) ride out a short provider outage; finished jobs are trimmed
+ * to keep Redis small.
+ */
+export function emailJobOptions(notificationId: string) {
+  return {
+    jobId: notificationId,
+    attempts: 3,
+    backoff: { type: "exponential" as const, delay: 30_000 },
+    removeOnComplete: { count: 200 },
+    removeOnFail: { count: 200 },
+  };
+}
 
 /** The kinds of email a role can receive, in display order, with Settings text. */
 export const EMAIL_TYPES: Record<

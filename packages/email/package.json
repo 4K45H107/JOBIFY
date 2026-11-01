@@ -8,11 +8,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js"
+      "default": "./dist/index.js"
     },
     "./tokens": {
       "types": "./dist/tokens.d.ts",
-      "require": "./dist/tokens.js"
+      "default": "./dist/tokens.js"
     }
   },
   "scripts": {

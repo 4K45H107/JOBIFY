@@ -2,7 +2,7 @@
   "name": "@jobify/worker",
   "version": "0.1.0",
   "private": true,
-  "description": "Background jobs: interview reminders (and later job alerts and emails).",
+  "description": "Background jobs: interview reminders and notification emails (later job alerts).",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsx watch src/main.ts",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@jobify/db": "workspace:*",
+    "@jobify/email": "workspace:*",
     "@jobify/shared": "workspace:*",
     "bullmq": "^5.58.0",
     "dotenv": "^17.2.2",

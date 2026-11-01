@@ -26,7 +26,7 @@ services:
       timeout: 5s
       retries: 10
 
-  # S3-compatible object storage for CVs, photos and logos (Cloudflare R2 in production).
+  # S3-compatible object storage for CVs, photos and logos (Neon Object Storage in production).
   # Runs without S3 auth locally; the API creates the bucket on startup.
   seaweedfs:
     image: chrislusf/seaweedfs:latest
@@ -49,6 +49,18 @@ services:
       - "${LIVEKIT_PORT:-7880}:7880"
       - "7881:7881"
       - "7882:7882/udp"
+
+  # Catches every email the app sends (nothing leaves your machine). Inbox: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres-data:

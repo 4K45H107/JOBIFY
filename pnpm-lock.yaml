@@ -235,6 +235,9 @@ importers:
       '@jobify/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@jobify/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@jobify/shared':
         specifier: workspace:*
         version: link:../../packages/shared
