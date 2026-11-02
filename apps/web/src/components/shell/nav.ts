@@ -23,7 +23,7 @@ export const seekerNav: NavItem[] = [
     icon: "/icons/interview.png",
     matchPrefix: "/interviews",
   },
-  { label: "Settings", href: "/settings", icon: "/icons/settings.png", matchPrefix: "/settings" },
+  { label: "Profile", href: "/settings", icon: "/icons/settings.png", matchPrefix: "/settings" },
 ];
 
 /** Employer sidebar (Figma: Employer Home frame). */
@@ -54,7 +54,7 @@ export const employerNav: NavItem[] = [
     matchPrefix: "/employer/interviews",
   },
   {
-    label: "Settings",
+    label: "Profile",
     href: "/employer/settings",
     icon: "/icons/settings.png",
     matchPrefix: "/employer/settings",
@@ -68,7 +68,7 @@ export const employerNav: NavItem[] = [
 export const employerOnboardingNav: NavItem[] = [
   { label: "Set up company", href: "/employer/onboarding", icon: "/icons/team.png" },
   {
-    label: "Settings",
+    label: "Profile",
     href: "/employer/settings",
     icon: "/icons/settings.png",
     matchPrefix: "/employer/settings",

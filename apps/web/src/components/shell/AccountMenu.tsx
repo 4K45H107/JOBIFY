@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { AuthUser } from "@jobify/shared";
@@ -69,7 +70,11 @@ export function AccountMenu({ user }: { user: AuthUser }) {
           id={panelId}
           className="absolute right-0 z-20 mt-3 w-64 overflow-hidden rounded-[10px] border border-border bg-bg text-fg shadow-lg"
         >
-          <div className="border-b border-border px-4 py-3">
+          <Link
+            href={user.role === "EMPLOYER" ? "/employer/settings" : "/settings"}
+            onClick={() => setOpen(false)}
+            className="block border-b border-border px-4 py-3 hover:bg-surface-grey"
+          >
             <p className="truncate font-medium">{user.fullName ?? user.email}</p>
             <p className="truncate text-sm text-fg-subtle">{user.email}</p>
             {user.company && (
@@ -78,7 +83,8 @@ export function AccountMenu({ user }: { user: AuthUser }) {
                 {user.company.status === "PENDING" && " · pending approval"}
               </p>
             )}
-          </div>
+            <p className="mt-1 text-sm text-link">View profile</p>
+          </Link>
           <div className="border-b border-border px-4 py-3">
             <p className="mb-2 text-sm text-fg-subtle">Theme</p>
             <ThemeSwitcher />

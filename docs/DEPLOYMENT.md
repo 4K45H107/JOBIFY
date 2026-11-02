@@ -461,7 +461,7 @@ web app's domain), and the API signs the person in with its usual session.
   linked to it (only if Google has verified the email); a new email becomes a new, already verified
   account, after asking "looking for a job or hiring?" when started from the sign-in page.
 - Google-only accounts have no password; they can add one with "Forgot password" (or from
-  _Settings › Account settings_).
+  _Profile › Account settings_).
 - **Off until configured:** without `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, the button is
   hidden. Code: [`google.service.ts`](../apps/api/src/auth/google.service.ts).
 

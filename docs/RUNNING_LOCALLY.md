@@ -86,7 +86,7 @@ or "I'm hiring".
 
 **Dashboard and search (either role)**
 
-1. _Settings_ opens on the **Dashboard**: your counts and a chart of the last 7 or 30 days. Hover
+1. _Profile_ opens on the **Dashboard**: your counts and a chart of the last 7 or 30 days. Hover
    the chart (or focus it and use the arrow keys) to read each day.
 2. Press `/` anywhere and type, e.g. `north`: jobs and companies appear as you type. Arrow keys and
    Enter open one; Enter on its own shows all results.
@@ -110,14 +110,14 @@ or "I'm hiring".
 
 Every email the app sends locally lands in Mailpit at http://localhost:8025; nothing leaves your
 machine. Schedule an interview as `employer@jobify.dev` and the seeker's "Interview scheduled"
-email appears within a couple of seconds. Each email's footer links to _Settings › Email
+email appears within a couple of seconds. Each email's footer links to _Profile › Email
 notifications_ and to a one-click unsubscribe page.
 
 **Account security**
 
 - New accounts must verify their email before applying or posting jobs: a banner says so, and the
   link arrives in Mailpit. (Demo accounts are already verified.)
-- _Forgot password?_ on the sign-in page emails a reset link (Mailpit); _Settings › Account
+- _Forgot password?_ on the sign-in page emails a reset link (Mailpit); _Profile › Account
   settings_ has the verification status and a change-password form.
 - "Continue with Google" only appears when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set
   in `.env` (see [DEPLOYMENT.md › Google sign-in](DEPLOYMENT.md#6-google-sign-in)).

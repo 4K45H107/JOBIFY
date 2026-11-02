@@ -28,6 +28,10 @@ export class FilesController {
     if (!(await this.access.canRead(user, parsed)))
       throw new ForbiddenException("You can't open this file");
 
+    // Otherwise the browser lands on the storage's own "NoSuchKey" XML page.
+    if (!(await this.storage.exists(key)))
+      throw new NotFoundException("This file is no longer available");
+
     res.setHeader("Cache-Control", "private, no-store");
     res.redirect(302, await this.storage.signedUrl(key));
   }
