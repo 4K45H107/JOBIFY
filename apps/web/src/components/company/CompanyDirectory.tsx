@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Pagination } from "@/components/ui/Pagination";
 import { serverApi } from "@/lib/api/server";
 import { CompanyRow } from "./CompanyRow";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 /** Figma "Explore - Companies": illustration, employer search and company rows. Shared by both areas. */
 export async function CompanyDirectory({
@@ -62,9 +63,7 @@ export async function CompanyDirectory({
 
       <section aria-label="Companies">
         {list.items.length === 0 ? (
-          <p className="rounded-[10px] bg-surface-grey p-8 text-center text-fg-subtle">
-            No companies match “{q}”.
-          </p>
+          <EmptyState>{q ? <>No companies match “{q}”.</> : "No companies yet."}</EmptyState>
         ) : (
           list.items.map((c) => (
             <CompanyRow key={c.id} company={c} href={`${profileBase}/${c.slug}`} />

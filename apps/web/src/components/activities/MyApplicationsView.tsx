@@ -9,6 +9,7 @@ import { api } from "@/lib/api/client";
 import { formatPlace, formatSalary } from "@/lib/format";
 import { ClientTime } from "@/components/ui/ClientTime";
 import { STAGE_LABELS, StageBadge } from "./StageBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 /** Figma "Activities - Applications": total on the right, groups by status. */
 const GROUPS: { title: string; stages: MyApplication["stage"][] }[] = [
@@ -24,13 +25,13 @@ export function MyApplicationsView({ initial }: { initial: MyApplications }) {
 
   if (items.length === 0) {
     return (
-      <p className="rounded-[10px] bg-surface-grey p-8 text-center text-fg-subtle">
+      <EmptyState>
         No applications yet.{" "}
         <Link href="/explore/jobs" className="text-link underline">
           Find a job
         </Link>{" "}
         and use Easy Apply.
-      </p>
+      </EmptyState>
     );
   }
 

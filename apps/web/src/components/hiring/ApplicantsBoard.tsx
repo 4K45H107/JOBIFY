@@ -19,6 +19,7 @@ import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import { ClientTime } from "@/components/ui/ClientTime";
 import { EMPLOYMENT_LABELS } from "@/lib/labels";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const ACTION_LABELS: Partial<Record<ApplicationStage, string>> = {
   SHORTLISTED: "Shortlist",
@@ -93,9 +94,7 @@ export function ApplicantsBoard({
             Applicants list <span className="text-fg-subtle">({applicants.length})</span>
           </h2>
           {applicants.length === 0 ? (
-            <p className="rounded-[10px] bg-surface-grey p-8 text-center text-fg-subtle">
-              No applicants here yet.
-            </p>
+            <EmptyState>No applicants here yet.</EmptyState>
           ) : (
             <ul className="flex flex-col">
               {applicants.map((a) => (

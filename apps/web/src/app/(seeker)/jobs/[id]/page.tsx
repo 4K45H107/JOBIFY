@@ -29,7 +29,8 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   const { id } = await params;
   const [job, similar] = await Promise.all([
     loadJob(id),
-    serverApi<JobSummary[]>(`/jobs/${id}/similar`),
+    // Optional extras: a failure here (e.g. the job doesn't exist) must not hide loadJob's 404.
+    serverApi<JobSummary[]>(`/jobs/${id}/similar`).catch(() => []),
   ]);
   return (
     <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">

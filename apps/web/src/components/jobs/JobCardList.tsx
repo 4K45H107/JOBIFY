@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { JobSummary } from "@jobify/shared";
 import { JobCard } from "./JobCard";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 /** Figma "Search" layout: full-width cards that open the job page. */
 export function JobCardList({
@@ -18,11 +19,7 @@ export function JobCardList({
   employerView?: boolean;
 }) {
   if (jobs.length === 0) {
-    return (
-      <p className="rounded-[10px] bg-surface-grey p-8 text-center text-fg-subtle">
-        {emptyMessage}
-      </p>
-    );
+    return <EmptyState>{emptyMessage}</EmptyState>;
   }
   return (
     <ul className="flex flex-col">

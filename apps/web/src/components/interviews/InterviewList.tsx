@@ -7,6 +7,7 @@ import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { InterviewCard } from "./InterviewCard";
 import { ScheduleDialog } from "./ScheduleDialog";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export function InterviewList({
   initial,
@@ -38,12 +39,7 @@ export function InterviewList({
     }
   };
 
-  if (items.length === 0)
-    return (
-      <p className="rounded-[10px] bg-surface-grey p-8 text-center text-fg-subtle">
-        {emptyMessage}
-      </p>
-    );
+  if (items.length === 0) return <EmptyState>{emptyMessage}</EmptyState>;
   return (
     <>
       {error && <p className="text-sm text-heading-accent">{error}</p>}
