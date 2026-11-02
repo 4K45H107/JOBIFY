@@ -163,7 +163,7 @@ notification, it adds a job to the `email` queue; the worker picks it up and:
 
 A failed send is retried twice (after 30 s, then 1 min). Queuing instead of sending in the API
 means a slow or failing email provider never holds up a click in the app. Setup and the Brevo
-account: [DEPLOYMENT.md](DEPLOYMENT.md#5-brevo-email).
+account: [DEPLOYMENT.md](DEPLOYMENT.md#5-brevo-email). The full picture is in [EMAIL.md](EMAIL.md).
 
 ## What it will do next
 

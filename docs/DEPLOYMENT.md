@@ -393,6 +393,8 @@ Nothing else is needed from LiveKit: no Agents, telephony, Egress or recording.
 
 ## 5. Brevo: email
 
+The full email guide (what's sent, the code, settings, troubleshooting) is [EMAIL.md](EMAIL.md).
+
 ### Why Brevo
 
 The worker emails people about their applications, tests, interviews and join requests. Brevo's
