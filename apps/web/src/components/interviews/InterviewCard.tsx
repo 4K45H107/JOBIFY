@@ -38,7 +38,8 @@ export function InterviewCard({
           src={i.company.logoUrl}
           className="size-12 shrink-0 text-base"
         />
-        <div className="min-w-0 flex-1">
+        {/* basis: on narrow screens the buttons wrap below instead of squeezing this column. */}
+        <div className="min-w-0 flex-1 basis-52">
           <p className="text-xl font-medium">{i.job.title}</p>
           <p className="text-fg-muted">
             {i.stage} · {viewer === "SEEKER" ? i.company.name : i.seeker.fullName}

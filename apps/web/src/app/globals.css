@@ -153,6 +153,11 @@ body {
     outline-offset: 2px;
   }
 
+  /* Fieldsets default to min-width: min-content, so a wide child pushed forms off small screens. */
+  fieldset {
+    min-width: 0;
+  }
+
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   summary,

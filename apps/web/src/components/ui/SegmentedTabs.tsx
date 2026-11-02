@@ -29,7 +29,7 @@ export function SegmentedTabs({
           href={tab.href}
           aria-current={tab.active ? "page" : undefined}
           className={cn(
-            "flex-1 py-3 text-center text-xl tracking-label md:text-2xl",
+            "flex-1 py-3 text-center text-sm whitespace-nowrap sm:text-xl sm:tracking-label md:text-2xl",
             tab.active && "bg-surface-muted",
             i > 0 && "border-l border-fg",
           )}
