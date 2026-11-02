@@ -31,10 +31,9 @@ export class DashboardService {
 
   async seeker(seekerId: string, query: DashboardQuery, now = new Date()): Promise<Dashboard> {
     const mine: Prisma.ApplicationWhereInput = { seekerId };
-    const [byStage, interviewed, savedJobs, upcoming] = await Promise.all([
+    const [byStage, interviewed, upcoming] = await Promise.all([
       this.prisma.application.groupBy({ by: ["stage"], where: mine, _count: { _all: true } }),
       this.prisma.application.count({ where: { ...mine, ...reachedInterview } }),
-      this.prisma.savedJob.count({ where: { userId: seekerId } }),
       this.prisma.interview.count({
         where: { application: mine, status: "SCHEDULED", scheduledAt: { gte: now } },
       }),
@@ -65,7 +64,6 @@ export class DashboardService {
         stat("offers", "Offers", stages.OFFER),
         stat("rejected", "Rejected", stages.REJECTED),
         stat("upcoming", "Upcoming interviews", upcoming),
-        stat("saved", "Saved jobs", savedJobs),
       ],
       series: [
         { key: "applications", label: "Applications", points: fillDays(applied, days) },
@@ -110,11 +108,10 @@ export class DashboardService {
       stats: [
         stat("openJobs", "Open jobs", openJobs),
         stat("applicants", "Total applicants", stages.total),
-        stat("interviewed", "Selected for interviews", interviewed),
         stat("ongoing", "In progress", stages.ongoing),
-        stat("offers", "Offers made", stages.OFFER),
-        stat("rejected", "Rejected", stages.REJECTED),
+        stat("interviewed", "Selected for interviews", interviewed),
         stat("upcoming", "Upcoming interviews", upcoming),
+        stat("offers", "Offers made", stages.OFFER),
       ],
       series: [
         { key: "applicants", label: "Applicants", points: fillDays(applicants, days) },

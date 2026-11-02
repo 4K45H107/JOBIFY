@@ -130,7 +130,6 @@ describe("Dashboard (e2e)", () => {
       offers: 1,
       rejected: 1,
       upcoming: 1,
-      saved: 1,
     });
     expect(series(body, "applications")).toEqual([0, 0, 0, 0, 2, 0, 1]);
     expect(series(body, "views")).toEqual([0, 0, 0, 0, 0, 0, 1]);
@@ -151,7 +150,6 @@ describe("Dashboard (e2e)", () => {
       interviewed: 3,
       ongoing: 3,
       offers: 1,
-      rejected: 1,
       upcoming: 1,
     });
     expect(series(body, "applicants")).toEqual([0, 0, 0, 0, 2, 1, 1]);

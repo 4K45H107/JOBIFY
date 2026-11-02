@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,6 +14,7 @@ import {
   UPLOAD_LIMITS,
 } from "@jobify/shared";
 import { z } from "zod";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -103,7 +105,31 @@ export function EmployerSettings({
       active={section}
       basePath="/employer/settings"
     >
-      {section === "info" ? (
+      {section === "dashboard" ? (
+        companyName ? (
+          <DashboardSection
+            emptyHint={
+              <>
+                Nothing here yet.{" "}
+                <Link href="/employer/jobs/new" className="text-link underline">
+                  Post your first job
+                </Link>
+                .
+              </>
+            }
+          />
+        ) : (
+          <Card>
+            <CardHeader
+              title="Dashboard"
+              description="Your company's jobs and applicants show up here once your company is set up."
+            />
+            <Link href="/employer/onboarding" className="text-link underline">
+              Set up your company
+            </Link>
+          </Card>
+        )
+      ) : section === "info" ? (
         <Card>
           <CardHeader
             title="My information"
