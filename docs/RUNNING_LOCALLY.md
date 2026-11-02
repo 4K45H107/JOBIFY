@@ -84,6 +84,13 @@ or "I'm hiring".
 3. **Easy Apply**: contact info, then CV, then the employer's questions, then **Take the test**.
 4. Answer the timed questions. The score shows up under _Activities › Applications_.
 
+**Dashboard and search (either role)**
+
+1. _Settings_ opens on the **Dashboard**: your counts and a chart of the last 7 or 30 days. Hover
+   the chart (or focus it and use the arrow keys) to read each day.
+2. Press `/` anywhere and type, e.g. `north`: jobs and companies appear as you type. Arrow keys and
+   Enter open one; Enter on its own shows all results.
+
 **Review applicants and schedule an interview (employer)**
 
 1. Sign in as `employer@jobify.dev` and open a job on _Home_, then **Review applicants**.
