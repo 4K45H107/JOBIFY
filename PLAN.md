@@ -346,8 +346,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Email for all key events (React Email, sent by the worker through Brevo; Mailpit locally). Email preferences per type, one-click unsubscribe
 - [x] Account security: email verification (needed to apply or post jobs), forgot / reset password, change password (signs out other devices), with account emails
 - [x] Google sign-in (direct OAuth with state, PKCE and nonce; links to existing accounts by verified email)
-- [ ] Profile dashboard stats + weekly activity chart
-- [ ] Global header search
+- [x] Profile dashboard stats + weekly activity chart (Settings › Dashboard: stat pills, 7/30-day chart in the viewer's time zone)
+- [x] Global header search (live job + company suggestions, keyboard combobox, `/` shortcut)
 - [ ] Empty/loading/error states, accessibility pass, responsive layouts
 - [ ] Playwright e2e of the golden path (seeker applies → test → interview scheduled)
 

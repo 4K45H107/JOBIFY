@@ -1,8 +1,10 @@
 "use client";
 
 import { type EmailPreference, type SeekerProfile, UPLOAD_LIMITS } from "@jobify/shared";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { DashboardSection } from "@/components/dashboard/DashboardSection";
 import { FileButton } from "@/components/ui/FileButton";
 import { AccountSection } from "./AccountSection";
 import { EmailPreferencesSection } from "./EmailPreferencesSection";
@@ -55,6 +57,19 @@ export function SeekerSettings({
       active={section}
       basePath="/settings"
     >
+      {section === "dashboard" && (
+        <DashboardSection
+          emptyHint={
+            <>
+              Nothing here yet.{" "}
+              <Link href="/explore/jobs" className="text-link underline">
+                Find a job to apply for
+              </Link>
+              .
+            </>
+          }
+        />
+      )}
       {section === "info" && <SeekerInfoSection profile={profile} onSaved={onSaved} />}
       {section === "cv" && <SeekerCvSection profile={profile} onSaved={onSaved} />}
       {section === "preferences" && (

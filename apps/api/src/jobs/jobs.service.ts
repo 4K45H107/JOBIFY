@@ -330,13 +330,14 @@ export class JobsService {
   /** "My Offerings" (posted by me) or "My Company Jobs" (whole company). */
   async employerJobs(
     employerId: string,
-    { scope, status, page, pageSize }: EmployerJobsQuery,
+    { scope, q, status, page, pageSize }: EmployerJobsQuery,
   ): Promise<JobList> {
     const { companyId } = await this.access.activeMembership(employerId);
     const where: Prisma.JobWhereInput = {
       companyId,
       ...(scope === "mine" && { postedById: employerId }),
       ...(status && { status }),
+      ...(q && { title: { contains: q, mode: "insensitive" } }),
     };
     const [total, jobs] = await this.prisma.$transaction([
       this.prisma.job.count({ where }),

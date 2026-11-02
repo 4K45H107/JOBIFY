@@ -1,5 +1,6 @@
 /** Section ids for the profile pages. Kept out of the client components so server pages can read them. */
 export const SEEKER_SECTIONS = [
+  { id: "dashboard", label: "Dashboard" },
   { id: "info", label: "My information" },
   { id: "cv", label: "CV" },
   { id: "preferences", label: "Job preferences" },
@@ -9,6 +10,7 @@ export const SEEKER_SECTIONS = [
 export type SeekerSectionId = (typeof SEEKER_SECTIONS)[number]["id"];
 
 export const EMPLOYER_SECTIONS = [
+  { id: "dashboard", label: "Dashboard" },
   { id: "info", label: "My information" },
   { id: "email", label: "Email notifications" },
   { id: "account", label: "Account settings" },

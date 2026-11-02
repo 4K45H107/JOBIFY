@@ -47,7 +47,7 @@ async function ForYou() {
             job preferences
           </Link>{" "}
           and{" "}
-          <Link href="/settings" className="text-link underline">
+          <Link href="/settings?section=info" className="text-link underline">
             skills
           </Link>{" "}
           to get recommendations, or{" "}
