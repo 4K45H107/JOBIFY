@@ -248,7 +248,9 @@ export function EasyApplyWizard({ job, profile }: { job: JobDetail; profile: See
                       key={v}
                       className={cn(
                         "cursor-pointer rounded-full border px-5 py-1.5 capitalize",
-                        answers[q.id] === v ? "border-outline bg-chip" : "border-border",
+                        answers[q.id] === v
+                          ? "border-outline bg-chip text-chip-fg"
+                          : "border-border",
                       )}
                     >
                       <input

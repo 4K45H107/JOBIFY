@@ -14,7 +14,7 @@ export function CompanyRow({ company, href }: { company: CompanySummary; href: s
             src={company.logoUrl}
             className="size-14 text-lg md:size-16"
           />
-          <h3 className="text-lg tracking-label uppercase">{company.name}</h3>
+          <h2 className="text-lg tracking-label uppercase">{company.name}</h2>
         </div>
         <dl className="flex gap-8 text-center">
           <div>

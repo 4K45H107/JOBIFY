@@ -31,6 +31,9 @@ export function JobDetailPanel({
   fullPageHref?: string | null;
 }) {
   const [expanded, setExpanded] = useState(!collapsible);
+  // On its own page the job title is the page heading; in a list it sits under the list's.
+  const Title = collapsible ? "h2" : "h1";
+  const Sub = collapsible ? "h3" : "h2";
   const long = job.description.length > 600;
 
   return (
@@ -45,7 +48,7 @@ export function JobDetailPanel({
             />
             <span className="text-sm tracking-label uppercase">{job.company.name}</span>
           </Link>
-          <h2 className="mt-2 text-2xl font-medium md:text-3xl">{job.title}</h2>
+          <Title className="mt-2 text-2xl font-medium md:text-3xl">{job.title}</Title>
           <p className="text-fg-muted">
             {WORKPLACE_LABELS[job.workplace]} · {formatPlace(job.city, job.country)} ·{" "}
             {JOB_TYPE_LABELS[job.type]}
@@ -92,7 +95,7 @@ export function JobDetailPanel({
 
       {job.skills.length > 0 && (
         <section>
-          <h3 className="mb-2 font-semibold">Skills</h3>
+          <Sub className="mb-2 font-semibold">Skills</Sub>
           <ul className="flex flex-wrap gap-2">
             {job.skills.map((s) => (
               <li key={s} className="rounded-full border border-border px-3 py-1 text-sm">
@@ -104,7 +107,7 @@ export function JobDetailPanel({
       )}
 
       <section>
-        <h3 className="mb-2 font-semibold">Job description</h3>
+        <Sub className="mb-2 font-semibold">Job description</Sub>
         <p
           className={cn(
             "whitespace-pre-line text-fg-muted",
@@ -129,7 +132,7 @@ export function JobDetailPanel({
         {fullPageHref && (
           <>
             {" · "}
-            <Link href={fullPageHref} className="text-link hover:underline">
+            <Link href={fullPageHref} className="text-link underline">
               Open full page
             </Link>
           </>
@@ -156,7 +159,7 @@ function SeekerActions({
       ) : (
         <Link
           href={`/jobs/${job.id}/apply`}
-          className="flex items-center gap-1 rounded-[6px] bg-success/60 px-3 py-1.5 text-sm font-medium text-fg hover:bg-success/80"
+          className="flex items-center gap-1 rounded-[6px] border border-success/50 bg-success/10 px-3 py-1.5 text-sm font-medium text-success hover:bg-success/20"
         >
           <Image src="/icons/easy-apply.png" alt="" width={18} height={18} />
           Easy Apply

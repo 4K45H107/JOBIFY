@@ -13,12 +13,14 @@ import { STAGE_LABELS, StageBadge } from "@/components/activities/StageBadge";
 import { ScheduleDialog } from "@/components/interviews/ScheduleDialog";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import { ClientTime } from "@/components/ui/ClientTime";
 import { EMPLOYMENT_LABELS } from "@/lib/labels";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const ACTION_LABELS: Partial<Record<ApplicationStage, string>> = {
   SHORTLISTED: "Shortlist",
@@ -62,12 +64,12 @@ export function ApplicantsBoard({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-baseline gap-x-4">
-        <span className="text-xl">Job title:</span>
+      <h1 className="flex flex-wrap items-baseline gap-x-4">
+        <span className="text-xl">Applicants for:</span>
         <Link href={`/employer/jobs/${jobId}`} className="text-2xl font-medium hover:underline">
           {jobTitle}
         </Link>
-      </header>
+      </h1>
 
       <nav aria-label="Filter by stage" className="flex flex-wrap gap-2">
         {(
@@ -79,7 +81,9 @@ export function ApplicantsBoard({
             aria-current={s === stage ? "page" : undefined}
             className={cn(
               "rounded-full border px-3 py-1 text-sm",
-              s === stage ? "border-outline bg-chip" : "border-border hover:bg-surface-grey",
+              s === stage
+                ? "border-outline bg-chip text-chip-fg"
+                : "border-border hover:bg-surface-grey",
             )}
           >
             {s ? STAGE_LABELS[s] : "All"}
@@ -93,9 +97,7 @@ export function ApplicantsBoard({
             Applicants list <span className="text-fg-subtle">({applicants.length})</span>
           </h2>
           {applicants.length === 0 ? (
-            <p className="rounded-[10px] bg-surface-grey p-8 text-center text-fg-subtle">
-              No applicants here yet.
-            </p>
+            <EmptyState>No applicants here yet.</EmptyState>
           ) : (
             <ul className="flex flex-col">
               {applicants.map((a) => (
@@ -315,35 +317,28 @@ function ApplicantRow({
 
 function CvViewer({ applicant, onClose }: { applicant: Applicant; onClose: () => void }) {
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${applicant.seeker.fullName}'s CV`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
+    <Modal
+      onClose={onClose}
+      label={`${applicant.seeker.fullName}'s CV`}
+      className="flex h-[calc(100dvh-4rem)] w-[min(56rem,calc(100vw-2rem))] flex-col overflow-hidden"
     >
-      <div
-        className="flex h-[90dvh] w-full max-w-4xl flex-col overflow-hidden rounded-[10px] bg-bg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="flex items-center justify-between border-b border-border px-4 py-3">
-          <p className="font-medium">{applicant.seeker.fullName} · CV</p>
-          <div className="flex gap-2">
-            <a
-              href={applicant.cvUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-[10px] border border-outline px-3 py-1 text-sm"
-            >
-              Open in new tab
-            </a>
-            <Button size="sm" variant="ghost" onClick={onClose} autoFocus>
-              Close
-            </Button>
-          </div>
-        </header>
-        <iframe title="CV" src={applicant.cvUrl} className="flex-1 bg-surface-grey" />
-      </div>
-    </div>
+      <header className="flex items-center justify-between border-b border-border px-4 py-3">
+        <p className="font-medium">{applicant.seeker.fullName} · CV</p>
+        <div className="flex gap-2">
+          <a
+            href={applicant.cvUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-[10px] border border-outline px-3 py-1 text-sm"
+          >
+            Open in new tab
+          </a>
+          <Button size="sm" variant="ghost" onClick={onClose} autoFocus>
+            Close
+          </Button>
+        </div>
+      </header>
+      <iframe title="CV" src={applicant.cvUrl} className="flex-1 bg-surface-grey" />
+    </Modal>
   );
 }

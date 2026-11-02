@@ -16,6 +16,7 @@ export default async function InterviewsPage({
   );
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
+      <h1 className="sr-only">Interviews</h1>
       <SegmentedTabs tabs={tabs} />
       <InterviewList key={scope} initial={interviews} viewer="SEEKER" emptyMessage={emptyMessage} />
     </div>

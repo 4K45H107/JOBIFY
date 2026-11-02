@@ -7,6 +7,7 @@ import { api } from "@/lib/api/client";
 import { JobCard } from "./JobCard";
 import { EmployerJobActions } from "./EmployerJobActions";
 import { JobDetailPanel } from "./JobDetailPanel";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export interface BrowserJob extends JobSummary {
   reasons?: string[];
@@ -48,11 +49,7 @@ export function JobBrowser({
   }, [selectedId]);
 
   if (jobs.length === 0) {
-    return (
-      <p className="rounded-[10px] bg-surface-grey p-8 text-center text-fg-subtle">
-        {emptyMessage}
-      </p>
-    );
+    return <EmptyState>{emptyMessage}</EmptyState>;
   }
 
   return (
@@ -65,6 +62,7 @@ export function JobBrowser({
               selected={job.id === selectedId}
               reasons={job.reasons}
               employerView={employer}
+              headingLevel={2}
               onSavedChange={(s) => onSavedChange?.(job.id, s)}
               action={
                 <>

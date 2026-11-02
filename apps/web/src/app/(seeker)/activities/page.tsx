@@ -4,7 +4,7 @@ import type { JobSummary, MyApplications } from "@jobify/shared";
 import { MyApplicationsView } from "@/components/activities/MyApplicationsView";
 import { SavedJobs } from "@/components/activities/SavedJobs";
 import { JobBrowser } from "@/components/jobs/JobBrowser";
-import { ComingSoon } from "@/components/ui/ComingSoon";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { serverApi } from "@/lib/api/server";
 import { cn } from "@/lib/cn";
@@ -33,6 +33,7 @@ export default async function ActivitiesPage({
     <div
       className={cn("flex flex-col gap-6", (tab === "saved" || tab === "recent") && "lg:h-full")}
     >
+      <h1 className="sr-only">Activities</h1>
       <SegmentedTabs
         className="max-w-3xl"
         tabs={TABS.map((t) => ({
@@ -57,7 +58,13 @@ export default async function ActivitiesPage({
         />
       )}
       {tab === "alerts" && (
-        <ComingSoon title="Job alerts" figmaFrame="Activities - Job Alerts" phase="Phase 5" />
+        <EmptyState title="Job alerts aren't available yet">
+          Until then,{" "}
+          <Link href="/explore/jobs?tab=search" className="text-link underline">
+            search jobs
+          </Link>{" "}
+          and save the ones you like, or check <strong>For you</strong> for new matches.
+        </EmptyState>
       )}
       {tab === "applications" && (
         <MyApplicationsView initial={await serverApi<MyApplications>("/me/applications")} />

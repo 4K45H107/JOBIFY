@@ -18,6 +18,7 @@ export default async function EmployerHomePage({
 
   return (
     <div className="flex flex-col gap-6 lg:h-full">
+      <h1 className="sr-only">Your company&apos;s jobs</h1>
       <SegmentedTabs
         tabs={[
           { label: "My Company Jobs", href: "/employer", active: scope === "company" },
