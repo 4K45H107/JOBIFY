@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Attempt, MyApplication } from "@jobify/shared";
+import { CodingExam } from "@/components/apply/CodingExam";
 import { McqExam } from "@/components/apply/McqExam";
 import { ApiError } from "@/lib/api/errors";
 import { serverApi } from "@/lib/api/server";
@@ -23,5 +24,6 @@ export default async function TestPage({ params }: { params: Promise<{ id: strin
     application.test.state === "NOT_STARTED"
       ? null
       : await serverApi<Attempt>(`/me/applications/${id}/attempt`, { method: "POST" });
-  return <McqExam applicationId={id} jobTitle={application.job.title} initial={attempt} />;
+  const Exam = application.test.kind === "CODING" ? CodingExam : McqExam;
+  return <Exam applicationId={id} jobTitle={application.job.title} initial={attempt} />;
 }

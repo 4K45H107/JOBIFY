@@ -121,7 +121,12 @@ function ApplicationRow({
               Applied <ClientTime iso={a.appliedAt} format="ago" /> ago
             </span>
             {a.test.state === "SUBMITTED" && (
-              <span className="text-fg-subtle">· Test score {a.test.score}%</span>
+              <span className="text-fg-subtle">
+                ·{" "}
+                {a.test.kind === "CODING"
+                  ? "Coding solution submitted"
+                  : `Test score ${a.test.score}%`}
+              </span>
             )}
           </p>
         </div>

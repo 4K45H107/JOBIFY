@@ -11,6 +11,7 @@ import {
 } from "@jobify/shared";
 import { STAGE_LABELS, StageBadge } from "@/components/activities/StageBadge";
 import { ScheduleDialog } from "@/components/interviews/ScheduleDialog";
+import { CodeViewer } from "./CodeViewer";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -159,6 +160,7 @@ function ApplicantRow({
   const [error, setError] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState(false);
   const [scheduled, setScheduled] = useState<string | null>(null);
+  const [viewingCode, setViewingCode] = useState(false);
 
   const move = async (to: ApplicationStage) => {
     if (to === "REJECTED" && !confirm(`Reject ${a.seeker.fullName}? They'll be notified.`)) return;
@@ -208,7 +210,20 @@ function ApplicantRow({
             {a.seeker.location && `${a.seeker.location} · `}
             Applied <ClientTime iso={a.appliedAt} format="ago" /> ago ({formatDate(a.appliedAt)})
           </p>
-          {hasTest && (
+          {hasTest && a.test.kind === "CODING" && (
+            <p className="mt-1 text-sm">
+              {a.test.state === "SUBMITTED" ? (
+                <span className="font-medium">Submitted a coding solution</span>
+              ) : (
+                <span className="text-fg-subtle">
+                  {a.test.state === "IN_PROGRESS"
+                    ? "Working on the coding test"
+                    : "Coding test not started yet"}
+                </span>
+              )}
+            </p>
+          )}
+          {hasTest && a.test.kind !== "CODING" && (
             <p className="mt-1 text-sm">
               {a.test.state === "SUBMITTED" ? (
                 <span className="font-medium">Got {a.test.score}% on skill test</span>
@@ -225,6 +240,11 @@ function ApplicantRow({
             <Button size="sm" variant="outline" onClick={onViewCv}>
               View CV
             </Button>
+            {a.test.kind === "CODING" && a.test.state === "SUBMITTED" && (
+              <Button size="sm" variant="outline" onClick={() => setViewingCode(true)}>
+                View code
+              </Button>
+            )}
             {(a.stage === "SHORTLISTED" || a.stage === "INTERVIEW") && (
               <Button size="sm" onClick={() => setScheduling(true)}>
                 {a.stage === "INTERVIEW" ? "Schedule another" : "Schedule interview"}
@@ -249,6 +269,7 @@ function ApplicantRow({
       </div>
       {error && <p className="mt-2 text-sm text-heading-accent">{error}</p>}
       {scheduled && <p className="mt-2 text-sm text-success">{scheduled}</p>}
+      {viewingCode && <CodeViewer applicationId={a.id} onClose={() => setViewingCode(false)} />}
       {scheduling && (
         <ScheduleDialog
           title={`Schedule interview · ${a.seeker.fullName}`}
