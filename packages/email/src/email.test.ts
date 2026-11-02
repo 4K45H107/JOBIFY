@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { formatWhen, renderNotificationEmail } from "./render";
+import { formatWhen, renderAccountEmail, renderNotificationEmail } from "./render";
 import { unsubscribeToken, verifyUnsubscribeToken } from "./tokens";
 import { brevoMailer, parseAddress } from "./transport";
 
@@ -120,5 +120,41 @@ describe("brevoMailer", () => {
   it("parses sender addresses", () => {
     expect(parseAddress('"Jobify" <hi@x.com>')).toEqual({ name: "Jobify", email: "hi@x.com" });
     expect(parseAddress("hi@x.com")).toEqual({ email: "hi@x.com" });
+  });
+});
+
+describe("renderAccountEmail", () => {
+  it("links to the verify page with the token, and has no unsubscribe", async () => {
+    const email = await renderAccountEmail({
+      kind: "VERIFY_EMAIL",
+      name: "Mina Das",
+      webOrigin: "https://jobify.test",
+      token: "tok_123",
+    });
+    expect(email.subject).toBe("Verify your email for Jobify");
+    expect(email.html).toContain("https://jobify.test/verify-email?token=tok_123");
+    expect(email.html).toContain("Hi Mina,");
+    expect(email.html).not.toContain("Unsubscribe");
+  });
+
+  it("links to the reset page, and says how long the link works", async () => {
+    const email = await renderAccountEmail({
+      kind: "PASSWORD_RESET",
+      name: null,
+      webOrigin: "https://jobify.test",
+      token: "abc",
+    });
+    expect(email.html).toContain("https://jobify.test/reset-password?token=abc");
+    expect(email.text).toContain("60 minutes");
+  });
+
+  it("sends the password-changed notice with a way back in", async () => {
+    const email = await renderAccountEmail({
+      kind: "PASSWORD_CHANGED",
+      name: "Sam",
+      webOrigin: "https://jobify.test",
+    });
+    expect(email.subject).toBe("Your Jobify password was changed");
+    expect(email.html).toContain("https://jobify.test/forgot-password");
   });
 });

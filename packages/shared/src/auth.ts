@@ -33,6 +33,33 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
+/** Link tokens are 43 base64url characters; accept a little slack, reject junk early. */
+const linkToken = z.string().trim().min(20).max(200);
+
+export const forgotPasswordSchema = z.object({ email: emailSchema });
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z.object({ token: linkToken, password: passwordSchema });
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password").max(128),
+    newPassword: passwordSchema,
+  })
+  .refine((v) => v.newPassword !== v.currentPassword, {
+    message: "Choose a password different from the current one",
+    path: ["newPassword"],
+  });
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export const verifyEmailSchema = z.object({ token: linkToken });
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
+/** How long emailed links work. */
+export const EMAIL_VERIFICATION_TTL_HOURS = 48;
+export const PASSWORD_RESET_TTL_MINUTES = 60;
+
 export const MembershipStatus = z.enum(["PENDING", "ACTIVE", "REJECTED"]);
 export type MembershipStatus = z.infer<typeof MembershipStatus>;
 
@@ -43,6 +70,8 @@ export const authUserSchema = z.object({
   role: UserRole,
   fullName: z.string().nullable(),
   photoUrl: z.string().nullable(),
+  /** Applying to and posting jobs need a verified email. */
+  emailVerified: z.boolean(),
   company: z
     .object({
       id: z.string(),
