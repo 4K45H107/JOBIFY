@@ -42,6 +42,7 @@ API docs (OpenAPI / Swagger UI) are served at http://localhost:4000/api/docs.
 
 Production setup (which service runs what, and how each was configured): [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 How email works and how to turn it on: [`docs/EMAIL.md`](docs/EMAIL.md).
+How sign-in, sessions and Google sign-in work, and how they compare to security standards: [`docs/AUTH.md`](docs/AUTH.md).
 
 ### Demo accounts
 
