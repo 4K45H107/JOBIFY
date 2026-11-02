@@ -112,6 +112,8 @@ notifications_ and to a one-click unsubscribe page.
   link arrives in Mailpit. (Demo accounts are already verified.)
 - _Forgot password?_ on the sign-in page emails a reset link (Mailpit); _Settings › Account
   settings_ has the verification status and a change-password form.
+- "Continue with Google" only appears when `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set
+  in `.env` (see [DEPLOYMENT.md › Google sign-in](DEPLOYMENT.md#6-google-sign-in)).
 
 **Company onboarding**
 
