@@ -186,7 +186,9 @@ function ApplicantRow({
 
   return (
     <li className="border-b border-fg/60 py-4">
-      <div className="flex flex-wrap items-start gap-4">
+      {/* Actions sit on their own row under the details: next to them, several buttons squeezed
+          the details into a narrow, tall column. */}
+      <div className="flex items-start gap-4">
         <Avatar
           src={a.seeker.photoUrl}
           name={a.seeker.fullName}
@@ -219,30 +221,30 @@ function ApplicantRow({
               )}
             </p>
           )}
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Button size="sm" variant="outline" onClick={onViewCv}>
-            View CV
-          </Button>
-          {(a.stage === "SHORTLISTED" || a.stage === "INTERVIEW") && (
-            <Button size="sm" onClick={() => setScheduling(true)}>
-              {a.stage === "INTERVIEW" ? "Schedule another" : "Schedule interview"}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={onViewCv}>
+              View CV
             </Button>
-          )}
-          {/* Moving to INTERVIEW happens by scheduling one, so it isn't a separate button. */}
-          {STAGE_TRANSITIONS[a.stage]
-            .filter((to) => to !== "INTERVIEW")
-            .map((to) => (
-              <Button
-                key={to}
-                size="sm"
-                variant={to === "REJECTED" ? "ghost" : "primary"}
-                disabled={busy !== null}
-                onClick={() => move(to)}
-              >
-                {busy === to ? "…" : (ACTION_LABELS[to] ?? STAGE_LABELS[to])}
+            {(a.stage === "SHORTLISTED" || a.stage === "INTERVIEW") && (
+              <Button size="sm" onClick={() => setScheduling(true)}>
+                {a.stage === "INTERVIEW" ? "Schedule another" : "Schedule interview"}
               </Button>
-            ))}
+            )}
+            {/* Moving to INTERVIEW happens by scheduling one, so it isn't a separate button. */}
+            {STAGE_TRANSITIONS[a.stage]
+              .filter((to) => to !== "INTERVIEW")
+              .map((to) => (
+                <Button
+                  key={to}
+                  size="sm"
+                  variant={to === "REJECTED" ? "ghost" : "primary"}
+                  disabled={busy !== null}
+                  onClick={() => move(to)}
+                >
+                  {busy === to ? "…" : (ACTION_LABELS[to] ?? STAGE_LABELS[to])}
+                </Button>
+              ))}
+          </div>
         </div>
       </div>
       {error && <p className="mt-2 text-sm text-heading-accent">{error}</p>}
@@ -265,7 +267,7 @@ function ApplicantRow({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="mt-2 text-sm text-link hover:underline"
+        className="mt-2 ml-16 text-sm text-link hover:underline"
         aria-expanded={open}
       >
         {open ? "Hide details" : "Show answers, contact and history"}
