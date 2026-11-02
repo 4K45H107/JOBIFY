@@ -5,7 +5,7 @@ export function Alert({ children, className }: { children: React.ReactNode; clas
     <div
       role="alert"
       className={cn(
-        "rounded-[10px] border border-heading-accent/40 bg-heading-accent/10 px-4 py-3 text-sm text-heading-accent",
+        "rounded-[10px] border border-heading-accent/40 bg-heading-accent/10 px-4 py-3 text-sm text-fg",
         className,
       )}
     >

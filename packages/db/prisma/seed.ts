@@ -141,6 +141,56 @@ const LOCATIONS = [
   { country: "Canada", city: "Toronto" },
 ];
 
+/** Library problems the seed's coding tests use, with a correct Python answer to show employers. */
+const SEED_SOLUTIONS = [
+  {
+    slug: "two-sum",
+    python: `import sys
+
+def main():
+    data = list(map(int, sys.stdin.read().split()))
+    n, target, a = data[0], data[1], data[2:]
+    first_seen = {}
+    for j in range(n):
+        i = first_seen.get(target - a[j])
+        if i is not None:
+            print(i + 1, j + 1)
+            return
+        first_seen.setdefault(a[j], j)
+    print(-1)
+
+main()
+`,
+  },
+  {
+    slug: "balanced-brackets",
+    python: `import sys
+
+pairs = {")": "(", "]": "[", "}": "{"}
+stack = []
+for ch in sys.stdin.readline().strip():
+    if ch in "([{":
+        stack.append(ch)
+    elif not stack or stack.pop() != pairs[ch]:
+        print("NO")
+        sys.exit()
+print("YES" if not stack else "NO")
+`,
+  },
+  {
+    slug: "maximum-subarray",
+    python: `import sys
+
+data = list(map(int, sys.stdin.read().split()))
+best, current = float("-inf"), 0
+for v in data[1:]:
+    current = max(v, current + v)
+    best = max(best, current)
+print(best)
+`,
+  },
+] as const;
+
 const MCQ_BANK = [
   {
     prompt: "What is the SI unit of power?",
@@ -331,24 +381,40 @@ async function main() {
     jobs.push({ id: job.id, companyIdx, postedById, title: template.title });
   }
 
-  // MCQ assessments on the first 8 demo-company jobs and some others
+  // Skill tests on the first 8 demo-company jobs and some others. Engineering roles get a
+  // coding problem from the library (apps/api/src/coding/library) instead of multiple choice.
   const assessed = jobs.filter((_, i) => i < 8 || i % 5 === 0);
-  const assessmentByJob = new Map<string, string>();
+  const assessmentByJob = new Map<
+    string,
+    { id: string; coding: (typeof SEED_SOLUTIONS)[number] | null }
+  >();
+  let codingCount = 0;
   for (const job of assessed) {
+    const coding = /engineer|developer/i.test(job.title)
+      ? SEED_SOLUTIONS[codingCount++ % SEED_SOLUTIONS.length]!
+      : null;
     const a = await prisma.assessment.create({
-      data: {
-        jobId: job.id,
-        kind: "MCQ",
-        title: `${job.title} skill test`,
-        timeLimitMin: 15,
-        mcqQuestions: {
-          create: faker.helpers
-            .arrayElements(MCQ_BANK, 4)
-            .map((q, position) => ({ ...q, position })),
-        },
-      },
+      data: coding
+        ? {
+            jobId: job.id,
+            kind: "CODING",
+            title: `${job.title} coding test`,
+            timeLimitMin: 45,
+            problemSlug: coding.slug,
+          }
+        : {
+            jobId: job.id,
+            kind: "MCQ",
+            title: `${job.title} skill test`,
+            timeLimitMin: 15,
+            mcqQuestions: {
+              create: faker.helpers
+                .arrayElements(MCQ_BANK, 4)
+                .map((q, position) => ({ ...q, position })),
+            },
+          },
     });
-    assessmentByJob.set(job.id, a.id);
+    assessmentByJob.set(job.id, { id: a.id, coding });
   }
 
   // Seekers, each with a generated one-page PDF CV in object storage
@@ -506,21 +572,23 @@ async function main() {
         })),
       });
 
-      // A graded MCQ attempt once the applicant has gone past TESTING
-      const assessmentId = assessmentByJob.get(job.id);
+      // A finished attempt once the applicant has gone past TESTING: a graded MCQ, or a
+      // submitted (not yet graded) coding solution.
+      const assessment = assessmentByJob.get(job.id);
       if (
-        assessmentId &&
+        assessment &&
         reached.includes(ApplicationStage.TESTING) &&
         finalStage !== ApplicationStage.TESTING
       ) {
         await prisma.attempt.create({
           data: {
-            assessmentId,
+            assessmentId: assessment.id,
             applicationId: app.id,
             startedAt: createdAt,
             submittedAt: new Date(createdAt.getTime() + 600_000),
-            score: faker.helpers.arrayElement([25, 50, 75, 100]),
-            answers: [],
+            ...(assessment.coding
+              ? { language: "python", code: assessment.coding.python, score: null, answers: {} }
+              : { score: faker.helpers.arrayElement([25, 50, 75, 100]), answers: [] }),
           },
         });
       }
@@ -585,7 +653,7 @@ async function main() {
 
   console.log(
     `Seeded ${companies.length} companies, ${jobs.length} jobs, ${seekerIds.length} seekers, ` +
-      `${applicationCount} applications, ${assessed.length} assessments.\n` +
+      `${applicationCount} applications, ${assessed.length} assessments (${codingCount} coding).\n` +
       `Demo logins (password ${DEMO_PASSWORD}): seeker@jobify.dev, employer@jobify.dev, admin@jobify.dev`,
   );
 }

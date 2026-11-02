@@ -28,12 +28,15 @@ export function McqBuilder({
   initial,
   responses,
   tab,
+  replaces,
 }: {
   jobId: string;
   jobTitle: string;
   initial: TeamAssessment | null;
   responses: Applicant[];
   tab: "questions" | "responses";
+  /** Set when saving replaces another kind of test, e.g. "coding test". */
+  replaces?: string;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? `${jobTitle} skill test`);
@@ -126,6 +129,9 @@ export function McqBuilder({
             <Alert>
               Candidates have already taken this test, so its questions can&apos;t change any more.
             </Alert>
+          )}
+          {replaces && (
+            <Alert>Saving this multiple-choice test replaces the job&apos;s {replaces}.</Alert>
           )}
           {error && <Alert>{error}</Alert>}
 

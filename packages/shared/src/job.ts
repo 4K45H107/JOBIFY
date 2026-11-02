@@ -99,6 +99,8 @@ export const jobSummarySchema = z.object({
   company: jobCompanySchema,
   skills: z.array(z.string()),
   hasAssessment: z.boolean(),
+  /** Which kind of skill test, when there is one. */
+  assessmentKind: z.enum(["MCQ", "CODING"]).nullable(),
   /** Seeker-specific; false for employers. */
   saved: z.boolean(),
   applicants: z.number(),

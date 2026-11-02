@@ -167,6 +167,7 @@ export function JobForm({
     company: { id: "", name: companyName, slug: "", logoUrl: companyLogo },
     skills: values.skills,
     hasAssessment: job?.hasAssessment ?? false,
+    assessmentKind: job?.assessmentKind ?? null,
     saved: false,
     applicants: job?.applicants ?? 0,
   };

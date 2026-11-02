@@ -83,7 +83,9 @@ export function JobDetailPanel({
       {(job.hasAssessment || job.ageMin !== null || job.ageMax !== null) && (
         <ul className="flex flex-wrap gap-2 text-sm">
           {job.hasAssessment && (
-            <li className="rounded-full bg-chip/30 px-3 py-1">Includes a skill test</li>
+            <li className="rounded-full bg-chip/30 px-3 py-1">
+              {job.assessmentKind === "CODING" ? "Includes a coding test" : "Includes a skill test"}
+            </li>
           )}
           {(job.ageMin !== null || job.ageMax !== null) && (
             <li className="rounded-full bg-surface-muted px-3 py-1">

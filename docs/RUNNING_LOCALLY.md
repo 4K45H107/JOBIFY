@@ -84,6 +84,17 @@ or "I'm hiring".
 3. **Easy Apply**: contact info, then CV, then the employer's questions, then **Take the test**.
 4. Answer the timed questions. The score shows up under _Activities › Applications_.
 
+**Coding test**
+
+1. As `employer@jobify.dev`, open a job without a skill test and choose **Coding problem +**. Filter
+   the library (difficulty, topic, search), preview a problem and press **Use this problem**, then
+   **Save coding test**. Seeded engineering roles at Northwind already have one.
+2. As `seeker@jobify.dev`, apply to that job, then **Take test**. Write a solution in the editor
+   (it autosaves; reload to see) and **Submit solution**. The editor (Monaco) loads from the
+   jsDelivr CDN, so it needs an internet connection.
+3. Back as the employer, the applicant shows "Submitted a coding solution" and **View code** opens
+   it. Nothing runs the code yet; grading with a code runner comes later.
+
 **Dashboard and search (either role)**
 
 1. _Profile_ opens on the **Dashboard**: your counts and a chart of the last 7 or 30 days. Hover

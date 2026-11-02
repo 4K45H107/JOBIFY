@@ -9,6 +9,7 @@ import { AuthModule } from "./auth/auth.module";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
+import { CodingModule } from "./coding/coding.module";
 import { CompaniesModule } from "./companies/companies.module";
 import { DashboardModule } from "./dashboard/dashboard.module";
 import { EmailModule } from "./email/email.module";
@@ -48,6 +49,7 @@ import { StorageModule } from "./storage/storage.module";
     JobsModule,
     ApplicationsModule,
     AssessmentsModule,
+    CodingModule,
     InterviewsModule,
     DashboardModule,
   ],
