@@ -9,6 +9,7 @@ export const PUBLIC_PAGES = [
   "/verify-email",
   // Right after Google sign-in, to send the now signed-in user to the right place.
   "/signing-in",
+  "/privacy",
 ];
 
 /** Request header the middleware sets with the current pathname. */
