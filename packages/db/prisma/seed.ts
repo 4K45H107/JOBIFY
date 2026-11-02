@@ -354,7 +354,9 @@ async function main() {
   // Seekers, each with a generated one-page PDF CV in object storage
   const uploadCv = await createCvUploader();
   const seekerIds: string[] = [];
-  const cvKeys = new Map<string, string>();
+  // Each application gets its own copy of the CV, as Easy Apply makes one: replacing the profile
+  // CV later must not break the employer's view of past applications.
+  const cvLines = new Map<string, string[]>();
   const seekerNames = new Map<string, string>();
   const seekerEmails = new Map<string, string>();
   for (let i = 0; i < 20; i++) {
@@ -418,14 +420,15 @@ async function main() {
     seekerNames.set(user.id, fullName);
     seekerEmails.set(user.id, user.email);
     if (uploadCv) {
-      const cvKey = await uploadCv(user.id, [
+      const lines = [
         fullName,
         isDemo ? "Frontend Developer" : template.title,
         `Email: ${user.email}`,
         "Experience: generated demo CV for the Jobify seed data.",
-      ]);
+      ];
+      const cvKey = await uploadCv(user.id, lines);
       await prisma.seekerProfile.update({ where: { userId: user.id }, data: { cvKey } });
-      cvKeys.set(user.id, cvKey);
+      cvLines.set(user.id, lines);
     }
   }
 
@@ -473,7 +476,10 @@ async function main() {
         data: {
           jobId: job.id,
           seekerId,
-          cvKey: cvKeys.get(seekerId) ?? "",
+          cvKey:
+            uploadCv && cvLines.has(seekerId)
+              ? await uploadCv(seekerId, cvLines.get(seekerId)!)
+              : "",
           contact: {
             fullName: seekerNames.get(seekerId) ?? "Applicant",
             email: seekerEmails.get(seekerId) ?? `applicant${s}@example.com`,

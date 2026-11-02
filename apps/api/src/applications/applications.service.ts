@@ -77,6 +77,11 @@ export class ApplicationsService {
     private readonly notifications: NotificationsService,
   ) {}
 
+  /** True when an application points at this CV file, so it must be kept. */
+  async isCvInUse(key: string): Promise<boolean> {
+    return (await this.prisma.application.count({ where: { cvKey: key } })) > 0;
+  }
+
   // ─── seeker ──────────────────────────────────────────────────────────────
 
   async apply(seekerId: string, jobId: string, input: ApplyInput): Promise<MyApplication> {

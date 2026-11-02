@@ -8,6 +8,7 @@ import type {
 } from "@jobify/shared";
 import { fileUrl, userFileKey } from "../files/file-keys";
 import { PrismaService } from "../prisma/prisma.service";
+import { ApplicationsService } from "../applications/applications.service";
 import { StorageService } from "../storage/storage.service";
 
 const EMPTY_PREFERENCES: JobPreference = {
@@ -23,6 +24,7 @@ export class ProfileService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly applications: ApplicationsService,
   ) {}
 
   async getSeeker(userId: string): Promise<SeekerProfile> {
@@ -122,15 +124,24 @@ export class ProfileService {
     const field = kind === "cv" ? "cvKey" : "photoKey";
     const before = await this.prisma.seekerProfile.findUniqueOrThrow({ where: { userId } });
     await this.prisma.seekerProfile.update({ where: { userId }, data: { [field]: key } });
-    if (before[field]) await this.storage.delete(before[field]);
+    if (before[field]) await this.deleteOldFile(before[field]);
     return this.getSeeker(userId);
   }
 
   async removeSeekerCv(userId: string): Promise<SeekerProfile> {
     const before = await this.prisma.seekerProfile.findUniqueOrThrow({ where: { userId } });
     await this.prisma.seekerProfile.update({ where: { userId }, data: { cvKey: null } });
-    if (before.cvKey) await this.storage.delete(before.cvKey);
+    if (before.cvKey) await this.deleteOldFile(before.cvKey);
     return this.getSeeker(userId);
+  }
+
+  /**
+   * Applying copies the CV, so an application normally has its own file. Older data (and the
+   * seed, before it copied) pointed applications at the profile file; never delete one of those.
+   */
+  private async deleteOldFile(key: string): Promise<void> {
+    if (await this.applications.isCvInUse(key)) return;
+    await this.storage.delete(key);
   }
 
   async getEmployer(userId: string): Promise<EmployerProfile> {
