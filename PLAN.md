@@ -234,10 +234,11 @@ Job(id, companyId, postedById, title, type[FULL_TIME|PART_TIME|CONTRACT|INTERNSH
 SavedJob(userId, jobId) · RecentView(userId, jobId, viewedAt) · JobAlert(userId, query, filters, lastNotifiedAt)
 Application(id, jobId, seekerId, cvKey, contact json, stage[APPLIED|TESTING|SHORTLISTED|INTERVIEW|OFFER|REJECTED|WITHDRAWN], createdAt)
   ScreeningAnswer(applicationId, questionId, answer)
-Assessment(id, jobId, kind[MCQ|CODING], timeLimitMin)
+Assessment(id, jobId unique, kind[MCQ|CODING], timeLimitMin, problemSlug?) -- one test per job
   McqQuestion(id, assessmentId, prompt, options json, correctIndex)        -- correctIndex never leaves the API
-  CodingProblem(id, assessmentId, statement, languageIds[], testCases json) -- P2
-  Attempt(id, assessmentId, applicationId, startedAt, submittedAt, score, answers json)
+  Attempt(id, assessmentId, applicationId, startedAt, submittedAt, score, answers json, language?, code?)
+Coding problems are a library in code (apps/api/src/coding/library), not a table: 30 problems, each with
+  samples + hidden tests (at most 10) whose expected outputs come from a reference solution
 Interview(id, applicationId, stage, scheduledAt, durationMin, status[SCHEDULED|LIVE|COMPLETED|CANCELLED], roomName)
 Notification(id, userId, type, payload json, readAt, createdAt)
 ```
@@ -353,7 +354,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 ### Phase 6: Stretch (P2)
 
-- [ ] Coding test: Monaco editor + Judge0 runner (isolated service), test-case grading
+- [x] Coding test, part 1: a library of 30 problems (easy/medium/hard, at most 10 tests each), chosen instead of an MCQ; candidates write code in Monaco (Python, JavaScript, C++, Java) with autosave and submit it; the hiring team reads the code
+- [ ] Coding test, part 2: run against sample tests and grade on submit with a code runner (Judge0 or similar, isolated service)
 - [ ] Whiteboard (tldraw + Yjs) and shared code pad inside the interview room
 - [ ] Company reviews & ratings, platform admin panel
 - [ ] Meilisearch, if Postgres search isn't enough
@@ -390,6 +392,6 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 ## 8. Open questions
 
 - Keep the original team credited as co-authors, or only link the original repo?
-- Is the coding test in scope (P2) or should it be cut?
+- ~~Is the coding test in scope?~~ Yes: part 1 (library, editor, submit) is built; grading with a runner is next
 - Keep **Learning Hours / My Courses** from the Profile frame, or drop it? It doesn't fit the core product
 - LiveKit vs staying with Agora?
