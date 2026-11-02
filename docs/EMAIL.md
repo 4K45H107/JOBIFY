@@ -208,6 +208,54 @@ Checking it:
   "Brevo 401": generate a new key (Restricted, _Transactional email: All_, everything else _None_)
   and replace `BREVO_API_KEY` on Render.
 
+## Alternatives we could have used
+
+Jobify only needs a service that accepts an email over an API or SMTP and delivers it. Everything
+else (templates, the queue, retries, preferences, unsubscribe) lives in the app, so switching
+provider means writing one small sender in
+[`transport.ts`](../packages/email/src/transport.ts) next to `brevoMailer`, and changing the
+settings on Render.
+
+Free plans and prices change often; the notes below are approximate, so check each provider's
+pricing page before choosing.
+
+### Email sending services
+
+| Service                          | What it is                                                  | Good                                                                         | Not so good                                                                                 |
+| -------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Brevo** (chosen)               | Transactional and marketing email, formerly Sendinblue      | Free plan of about 300 emails a day; works with just a verified Gmail sender | Daily cap; with a free-address sender, the From address is rewritten onto Brevo's domain    |
+| **SendGrid** (Twilio)            | One of the oldest and largest email APIs                    | Very mature, detailed analytics, SDKs for every language                     | No longer a permanent free plan (a trial instead); wants a domain; dashboard is heavyweight |
+| **Resend**                       | A newer developer-focused API, made by the React Email team | Cleanest API and docs; React Email fits naturally; free tier for small apps  | Needs a domain you own and verify (DNS records) before sending to anyone but yourself       |
+| **Amazon SES**                   | AWS's email service                                         | Cheapest at volume (cents per thousand); very reliable                       | Starts in a "sandbox" until AWS approves you; needs an AWS account, a domain and more setup |
+| **Mailgun**                      | Email API popular with developers, with inbound email too   | Good deliverability tools, logs and inbound routing                          | Free option is limited or a trial; wants a domain                                           |
+| **Postmark**                     | Transactional-only email, known for fast, reliable delivery | Excellent inbox placement and speed; strict about spam                       | Small free allowance (for testing); paid after that; needs a domain                         |
+| **Mailjet**                      | Email API and campaigns (part of Sinch, like Mailgun)       | Generous free tier, similar to Brevo's                                       | Daily limit and branding on the free plan; wants a verified domain for best delivery        |
+| **MailerSend**                   | Transactional API from the makers of MailerLite             | Simple API, free tier, good templates                                        | Needs a domain                                                                              |
+| **Gmail SMTP** (with nodemailer) | Sending through your own Gmail account with an app password | No new account; zero cost                                                    | Google's sending limits, your personal account at risk, not meant for app email             |
+
+**Why Brevo:** the brief was "everything free" and there is no domain. Brevo was the main option
+that sends to anyone from a verified Gmail address on a free plan. With a domain, Resend (best
+developer experience, and it pairs with React Email) or Amazon SES (cheapest at scale) would be
+the usual choices.
+
+### Catching email during development
+
+| Tool                      | What it is                                      | Note                                                           |
+| ------------------------- | ----------------------------------------------- | -------------------------------------------------------------- |
+| **Mailpit** (chosen)      | A local SMTP server with a web inbox, in Docker | Actively maintained, fast, has an API the tests use            |
+| **MailHog**               | The older tool Mailpit replaced                 | Same idea, no longer maintained                                |
+| **Mailtrap**              | A hosted fake inbox (plus a sending service)    | Shared inboxes for a team; an online account instead of Docker |
+| **Ethereal** (nodemailer) | Throwaway online inboxes from nodemailer        | No setup; messages are public and short-lived                  |
+
+### Writing the templates
+
+| Option                      | Note                                                                                                                              |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **React Email** (chosen)    | Components in TypeScript/JSX, like the web app; renders email-safe HTML and plain text                                            |
+| **MJML**                    | A markup language that compiles to email-safe HTML; widely used, not TypeScript                                                   |
+| **Handlebars / plain HTML** | Simple string templates; email-client quirks (tables, inline styles) are on you                                                   |
+| **Provider templates**      | Designed in Brevo's or SendGrid's dashboard; edited without a deploy, but they live outside the repo and tie you to that provider |
+
 ## What's left
 
 **Owner (to turn real email on):**
