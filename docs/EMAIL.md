@@ -60,10 +60,17 @@ flowchart LR
 
 ### Why demo accounts are protected
 
-The seed's addresses are made up, and some are on real domains (`…@gmail.com`, `…@hotmail.com`).
+**Seeded accounts** are the made-up users the seed script (`pnpm db:seed`) creates so the app isn't
+empty: the demo logins plus about 35 random people, with companies, jobs and applications. They
+stay in the app next to real users. But their addresses are invented, and some are on real
+providers (`…@gmail.com`, `…@hotmail.com`), so they could belong to real strangers.
+
 Every seeded user is marked `isDemo`, and the worker never emails them through Brevo. Locally they
 still get email in Mailpit, so the demo flows show emails. Accounts people register themselves are
 never demo.
+
+**Don't run `pnpm db:seed` against the live database:** it wipes every table, real users included,
+before recreating the demo data. Reseeding is only for local development.
 
 ## Where the code is
 
@@ -184,15 +191,7 @@ Checking it:
 
 **Owner (to turn real email on):**
 
-- [ ] **Mark the seeded accounts as demo on Neon** (before adding the key). In the Neon SQL Editor,
-      on the `production` branch; it should report 38 rows:
-
-  ```sql
-  UPDATE "User" SET "isDemo" = true
-  WHERE email <> 'fahad11.ahmed11@gmail.com'
-    AND "createdAt" < (SELECT "createdAt" FROM "User" WHERE email = 'fahad11.ahmed11@gmail.com');
-  ```
-
+- [x] **Mark the seeded accounts as demo on Neon** (done 2 Nov 2026: 38 demo accounts, 1 real).
 - [ ] **Brevo account** (free plan) at brevo.com.
 - [ ] **Verify a sender:** _Settings › Senders, domains & dedicated IPs › Senders › Add a sender_
       (name `Jobify`, your Gmail), then click the confirmation link Brevo emails you.
