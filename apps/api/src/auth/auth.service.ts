@@ -4,6 +4,7 @@ import { isUniqueConstraintError } from "@jobify/db";
 import argon2 from "argon2";
 import { fileUrl } from "../files/file-keys";
 import { PrismaService } from "../prisma/prisma.service";
+import { AccountService } from "./account.service";
 import { TokensService } from "./tokens.service";
 
 export interface IssuedTokens {
@@ -29,6 +30,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tokens: TokensService,
+    private readonly account: AccountService,
   ) {}
 
   async register(input: RegisterInput, userAgent?: string): Promise<IssuedTokens> {
@@ -44,6 +46,7 @@ export class AuthService {
           ...(input.role === "SEEKER" ? { seekerProfile: profile } : { employerProfile: profile }),
         },
       });
+      await this.account.sendVerification(user.id);
       return this.issueTokens(user, userAgent);
     } catch (error) {
       if (isUniqueConstraintError(error)) {
@@ -153,6 +156,7 @@ export class AuthService {
       role: user.role,
       fullName: user.seekerProfile?.fullName ?? user.employerProfile?.fullName ?? null,
       photoUrl: fileUrl(user.seekerProfile?.photoKey ?? user.employerProfile?.photoKey),
+      emailVerified: user.emailVerifiedAt !== null,
       company: membership
         ? { ...membership.company, role: membership.role, status: membership.status }
         : null,

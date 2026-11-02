@@ -52,13 +52,18 @@ export function LoginForm() {
         error={errors.email?.message}
         {...register("email")}
       />
-      <TextField
-        label="Password"
-        type="password"
-        autoComplete="current-password"
-        error={errors.password?.message}
-        {...register("password")}
-      />
+      <div className="flex flex-col gap-1.5">
+        <TextField
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          error={errors.password?.message}
+          {...register("password")}
+        />
+        <Link href="/forgot-password" className="self-end text-sm text-link hover:underline">
+          Forgot password?
+        </Link>
+      </div>
 
       <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
         {isSubmitting ? "Signing in…" : "Sign in"}

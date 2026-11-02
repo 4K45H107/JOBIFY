@@ -4,7 +4,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { setupApp } from "../src/app.setup";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { uniqueRun } from "./helpers";
+import { markVerified, uniqueRun } from "./helpers";
 
 const run = uniqueRun();
 const email = (name: string) => `${name}.${run}@jobs-e2e.test`;
@@ -43,6 +43,7 @@ describe("Jobs (e2e)", () => {
       .post("/api/auth/register")
       .send({ fullName: `${name} X`, email: email(name), password, role })
       .expect(201);
+    await markVerified(app, email(name));
     return { agent, id: res.body.id as string };
   };
   const createJob = (agent: request.Agent, overrides: Record<string, unknown> = {}) =>

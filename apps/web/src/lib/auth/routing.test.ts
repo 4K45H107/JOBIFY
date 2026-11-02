@@ -11,10 +11,17 @@ describe("decideRoute", () => {
     expect(decideRoute("/login", "", null)).toEqual({ type: "allow" });
   });
 
-  it("opens the unsubscribe page to everyone", () => {
-    for (const role of [null, "SEEKER", "EMPLOYER"] as const) {
-      expect(decideRoute("/unsubscribe", "?token=x", role)).toEqual({ type: "allow" });
+  it("opens emailed-link pages to everyone, signed in or not", () => {
+    for (const path of ["/unsubscribe", "/reset-password", "/verify-email"]) {
+      for (const role of [null, "SEEKER", "EMPLOYER"] as const) {
+        expect(decideRoute(path, "?token=x", role)).toEqual({ type: "allow" });
+      }
     }
+  });
+
+  it("treats forgot-password like the other sign-in pages", () => {
+    expect(decideRoute("/forgot-password", "", null)).toEqual({ type: "allow" });
+    expect(decideRoute("/forgot-password", "", "SEEKER")).toEqual({ type: "redirect", to: "/" });
   });
 
   it("keeps signed-in users off the auth pages", () => {

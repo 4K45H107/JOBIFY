@@ -571,6 +571,11 @@ async function main() {
   // Every seeded address is made up (some on real domains), so the worker never emails them
   // through a real provider. Locally they still show up in Mailpit.
   await prisma.user.updateMany({ data: { isDemo: true } });
+  // Demo logins must work without a verification email (they never get real email).
+  await prisma.user.updateMany({
+    where: { emailVerifiedAt: null },
+    data: { emailVerifiedAt: new Date() },
+  });
 
   console.log(
     `Seeded ${companies.length} companies, ${jobs.length} jobs, ${seekerIds.length} seekers, ` +

@@ -10,6 +10,29 @@ export const emailJobSchema = z.object({ notificationId: z.string() });
 export type EmailJob = z.infer<typeof emailJobSchema>;
 
 /**
+ * Account emails (verify, reset, password changed) go on the same queue under this name.
+ * They're about the account itself, so email preferences and unsubscribe don't apply.
+ */
+export const ACCOUNT_EMAIL_JOB_NAME = "account";
+export const AccountEmailKind = z.enum(["VERIFY_EMAIL", "PASSWORD_RESET", "PASSWORD_CHANGED"]);
+export type AccountEmailKind = z.infer<typeof AccountEmailKind>;
+export const accountEmailJobSchema = z.object({
+  kind: AccountEmailKind,
+  userId: z.string(),
+  /** The raw link token (verify, reset). The job is deleted as soon as it's done. */
+  token: z.string().optional(),
+});
+export type AccountEmailJob = z.infer<typeof accountEmailJobSchema>;
+
+/** Like emailJobOptions, but the job (which holds a raw link token) is deleted once done. */
+export const accountEmailJobOptions = {
+  attempts: 3,
+  backoff: { type: "exponential" as const, delay: 30_000 },
+  removeOnComplete: true,
+  removeOnFail: true,
+};
+
+/**
  * BullMQ options for an email job (plain data, so this package doesn't depend on BullMQ).
  * The notification id as job id drops duplicates while a job is queued; three tries in all
  * (retried after 30 s, then 1 min) ride out a short provider outage; finished jobs are trimmed

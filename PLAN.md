@@ -344,6 +344,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 - [ ] Job Alerts (saved searches + daily digest via worker)
 - [x] Email for all key events (React Email, sent by the worker through Brevo; Mailpit locally). Email preferences per type, one-click unsubscribe
+- [x] Account security: email verification (needed to apply or post jobs), forgot / reset password, change password (signs out other devices), with account emails
 - [ ] Profile dashboard stats + weekly activity chart
 - [ ] Global header search
 - [ ] Empty/loading/error states, accessibility pass, responsive layouts

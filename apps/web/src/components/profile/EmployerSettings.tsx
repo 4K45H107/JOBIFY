@@ -19,6 +19,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { FileButton } from "@/components/ui/FileButton";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
+import { AccountSection } from "./AccountSection";
 import { EmailPreferencesSection } from "./EmailPreferencesSection";
 import { EMPLOYER_SECTIONS, type EmployerSectionId } from "./sections";
 import { SettingsLayout } from "./SettingsLayout";
@@ -36,10 +37,12 @@ export function EmployerSettings({
   section,
   companyName,
   emailPreferences,
+  emailVerified,
 }: {
   initial: EmployerProfile;
   section: EmployerSectionId;
   companyName: string | null;
+  emailVerified: boolean;
   /** Loaded by the page only for the email section. */
   emailPreferences?: EmailPreference[];
 }) {
@@ -173,22 +176,11 @@ export function EmployerSettings({
       ) : section === "email" ? (
         emailPreferences && <EmailPreferencesSection initial={emailPreferences} />
       ) : (
-        <Card>
-          <CardHeader title="Account settings" />
-          <dl className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-sm text-fg-subtle">Email</dt>
-              <dd className="text-lg">{profile.email}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-fg-subtle">Account type</dt>
-              <dd className="text-lg">Employer</dd>
-            </div>
-          </dl>
-          <p className="mt-6 text-sm text-fg-subtle">
-            Password change and email verification come with the account security update.
-          </p>
-        </Card>
+        <AccountSection
+          email={profile.email}
+          accountType="Employer"
+          emailVerified={emailVerified}
+        />
       )}
     </SettingsLayout>
   );

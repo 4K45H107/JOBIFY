@@ -37,6 +37,12 @@ export class TokensService {
     };
   }
 
+  /** A random token for an emailed link (verify email, reset password) plus the hash we store. */
+  createLinkToken(): { token: string; hash: string } {
+    const token = randomBytes(32).toString("base64url");
+    return { token, hash: TokensService.hash(token) };
+  }
+
   static hash(token: string): string {
     return createHash("sha256").update(token).digest("hex");
   }

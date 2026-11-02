@@ -1,10 +1,14 @@
 import { render } from "@react-email/render";
 import {
+  type AccountEmailKind,
   describeNotification,
+  EMAIL_VERIFICATION_TTL_HOURS,
+  PASSWORD_RESET_TTL_MINUTES,
   emailTypeLabel,
   type NotificationType,
   type UserRole,
 } from "@jobify/shared";
+import { AccountEmail } from "./templates/AccountEmail";
 import { NotificationEmail } from "./templates/NotificationEmail";
 
 export interface RenderedEmail {
@@ -77,6 +81,70 @@ export async function renderNotificationEmail(input: {
   });
   return {
     subject: title,
+    html: await render(element),
+    text: await render(element, { plainText: true }),
+  };
+}
+
+/**
+ * Account emails. The link carries the raw token; it's single-use and expires (see the TTLs).
+ * PASSWORD_CHANGED has no token: it's a notice with a link to reset if it wasn't them.
+ */
+export async function renderAccountEmail(input: {
+  kind: AccountEmailKind;
+  name: string | null;
+  webOrigin: string;
+  token?: string;
+}): Promise<RenderedEmail> {
+  const link = (path: string) => new URL(path, input.webOrigin).toString();
+  const withToken = (path: string) =>
+    link(`${path}?token=${encodeURIComponent(input.token ?? "")}`);
+  const content = {
+    VERIFY_EMAIL: {
+      subject: "Verify your email for Jobify",
+      title: "Verify your email",
+      body: [
+        "Confirm this is your email address to apply to jobs and post them on Jobify.",
+        `The link works for ${EMAIL_VERIFICATION_TTL_HOURS} hours.`,
+      ],
+      actionLabel: "Verify my email",
+      actionUrl: withToken("/verify-email"),
+      footerNote:
+        "You get this because this address was used to create a Jobify account. If that wasn't you, ignore this email.",
+    },
+    PASSWORD_RESET: {
+      subject: "Reset your Jobify password",
+      title: "Reset your password",
+      body: [
+        "Someone asked to reset the password for this Jobify account. Choose a new one with the button below.",
+        `The link works once, for ${PASSWORD_RESET_TTL_MINUTES} minutes.`,
+      ],
+      actionLabel: "Choose a new password",
+      actionUrl: withToken("/reset-password"),
+      footerNote: "If you didn't ask for this, ignore this email: your password stays the same.",
+    },
+    PASSWORD_CHANGED: {
+      subject: "Your Jobify password was changed",
+      title: "Your password was changed",
+      body: [
+        "The password for your Jobify account was just changed. Other devices are signed out within 15 minutes.",
+        "If this wasn't you, reset your password now.",
+      ],
+      actionLabel: "Reset my password",
+      actionUrl: link("/forgot-password"),
+      footerNote: "You get this security notice whenever your password changes.",
+    },
+  }[input.kind];
+  const element = AccountEmail({
+    greetingName: input.name?.split(" ")[0] ?? null,
+    title: content.title,
+    body: content.body,
+    actionLabel: content.actionLabel,
+    actionUrl: content.actionUrl,
+    footerNote: content.footerNote,
+  });
+  return {
+    subject: content.subject,
     html: await render(element),
     text: await render(element, { plainText: true }),
   };

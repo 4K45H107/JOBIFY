@@ -25,6 +25,7 @@ export default async function EmployerSettingsPage({
       section={active}
       companyName={company}
       emailPreferences={email?.preferences}
+      emailVerified={user?.emailVerified ?? false}
     />
   );
 }

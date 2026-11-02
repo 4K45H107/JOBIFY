@@ -46,6 +46,7 @@ model User {
   sessions          Session[]
   emailPreferences  EmailPreference[]
   emailLogs         EmailLog[]
+  authTokens        AuthToken[]
 }
 
 enum EmploymentStatus {
@@ -478,6 +479,29 @@ model Notification {
   emailLog EmailLog?
 
   @@index([userId, readAt, createdAt])
+}
+
+// ─── account tokens ──────────────────────────────────────────────────────────
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+/// Single-use link tokens (verify email, reset password). Only the SHA-256 of the token is
+/// stored; the raw token only ever travels in the emailed link.
+model AuthToken {
+  id        String        @id @default(cuid())
+  userId    String
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
 }
 
 // ─── email ───────────────────────────────────────────────────────────────────

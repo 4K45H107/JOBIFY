@@ -1,6 +1,11 @@
 import { type createPrismaClient, isUniqueConstraintError } from "@jobify/db";
-import { type Mailer, renderNotificationEmail, unsubscribeToken } from "@jobify/email";
-import { EMAIL_JOB_NAME, EMAIL_TYPES, emailJobOptions } from "@jobify/shared";
+import {
+  type Mailer,
+  renderAccountEmail,
+  renderNotificationEmail,
+  unsubscribeToken,
+} from "@jobify/email";
+import { type AccountEmailJob, EMAIL_JOB_NAME, EMAIL_TYPES, emailJobOptions } from "@jobify/shared";
 import type { Queue } from "bullmq";
 
 type Prisma = ReturnType<typeof createPrismaClient>;
@@ -124,4 +129,38 @@ export async function markEmailFailed(prisma: Prisma, notificationId: string, me
     where: { notificationId, status: "SENDING" },
     data: { status: "FAILED", reason: message.slice(0, 500) },
   });
+}
+
+/**
+ * Verify email, reset password, password changed. Preferences don't apply (they're about the
+ * account), but the kill switch and the demo-account rule do. Nothing is logged in EmailLog:
+ * there's no notification row, and a repeated reset email is harmless.
+ */
+export async function sendAccountEmail(
+  deps: { prisma: Prisma; mailer: Mailer; config: EmailConfig },
+  job: AccountEmailJob,
+): Promise<EmailOutcome> {
+  const { prisma, mailer, config } = deps;
+  const user = await prisma.user.findUnique({
+    where: { id: job.userId },
+    select: {
+      email: true,
+      isDemo: true,
+      seekerProfile: { select: { fullName: true } },
+      employerProfile: { select: { fullName: true } },
+    },
+  });
+  if (!user) return { outcome: "missing" };
+  if (!config.enabled) return { outcome: "skipped", reason: "Email is turned off" };
+  if (user.isDemo && mailer.provider === "brevo") {
+    return { outcome: "skipped", reason: "Demo account (made-up address)" };
+  }
+  const email = await renderAccountEmail({
+    kind: job.kind,
+    name: user.seekerProfile?.fullName ?? user.employerProfile?.fullName ?? null,
+    webOrigin: config.webOrigin,
+    token: job.token,
+  });
+  const providerId = await mailer.send({ to: user.email, ...email });
+  return { outcome: "sent", providerId };
 }
