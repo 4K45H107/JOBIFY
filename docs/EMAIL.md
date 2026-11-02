@@ -3,8 +3,8 @@
 How Jobify sends email: what goes out, to whom, how it's built, how to run it locally and in
 production, and what's left to do.
 
-> **Status:** built and deployed (PR #39). Real email in production is **off until the Brevo key is
-> set on Render**; see [What's left](#whats-left). Locally every email goes to Mailpit.
+> **Status:** built, deployed (PR #39) and **on in production** through Brevo since 2 Nov 2026.
+> Locally every email goes to Mailpit. Remaining items: [What's left](#whats-left).
 
 ## What gets sent
 
@@ -202,12 +202,14 @@ Checking it:
       (name `Jobify`, your Gmail), then click the confirmation link Brevo emails you.
 - [x] **API key** (Restricted: _Transactional email: All_, everything else _None_; a test email
       through it was accepted on 2 Nov 2026): _Settings › SMTP & API › API keys › Generate a new API key_. Copy it right away.
-- [ ] **Render** (`jobify-api` › Environment): `BREVO_API_KEY` = the key,
-      `MAIL_FROM` = `Jobify <your-gmail-address>`. Save and deploy.
-- [ ] **Check the log** shows `emails via brevo`.
-- [ ] **Test with your own account:** e.g. as an employer ask to join a company, or apply to one of
-      your own jobs from a second account you own; then look in your inbox (and spam) and in
-      Brevo's logs. Mark "Not spam" if needed.
+- [x] **Render** (`jobify-api` › Environment): `BREVO_API_KEY` and `MAIL_FROM` set and deployed
+      (2 Nov 2026).
+- [x] **Live check:** an interview scheduled for the demo seeker on the live site was logged
+      `SKIPPED: Demo account`, which only happens with Brevo active, so the worker runs, uses Brevo,
+      and protects demo accounts.
+- [ ] **A real email from the live app to your own account:** as `fahad11.ahmed11@gmail.com` (a
+      seeker), Easy Apply to a Northwind job marked "Includes a skill test". "Skill test for …" should
+      arrive within seconds; the `EmailLog` query above should show `SENT`.
 
 **Code (not started):**
 
@@ -218,5 +220,5 @@ Checking it:
 
 **Optional later:**
 
-- [ ] A domain of your own, verified in Brevo (SPF/DKIM), so email stops landing in spam.
+- [ ] A domain of your own, verified in Brevo (SPF/DKIM), so the sender address is your own.
 - [ ] Each person's own time zone for interview times.
