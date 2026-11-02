@@ -201,7 +201,7 @@ Checking it:
 - **One time zone:** everyone sees interview times in `EMAIL_TIME_ZONE`, with the zone named.
 - **Free-tier sleep:** the worker sleeps with the API after 15 idle minutes; a reminder due while
   nobody uses the site isn't sent then. See
-  [Known limitations](DEPLOYMENT.md#6-known-limitations-sleeping-on-the-free-tier).
+  [Known limitations](DEPLOYMENT.md#7-known-limitations-sleeping-on-the-free-tier).
 - **300 emails a day** on Brevo's free plan; plenty for a demo.
 - **The API key expires:** the current one on **2 Nov 2027**, and Brevo also expires keys after
   **90 days without use**. If the demo sends no email for three months, emails start failing with

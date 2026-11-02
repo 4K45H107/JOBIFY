@@ -22,7 +22,10 @@ enum UserRole {
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
+  /// Null for accounts created with Google that never set a password.
   passwordHash    String?
+  /// Google account id ("sub"), once the user has signed in with Google.
+  googleId        String?   @unique
   role            UserRole
   emailVerifiedAt DateTime?
   /// Seeded demo account with a made-up address: never sent real email.

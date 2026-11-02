@@ -5,7 +5,7 @@ it was set up. Everything runs on **free tiers**.
 
 > **Live:** https://jobify-hire.vercel.app (API: https://jobify-api-g2kn.onrender.com/api/health).
 > Every part is set up. The free API server sleeps when idle, so the first visit can be slow (see
-> [Known limitations](#6-known-limitations-sleeping-on-the-free-tier)). Demo logins: see
+> [Known limitations](#7-known-limitations-sleeping-on-the-free-tier)). Demo logins: see
 > [RUNNING_LOCALLY.md](RUNNING_LOCALLY.md#4-demo-accounts) (password `Password123!`).
 
 ## Overview
@@ -22,16 +22,17 @@ flowchart LR
     Render -. "emails (worker)" .-> Brevo["Brevo<br/>email"]
 ```
 
-| Stage                      | Service                        | Why this one                                                                                                      | Status      |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------- |
-| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done     |
-| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done     |
-| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done     |
-| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done     |
-| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done     |
-| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done     |
-| Email                      | **Brevo** (free plan)          | About 300 emails a day for free, and needs no domain: a verified Gmail sender is enough                           | ✅ Done     |
-| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 6                | ➖ Not used |
+| Stage                      | Service                        | Why this one                                                                                                      | Status                    |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done                   |
+| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done                   |
+| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done                   |
+| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done                   |
+| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done                   |
+| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done                   |
+| Email                      | **Brevo** (free plan)          | About 300 emails a day for free, and needs no domain: a verified Gmail sender is enough                           | ✅ Done                   |
+| Google sign-in             | **Google Cloud** OAuth client  | Free; Jobify's API talks to Google directly, without an extra service in between                                  | ⏳ Needs the OAuth client |
+| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 7                | ➖ Not used               |
 
 ---
 
@@ -446,7 +447,56 @@ company. Brevo's _Transactional › Logs_ shows what was sent.
 
 _Status: on since 2 Nov 2026 (key and sender set on Render; checked live)._
 
-## 6. Known limitations: sleeping on the free tier
+## 6. Google sign-in
+
+### How it works
+
+"Continue with Google" on the sign-in and sign-up pages. The browser goes to Google, comes back to
+`/api/auth/google/callback` (through Vercel's `/api` proxy, so the session cookies are set on the
+web app's domain), and the API signs the person in with its usual session.
+
+- **Safety:** state (against forged returns), PKCE (the code is useless without our verifier) and
+  a nonce; Google's ID token is checked against Google's published keys.
+- **Accounts:** a known Google account signs in; an email that already has an account gets Google
+  linked to it (only if Google has verified the email); a new email becomes a new, already verified
+  account, after asking "looking for a job or hiring?" when started from the sign-in page.
+- Google-only accounts have no password; they can add one with "Forgot password" (or from
+  _Settings › Account settings_).
+- **Off until configured:** without `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, the button is
+  hidden. Code: [`google.service.ts`](../apps/api/src/auth/google.service.ts).
+
+Why not Auth0: Jobify already has its own sessions, verification and reset, so Auth0 would only sit
+between Jobify and Google, and a live site needs your own Google OAuth client either way.
+
+### How to set it up
+
+In [Google Cloud Console](https://console.cloud.google.com) (free):
+
+1. **Create a project**, e.g. `Jobify`.
+2. **Google Auth Platform › Get started** (the OAuth consent screen): app name `Jobify`, your email
+   as support and contact email, audience **External**.
+3. **Audience:** while the app is in **Testing**, only the test users you list can sign in. To let
+   anyone sign in, **Publish app**. Jobify only asks for the basic `openid`, `email` and `profile`
+   scopes, which don't need Google's review.
+4. **Clients › Create client** › type **Web application**:
+
+   | Field                         | Values                                                                                                         |
+   | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+   | Authorized JavaScript origins | `https://jobify-hire.vercel.app` and `http://localhost:3000`                                                   |
+   | Authorized redirect URIs      | `https://jobify-hire.vercel.app/api/auth/google/callback` and `http://localhost:3000/api/auth/google/callback` |
+
+5. Copy the **Client ID** and **Client secret**. On Render (`jobify-api` › Environment) set
+   `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, then save and deploy. To try it locally too, put
+   the same two values in your local `.env`.
+6. **Check:** the sign-in page shows "Continue with Google". Sign in with your Google account (the
+   same email as an existing account links to it).
+
+The redirect URI must match exactly (`https`, no trailing slash); a mismatch shows Google's
+`redirect_uri_mismatch` error.
+
+_Status: built; waiting for the OAuth client on Render._
+
+## 7. Known limitations: sleeping on the free tier
 
 ### What happens
 

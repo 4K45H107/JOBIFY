@@ -17,10 +17,12 @@ export function SeekerSettings({
   section,
   emailPreferences,
   emailVerified,
+  hasPassword,
 }: {
   initial: SeekerProfile;
   section: SeekerSectionId;
   emailVerified: boolean;
+  hasPassword: boolean;
   /** Loaded by the page only for the email section. */
   emailPreferences?: EmailPreference[];
 }) {
@@ -66,6 +68,7 @@ export function SeekerSettings({
           email={profile.email}
           accountType="Job seeker"
           emailVerified={emailVerified}
+          hasPassword={hasPassword}
         />
       )}
     </SettingsLayout>

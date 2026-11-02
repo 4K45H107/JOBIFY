@@ -12,7 +12,7 @@ describe("decideRoute", () => {
   });
 
   it("opens emailed-link pages to everyone, signed in or not", () => {
-    for (const path of ["/unsubscribe", "/reset-password", "/verify-email"]) {
+    for (const path of ["/unsubscribe", "/reset-password", "/verify-email", "/signing-in"]) {
       for (const role of [null, "SEEKER", "EMPLOYER"] as const) {
         expect(decideRoute(path, "?token=x", role)).toEqual({ type: "allow" });
       }
@@ -21,6 +21,7 @@ describe("decideRoute", () => {
 
   it("treats forgot-password like the other sign-in pages", () => {
     expect(decideRoute("/forgot-password", "", null)).toEqual({ type: "allow" });
+    expect(decideRoute("/register/google", "", null)).toEqual({ type: "allow" });
     expect(decideRoute("/forgot-password", "", "SEEKER")).toEqual({ type: "redirect", to: "/" });
   });
 

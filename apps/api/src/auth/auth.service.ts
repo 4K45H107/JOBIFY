@@ -34,20 +34,44 @@ export class AuthService {
   ) {}
 
   async register(input: RegisterInput, userAgent?: string): Promise<IssuedTokens> {
-    const passwordHash = await argon2.hash(input.password);
-    const profile = { create: { fullName: input.fullName } };
+    return this.createAccount(
+      {
+        email: input.email,
+        role: input.role,
+        fullName: input.fullName,
+        passwordHash: await argon2.hash(input.password),
+      },
+      userAgent,
+    );
+  }
 
+  /**
+   * Creates the account with its profile and signs it in. Unverified addresses get a
+   * verification email (Google sign-ups arrive already verified).
+   */
+  async createAccount(
+    input: {
+      email: string;
+      role: RegisterInput["role"];
+      fullName: string;
+      passwordHash?: string;
+      googleId?: string;
+      emailVerifiedAt?: Date;
+    },
+    userAgent?: string,
+  ): Promise<IssuedTokens> {
+    const { role, fullName, ...account } = input;
+    const profile = { create: { fullName } };
     try {
       const user = await this.prisma.user.create({
         data: {
-          email: input.email,
-          passwordHash,
-          role: input.role,
-          ...(input.role === "SEEKER" ? { seekerProfile: profile } : { employerProfile: profile }),
+          ...account,
+          role,
+          ...(role === "SEEKER" ? { seekerProfile: profile } : { employerProfile: profile }),
         },
       });
       await this.account.sendVerification(user.id);
-      return this.issueTokens(user, userAgent);
+      return this.issueSession(user, userAgent);
     } catch (error) {
       if (isUniqueConstraintError(error)) {
         throw new ConflictException("An account with this email already exists");
@@ -63,7 +87,7 @@ export class AuthService {
       : (await argon2.verify(await this.dummyHash, input.password), false);
 
     if (!user || !valid) throw new UnauthorizedException("Incorrect email or password");
-    return this.issueTokens(user, userAgent);
+    return this.issueSession(user, userAgent);
   }
 
   /** Rotates the refresh token. Reusing an already-rotated token revokes every session of that user. */
@@ -157,13 +181,15 @@ export class AuthService {
       fullName: user.seekerProfile?.fullName ?? user.employerProfile?.fullName ?? null,
       photoUrl: fileUrl(user.seekerProfile?.photoKey ?? user.employerProfile?.photoKey),
       emailVerified: user.emailVerifiedAt !== null,
+      hasPassword: user.passwordHash !== null,
       company: membership
         ? { ...membership.company, role: membership.role, status: membership.status }
         : null,
     };
   }
 
-  private async issueTokens(
+  /** A new session (refresh token row) and both tokens. */
+  async issueSession(
     user: { id: string; role: AuthUser["role"] },
     userAgent?: string,
   ): Promise<IssuedTokens> {

@@ -33,10 +33,13 @@ export function AccountSection({
   email,
   accountType,
   emailVerified,
+  hasPassword,
 }: {
   email: string;
   accountType: string;
   emailVerified: boolean;
+  /** False for accounts created with Google. */
+  hasPassword: boolean;
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -56,7 +59,7 @@ export function AccountSection({
           </div>
         </dl>
       </Card>
-      <ChangePasswordCard />
+      {hasPassword ? <ChangePasswordCard /> : <SetPasswordCard email={email} />}
     </div>
   );
 }
@@ -93,6 +96,40 @@ function VerificationStatus({ verified }: { verified: boolean }) {
       )}
       {typeof state === "object" && <span className="text-heading-accent">{state.error}</span>}
     </div>
+  );
+}
+
+/** Google-only accounts: a password is set through the emailed reset link. */
+function SetPasswordCard({ email }: { email: string }) {
+  const [state, setState] = useState<"idle" | "sending" | "sent" | { error: string }>("idle");
+  const send = async () => {
+    setState("sending");
+    try {
+      await api("/auth/password/forgot", { method: "POST", json: { email } });
+      setState("sent");
+    } catch (error) {
+      setState({ error: errorMessage(error) });
+    }
+  };
+  return (
+    <Card>
+      <CardHeader
+        title="Password"
+        description="You sign in with Google. Add a password to also sign in with your email."
+      />
+      {state === "sent" ? (
+        <p role="status" className="rounded-[10px] bg-success/15 px-4 py-3 text-sm">
+          We emailed you a link to set a password. It works for an hour.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {typeof state === "object" && <Alert>{state.error}</Alert>}
+          <Button onClick={send} disabled={state === "sending"} className="self-start">
+            {state === "sending" ? "Sending…" : "Email me a link to set a password"}
+          </Button>
+        </div>
+      )}
+    </Card>
   );
 }
 

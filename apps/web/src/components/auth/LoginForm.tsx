@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { type AuthUser, loginSchema, type LoginInput } from "@jobify/shared";
@@ -10,11 +11,23 @@ import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
+import { GoogleButton, OrDivider } from "./GoogleButton";
 import { useAuthRedirect } from "./useAuthRedirect";
 
-export function LoginForm() {
+const GOOGLE_ERRORS: Record<string, string> = {
+  google: "Google sign-in didn't work. Please try again.",
+  "google-cancelled": "Google sign-in was cancelled.",
+  "google-off": "Google sign-in isn't available right now. Use your email and password.",
+};
+
+export function LoginForm({ google }: { google: boolean }) {
   const redirect = useAuthRedirect();
-  const [formError, setFormError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [formError, setFormError] = useState<string | null>(
+    GOOGLE_ERRORS[searchParams.get("error") ?? ""] ?? null,
+  );
+  const next = searchParams.get("next");
+  const googleHref = `/api/auth/google${next ? `?next=${encodeURIComponent(next)}` : ""}`;
   const {
     register,
     handleSubmit,
@@ -44,6 +57,13 @@ export function LoginForm() {
       </header>
 
       {formError && <Alert>{formError}</Alert>}
+
+      {google && (
+        <>
+          <GoogleButton href={googleHref} />
+          <OrDivider />
+        </>
+      )}
 
       <TextField
         label="Email"

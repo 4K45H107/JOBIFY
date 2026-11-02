@@ -56,6 +56,21 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export const verifyEmailSchema = z.object({ token: linkToken });
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 
+/** Which sign-in methods are switched on (Google needs its OAuth client configured). */
+export const authProvidersSchema = z.object({ google: z.boolean() });
+export type AuthProviders = z.infer<typeof authProvidersSchema>;
+
+/** A first Google sign-in, before the account exists: what Google told us. */
+export const googlePendingSchema = z.object({ email: z.string(), fullName: z.string() });
+export type GooglePending = z.infer<typeof googlePendingSchema>;
+
+/** Finishing a first Google sign-in: Google doesn't know whether they're hiring. */
+export const googleSignupSchema = z.object({
+  fullName: z.string().trim().min(2, "Enter your full name").max(80),
+  role: SignupRole,
+});
+export type GoogleSignupInput = z.infer<typeof googleSignupSchema>;
+
 /** How long emailed links work. */
 export const EMAIL_VERIFICATION_TTL_HOURS = 48;
 export const PASSWORD_RESET_TTL_MINUTES = 60;
@@ -72,6 +87,8 @@ export const authUserSchema = z.object({
   photoUrl: z.string().nullable(),
   /** Applying to and posting jobs need a verified email. */
   emailVerified: z.boolean(),
+  /** False for Google-only accounts: they set one with "Forgot password". */
+  hasPassword: z.boolean(),
   company: z
     .object({
       id: z.string(),

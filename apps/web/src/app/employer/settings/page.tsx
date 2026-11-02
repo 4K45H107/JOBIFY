@@ -26,6 +26,7 @@ export default async function EmployerSettingsPage({
       companyName={company}
       emailPreferences={email?.preferences}
       emailVerified={user?.emailVerified ?? false}
+      hasPassword={user?.hasPassword ?? true}
     />
   );
 }

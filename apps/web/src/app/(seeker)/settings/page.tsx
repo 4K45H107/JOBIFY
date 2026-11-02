@@ -24,6 +24,7 @@ export default async function SettingsPage({
       section={active}
       emailPreferences={email?.preferences}
       emailVerified={user?.emailVerified ?? false}
+      hasPassword={user?.hasPassword ?? true}
     />
   );
 }
