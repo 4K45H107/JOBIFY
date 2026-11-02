@@ -23,6 +23,22 @@ Every email mirrors an in-app notification (the bell), with the same title and t
 Every email has a **Jobify header**, a greeting, the message, a button to the right page, and a
 footer with **Email settings** and **Unsubscribe from these** links.
 
+### Account emails
+
+These are about the account itself, so they **ignore email settings** and have no unsubscribe link
+(a security note instead). The kill switch and the demo-account rule still apply.
+
+| Email                            | Sent when                                             | Link                                                  |
+| -------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| Verify your email for Jobify     | Signing up, or "Send a new link" (banner or Settings) | `/verify-email?token=…`, works once, for 48 hours     |
+| Reset your Jobify password       | "Forgot password?" on the sign-in page                | `/reset-password?token=…`, works once, for 60 minutes |
+| Your Jobify password was changed | After a reset or a change in Settings                 | `/forgot-password`, in case it wasn't them            |
+
+They use the same queue under the job name `account`. The job holds the raw link token, so it's
+deleted from Redis as soon as it's done, and the database only stores the token's SHA-256
+(`AuthToken`). A new link replaces the previous unused one. Account security itself (the
+verification gate, sessions) is described in the API code: `apps/api/src/auth/account.service.ts`.
+
 ## How it works
 
 ```mermaid
@@ -207,9 +223,10 @@ Checking it:
 - [x] **Live check:** an interview scheduled for the demo seeker on the live site was logged
       `SKIPPED: Demo account`, which only happens with Brevo active, so the worker runs, uses Brevo,
       and protects demo accounts.
-- [ ] **A real email from the live app to your own account:** as `fahad11.ahmed11@gmail.com` (a
-      seeker), Easy Apply to a Northwind job marked "Includes a skill test". "Skill test for …" should
-      arrive within seconds; the `EmailLog` query above should show `SENT`.
+- [ ] **A real email from the live app to your own account:** since account security shipped,
+      your own live account shows a "Verify your email" banner; click **Send a new link** and the
+      verification email should arrive within seconds. Opening it verifies your account (needed to
+      apply to jobs).
 
 **Code (not started):**
 

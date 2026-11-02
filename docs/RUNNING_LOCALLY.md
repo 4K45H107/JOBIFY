@@ -106,6 +106,13 @@ machine. Schedule an interview as `employer@jobify.dev` and the seeker's "Interv
 email appears within a couple of seconds. Each email's footer links to _Settings › Email
 notifications_ and to a one-click unsubscribe page.
 
+**Account security**
+
+- New accounts must verify their email before applying or posting jobs: a banner says so, and the
+  link arrives in Mailpit. (Demo accounts are already verified.)
+- _Forgot password?_ on the sign-in page emails a reset link (Mailpit); _Settings › Account
+  settings_ has the verification status and a change-password form.
+
 **Company onboarding**
 
 - Register a new employer: you'll be asked to create a company or ask to join one.
