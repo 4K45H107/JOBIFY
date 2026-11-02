@@ -34,7 +34,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   ]);
   return (
     <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-      <JobDetailPanel job={job} collapsible={false} />
+      <JobDetailPanel job={job} collapsible={false} fullPageHref={null} />
       <aside aria-labelledby="similar">
         <SectionHeading id="similar" className="mb-2 text-xl">
           Similar jobs

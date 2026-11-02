@@ -4,6 +4,7 @@ import { useState } from "react";
 import { type Interview, interviewScheduleSchema } from "@jobify/shared";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import { SelectField } from "@/components/ui/Field";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
@@ -66,61 +67,54 @@ export function ScheduleDialog({
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="schedule-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
+    <Modal
+      onClose={onClose}
+      labelledBy="schedule-title"
+      className="flex w-[min(28rem,calc(100vw-2rem))] flex-col gap-4 p-6"
     >
-      <div
-        className="flex w-full max-w-md flex-col gap-4 rounded-[10px] bg-bg p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 id="schedule-title" className="text-xl font-medium">
-          {title}
-        </h2>
-        {error && <Alert>{error}</Alert>}
+      <h2 id="schedule-title" className="text-xl font-medium">
+        {title}
+      </h2>
+      {error && <Alert>{error}</Alert>}
+      <TextField
+        label="Round"
+        value={stage}
+        onChange={(e) => setStage(e.target.value)}
+        placeholder="e.g. Preli Exam"
+      />
+      <div className="grid grid-cols-2 gap-3">
         <TextField
-          label="Round"
-          value={stage}
-          onChange={(e) => setStage(e.target.value)}
-          placeholder="e.g. Preli Exam"
+          label="Date"
+          type="date"
+          value={date}
+          min={toLocalInput(new Date().toISOString()).slice(0, 10)}
+          onChange={(e) => setDate(e.target.value)}
         />
-        <div className="grid grid-cols-2 gap-3">
-          <TextField
-            label="Date"
-            type="date"
-            value={date}
-            min={toLocalInput(new Date().toISOString()).slice(0, 10)}
-            onChange={(e) => setDate(e.target.value)}
-          />
-          <TextField
-            label="Time"
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-          />
-        </div>
-        <SelectField label="Length" value={duration} onChange={(e) => setDuration(e.target.value)}>
-          {[15, 30, 45, 60, 90, 120].map((m) => (
-            <option key={m} value={m}>
-              {m} minutes
-            </option>
-          ))}
-        </SelectField>
-        <p className="text-xs text-fg-subtle">
-          Times are in your time zone ({Intl.DateTimeFormat().resolvedOptions().timeZone}).
-        </p>
-        <div className="flex justify-end gap-3">
-          <Button variant="ghost" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={confirm} disabled={busy}>
-            {busy ? "Saving…" : "Confirm"}
-          </Button>
-        </div>
+        <TextField
+          label="Time"
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+        />
       </div>
-    </div>
+      <SelectField label="Length" value={duration} onChange={(e) => setDuration(e.target.value)}>
+        {[15, 30, 45, 60, 90, 120].map((m) => (
+          <option key={m} value={m}>
+            {m} minutes
+          </option>
+        ))}
+      </SelectField>
+      <p className="text-xs text-fg-subtle">
+        Times are in your time zone ({Intl.DateTimeFormat().resolvedOptions().timeZone}).
+      </p>
+      <div className="flex justify-end gap-3">
+        <Button variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={confirm} disabled={busy}>
+          {busy ? "Saving…" : "Confirm"}
+        </Button>
+      </div>
+    </Modal>
   );
 }

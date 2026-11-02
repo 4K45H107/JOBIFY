@@ -32,6 +32,7 @@ export function SettingsLayout({
 }) {
   return (
     <div className="-mx-4 -my-6 flex min-h-[calc(100%+3rem)] flex-col md:-mx-10 md:-my-8 md:min-h-[calc(100%+4rem)] lg:flex-row">
+      <h1 className="sr-only">Profile</h1>
       <aside className="flex flex-col items-center gap-4 bg-sidebar/60 px-6 py-8 text-center lg:w-[260px] lg:shrink-0">
         <Avatar
           src={photoUrl}
@@ -42,7 +43,7 @@ export function SettingsLayout({
         {photoAction}
         <div>
           <p className="text-xl font-medium tracking-label uppercase">{name}</p>
-          <p className="text-sm text-fg-subtle">{email}</p>
+          <p className="text-sm text-fg-muted">{email}</p>
         </div>
         <nav aria-label="Profile sections" className="mt-2 w-full">
           <ul className="flex flex-wrap justify-center gap-2 lg:flex-col lg:items-end lg:gap-1">

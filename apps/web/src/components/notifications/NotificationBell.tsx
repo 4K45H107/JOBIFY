@@ -14,6 +14,7 @@ export function NotificationBell({ allHref }: { allHref: string }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[] | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     api<{ unread: number }>("/notifications/unread-count")
@@ -35,10 +36,13 @@ export function NotificationBell({ allHref }: { allHref: string }) {
       })
       .catch(() => setItems([]));
     const close = (e: MouseEvent | KeyboardEvent) => {
-      if (
-        e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)
-      )
+      if (e instanceof KeyboardEvent) {
+        if (e.key !== "Escape") return;
         setOpen(false);
+        button.current?.focus();
+      } else if (!ref.current?.contains(e.target as Node)) {
+        setOpen(false);
+      }
     };
     document.addEventListener("mousedown", close);
     document.addEventListener("keydown", close);
@@ -66,6 +70,7 @@ export function NotificationBell({ allHref }: { allHref: string }) {
   return (
     <div ref={ref} className="relative">
       <button
+        ref={button}
         type="button"
         aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
         aria-haspopup="dialog"
@@ -86,14 +91,14 @@ export function NotificationBell({ allHref }: { allHref: string }) {
           aria-label="Notifications"
           className="absolute right-0 z-30 mt-3 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-border bg-bg text-fg shadow-lg"
         >
-          <header className="flex items-center justify-between border-b border-border px-4 py-3">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h2 className="font-medium">Notifications</h2>
             {unread > 0 && (
               <button type="button" onClick={markAll} className="text-sm text-link hover:underline">
                 Mark all as read
               </button>
             )}
-          </header>
+          </div>
           <div className="max-h-[60vh] overflow-y-auto">
             {items === null ? (
               <p className="p-6 text-center text-sm text-fg-subtle">Loading…</p>

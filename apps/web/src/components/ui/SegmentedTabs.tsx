@@ -8,9 +8,21 @@ export interface TabLink {
 }
 
 /** Figma "Jobs | Companies" switch: underlined, the active tab gets a grey fill. */
-export function SegmentedTabs({ tabs, className }: { tabs: TabLink[]; className?: string }) {
+export function SegmentedTabs({
+  tabs,
+  className,
+  label = "Sections",
+}: {
+  tabs: TabLink[];
+  className?: string;
+  /** Names the nav landmark, so it's distinct from others on the page. */
+  label?: string;
+}) {
   return (
-    <nav className={cn("mx-auto flex w-full max-w-[536px] border-b border-fg", className)}>
+    <nav
+      aria-label={label}
+      className={cn("mx-auto flex w-full max-w-[536px] border-b border-fg", className)}
+    >
       {tabs.map((tab, i) => (
         <Link
           key={tab.href}
@@ -30,9 +42,17 @@ export function SegmentedTabs({ tabs, className }: { tabs: TabLink[]; className?
 }
 
 /** Figma "For You | Search" switch: small labels, the active one in a sky-blue chip. */
-export function PillTabs({ tabs, className }: { tabs: TabLink[]; className?: string }) {
+export function PillTabs({
+  tabs,
+  className,
+  label = "View",
+}: {
+  tabs: TabLink[];
+  className?: string;
+  label?: string;
+}) {
   return (
-    <nav className={cn("flex justify-center gap-2", className)}>
+    <nav aria-label={label} className={cn("flex justify-center gap-2", className)}>
       {tabs.map((tab) => (
         <Link
           key={tab.href}

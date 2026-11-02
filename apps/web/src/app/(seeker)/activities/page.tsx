@@ -33,6 +33,7 @@ export default async function ActivitiesPage({
     <div
       className={cn("flex flex-col gap-6", (tab === "saved" || tab === "recent") && "lg:h-full")}
     >
+      <h1 className="sr-only">Activities</h1>
       <SegmentedTabs
         className="max-w-3xl"
         tabs={TABS.map((t) => ({

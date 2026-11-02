@@ -16,6 +16,7 @@ export function JobCard({
   showSave = true,
   action,
   employerView = false,
+  headingLevel = 3,
 }: {
   job: JobSummary;
   selected?: boolean;
@@ -29,7 +30,10 @@ export function JobCard({
   action?: React.ReactNode;
   /** Shows status and applicant count instead of Easy Apply (Figma Employer Home). */
   employerView?: boolean;
+  /** 2 when the list sits right under the page heading, 3 under a section heading. */
+  headingLevel?: 2 | 3;
 }) {
+  const Title = headingLevel === 2 ? "h2" : "h3";
   return (
     <article
       className={cn(
@@ -58,7 +62,7 @@ export function JobCard({
           />
         )}
       </div>
-      <h3 className="mt-1 text-xl leading-tight font-medium md:text-2xl">{job.title}</h3>
+      <Title className="mt-1 text-xl leading-tight font-medium md:text-2xl">{job.title}</Title>
       <p className="font-light text-fg-muted">
         {WORKPLACE_LABELS[job.workplace]} · {formatPlace(job.city, job.country)}
       </p>

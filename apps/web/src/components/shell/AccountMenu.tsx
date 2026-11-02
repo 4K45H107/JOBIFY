@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { AuthUser } from "@jobify/shared";
 import { Avatar } from "@/components/ui/Avatar";
 import { api } from "@/lib/api/client";
@@ -12,15 +12,17 @@ export function AccountMenu({ user }: { user: AuthUser }) {
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
 
   useEffect(() => {
     if (!open) return;
     const close = (event: MouseEvent | KeyboardEvent) => {
-      if (
-        event instanceof KeyboardEvent
-          ? event.key === "Escape"
-          : !ref.current?.contains(event.target as Node)
-      ) {
+      if (event instanceof KeyboardEvent) {
+        if (event.key !== "Escape") return;
+        setOpen(false);
+        button.current?.focus();
+      } else if (!ref.current?.contains(event.target as Node)) {
         setOpen(false);
       }
     };
@@ -45,10 +47,11 @@ export function AccountMenu({ user }: { user: AuthUser }) {
   return (
     <div ref={ref} className="relative">
       <button
+        ref={button}
         type="button"
         aria-label="Account menu"
-        aria-haspopup="menu"
         aria-expanded={open}
+        aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
         className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chip"
       >
@@ -61,8 +64,9 @@ export function AccountMenu({ user }: { user: AuthUser }) {
       </button>
 
       {open && (
+        // A disclosure panel, not role="menu": it holds details and a theme switch, not just items.
         <div
-          role="menu"
+          id={panelId}
           className="absolute right-0 z-20 mt-3 w-64 overflow-hidden rounded-[10px] border border-border bg-bg text-fg shadow-lg"
         >
           <div className="border-b border-border px-4 py-3">
@@ -81,7 +85,6 @@ export function AccountMenu({ user }: { user: AuthUser }) {
           </div>
           <button
             type="button"
-            role="menuitem"
             onClick={signOut}
             disabled={signingOut}
             className="w-full px-4 py-3 text-left hover:bg-surface-grey disabled:opacity-50"

@@ -37,7 +37,7 @@
   --link: #2967b0; /* FILTERS heading, links */
   --chip: #71d1fb; /* active pill tab */
   --chip-fg: #2c2d2f;
-  --success: #00d080; /* Easy Apply */
+  --success: #047857; /* Easy Apply, "Saved". Figma's #00d080 is 2:1 on white, too faint for text */
   --selected: #1b2275; /* bar on the selected job card */
   --hero: #2f4ce0; /* Home "Your Job Searching starts here" */
   --search: #c9c3c3; /* Home search bar */
@@ -147,6 +147,12 @@ body {
 /* Tailwind v4 gives buttons the default cursor; keep the pointer (hand) on anything clickable,
    as in v3. Disabled buttons keep the default arrow. */
 @layer base {
+  /* One visible focus ring for keyboard users, in both themes. Components can still restyle it. */
+  :focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+  }
+
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   summary,

@@ -62,6 +62,7 @@ export function JobBrowser({
               selected={job.id === selectedId}
               reasons={job.reasons}
               employerView={employer}
+              headingLevel={2}
               onSavedChange={(s) => onSavedChange?.(job.id, s)}
               action={
                 <>

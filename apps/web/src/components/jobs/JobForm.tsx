@@ -175,6 +175,7 @@ export function JobForm({
     <div className="grid gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <Card>
         <CardHeader
+          level={1}
           title={editing ? "Edit job" : "Add job"}
           description={editing ? undefined : `Posting for ${companyName}`}
         />

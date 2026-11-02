@@ -28,7 +28,7 @@ export default async function HomePage() {
 
           <form
             action="/explore/jobs"
-            className="flex w-full max-w-xl overflow-hidden rounded-full bg-search text-search-fg"
+            className="flex w-full max-w-xl overflow-hidden rounded-full bg-search text-search-fg focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-link"
           >
             <input type="hidden" name="tab" value="search" />
             <label className="flex flex-1 items-center gap-2 px-4">

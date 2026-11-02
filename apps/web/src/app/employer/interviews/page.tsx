@@ -16,6 +16,7 @@ export default async function EmployerInterviewsPage({
   );
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
+      <h1 className="sr-only">Interview schedule</h1>
       <SegmentedTabs tabs={tabs} />
       <InterviewList
         key={scope}

@@ -54,6 +54,7 @@ export function FileButton<T>({
         accept={accept.join(",")}
         className="sr-only"
         tabIndex={-1}
+        aria-hidden
         onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
       />
       <Button
