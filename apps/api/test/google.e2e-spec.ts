@@ -14,7 +14,7 @@ const email = (name: string) => `${name}.${run}@google-e2e.test`;
 /** "name=value" for each Set-Cookie line, joined for a Cookie header. */
 const cookiesFrom = (res: request.Response) =>
   ((res.headers["set-cookie"] as unknown as string[] | undefined) ?? [])
-    .map((c) => c.split(";")[0])
+    .map((c) => c.split(";")[0] ?? "")
     .filter((c) => !c.endsWith("="))
     .join("; ");
 
