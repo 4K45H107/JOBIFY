@@ -11,9 +11,10 @@ import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
+import { GoogleButton, OrDivider } from "./GoogleButton";
 import { useAuthRedirect } from "./useAuthRedirect";
 
-const ROLES: { value: SignupRole; title: string; description: string }[] = [
+export const ROLES: { value: SignupRole; title: string; description: string }[] = [
   {
     value: "SEEKER",
     title: "I'm looking for a job",
@@ -22,7 +23,7 @@ const ROLES: { value: SignupRole; title: string; description: string }[] = [
   { value: "EMPLOYER", title: "I'm hiring", description: "Post jobs and review applicants" },
 ];
 
-export function RegisterForm() {
+export function RegisterForm({ google }: { google: boolean }) {
   const redirect = useAuthRedirect();
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -86,6 +87,16 @@ export function RegisterForm() {
           </label>
         ))}
       </fieldset>
+
+      {google && (
+        <>
+          <GoogleButton
+            href={`/api/auth/google?role=${role}`}
+            label={role === "EMPLOYER" ? "Sign up with Google to hire" : "Sign up with Google"}
+          />
+          <OrDivider />
+        </>
+      )}
 
       <TextField
         label="Full name"

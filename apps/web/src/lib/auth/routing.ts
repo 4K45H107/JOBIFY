@@ -1,9 +1,15 @@
 import type { UserRole } from "@jobify/shared";
 
-export const AUTH_PAGES = ["/login", "/register", "/forgot-password"];
+export const AUTH_PAGES = ["/login", "/register", "/register/google", "/forgot-password"];
 
 /** Open to everyone, signed in or not (links from emails). */
-export const PUBLIC_PAGES = ["/unsubscribe", "/reset-password", "/verify-email"];
+export const PUBLIC_PAGES = [
+  "/unsubscribe",
+  "/reset-password",
+  "/verify-email",
+  // Right after Google sign-in, to send the now signed-in user to the right place.
+  "/signing-in",
+];
 
 /** Request header the middleware sets with the current pathname. */
 export const PATHNAME_HEADER = "x-jobify-pathname";

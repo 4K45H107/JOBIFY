@@ -38,11 +38,13 @@ export function EmployerSettings({
   companyName,
   emailPreferences,
   emailVerified,
+  hasPassword,
 }: {
   initial: EmployerProfile;
   section: EmployerSectionId;
   companyName: string | null;
   emailVerified: boolean;
+  hasPassword: boolean;
   /** Loaded by the page only for the email section. */
   emailPreferences?: EmailPreference[];
 }) {
@@ -180,6 +182,7 @@ export function EmployerSettings({
           email={profile.email}
           accountType="Employer"
           emailVerified={emailVerified}
+          hasPassword={hasPassword}
         />
       )}
     </SettingsLayout>

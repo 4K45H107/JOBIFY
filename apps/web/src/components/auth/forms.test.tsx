@@ -43,7 +43,7 @@ const seeker = {
 
 describe("LoginForm", () => {
   it("validates before calling the API", async () => {
-    render(<LoginForm />);
+    render(<LoginForm google={false} />);
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
     expect(await screen.findByText("Enter a valid email address")).toBeInTheDocument();
     expect(screen.getByText("Enter your password")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("LoginForm", () => {
 
   it("shows a friendly message for wrong credentials", async () => {
     respond(401, { statusCode: 401, message: "Incorrect email or password" });
-    render(<LoginForm />);
+    render(<LoginForm google={false} />);
     await userEvent.type(screen.getByLabelText("Email"), "a@b.co");
     await userEvent.type(screen.getByLabelText("Password"), "nope");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -63,7 +63,7 @@ describe("LoginForm", () => {
   it("sends employers to /employer and ignores a ?next= from the seeker area", async () => {
     search.value = "next=/activities";
     respond(200, employer);
-    render(<LoginForm />);
+    render(<LoginForm google={false} />);
     await userEvent.type(screen.getByLabelText("Email"), "e@x.co");
     await userEvent.type(screen.getByLabelText("Password"), "Password123");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -77,7 +77,7 @@ describe("LoginForm", () => {
   it("returns seekers to a safe ?next= path", async () => {
     search.value = "next=%2Factivities";
     respond(200, seeker);
-    render(<LoginForm />);
+    render(<LoginForm google={false} />);
     await userEvent.type(screen.getByLabelText("Email"), "s@x.co");
     await userEvent.type(screen.getByLabelText("Password"), "Password123");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -87,7 +87,7 @@ describe("LoginForm", () => {
 
 it("sends an employer without a company to onboarding", async () => {
   respond(200, { ...employer, company: null });
-  render(<LoginForm />);
+  render(<LoginForm google={false} />);
   await userEvent.type(screen.getByLabelText("Email"), "e@x.co");
   await userEvent.type(screen.getByLabelText("Password"), "Password123");
   await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -97,7 +97,7 @@ it("sends an employer without a company to onboarding", async () => {
 describe("RegisterForm", () => {
   it("submits the chosen role and shows a duplicate-email error inline", async () => {
     respond(409, { statusCode: 409, message: "An account with this email already exists" });
-    render(<RegisterForm />);
+    render(<RegisterForm google={false} />);
     await userEvent.click(screen.getByText("I'm hiring"));
     await userEvent.type(screen.getByLabelText("Full name"), "Tanvir Hasan");
     await userEvent.type(screen.getByLabelText("Email"), "t@x.co");
@@ -112,9 +112,39 @@ describe("RegisterForm", () => {
   });
 
   it("explains password rules", async () => {
-    render(<RegisterForm />);
+    render(<RegisterForm google={false} />);
     await userEvent.type(screen.getByLabelText("Password"), "short");
     await userEvent.click(screen.getByRole("button", { name: "Create account" }));
     expect(await screen.findByText("Use at least 8 characters")).toBeInTheDocument();
+  });
+});
+
+describe("Google sign-in", () => {
+  it("is hidden unless the API has it switched on", () => {
+    render(<LoginForm google={false} />);
+    expect(screen.queryByRole("link", { name: "Continue with Google" })).toBeNull();
+  });
+
+  it("keeps ?next= on the sign-in page, and shows why a Google attempt failed", () => {
+    search.value = "next=%2Fjobs%2F1&error=google-cancelled";
+    render(<LoginForm google />);
+    expect(screen.getByRole("link", { name: "Continue with Google" })).toHaveAttribute(
+      "href",
+      "/api/auth/google?next=%2Fjobs%2F1",
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("Google sign-in was cancelled.");
+  });
+
+  it("passes the chosen role from the sign-up page", async () => {
+    render(<RegisterForm google />);
+    expect(screen.getByRole("link", { name: "Sign up with Google" })).toHaveAttribute(
+      "href",
+      "/api/auth/google?role=SEEKER",
+    );
+    await userEvent.click(screen.getByText("I'm hiring"));
+    expect(screen.getByRole("link", { name: "Sign up with Google to hire" })).toHaveAttribute(
+      "href",
+      "/api/auth/google?role=EMPLOYER",
+    );
   });
 });
