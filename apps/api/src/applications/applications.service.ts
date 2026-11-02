@@ -24,6 +24,7 @@ import { summaryInclude, toSummary } from "../jobs/job-summary";
 import { openJobs } from "../jobs/jobs.service";
 import { ageOn } from "../jobs/recommend";
 import { NotificationsService } from "../notifications/notifications.service";
+import { assertEmailVerified } from "../common/verified";
 import { PrismaService } from "../prisma/prisma.service";
 import { StorageService } from "../storage/storage.service";
 import { checkScreeningAnswers } from "./screening";
@@ -79,6 +80,7 @@ export class ApplicationsService {
   // ─── seeker ──────────────────────────────────────────────────────────────
 
   async apply(seekerId: string, jobId: string, input: ApplyInput): Promise<MyApplication> {
+    await assertEmailVerified(this.prisma, seekerId);
     const job = await this.prisma.job.findFirst({
       where: { AND: [{ id: jobId }, openJobs()] },
       include: {

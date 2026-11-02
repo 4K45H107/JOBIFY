@@ -5,7 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { setupApp } from "../src/app.setup";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { uniqueRun } from "./helpers";
+import { markVerified, uniqueRun } from "./helpers";
 
 const run = uniqueRun();
 const email = (name: string) => `${name}.${run}@iv-e2e.test`;
@@ -29,6 +29,7 @@ describe("Interviews (e2e)", () => {
       .post("/api/auth/register")
       .send({ fullName: `${name} I`, email: email(name), password: "Password123", role })
       .expect(201);
+    await markVerified(app, email(name));
     return { agent, id: res.body.id as string };
   };
   const apply = async (agent: request.Agent) => {

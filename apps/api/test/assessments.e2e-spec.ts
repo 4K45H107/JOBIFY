@@ -4,7 +4,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { setupApp } from "../src/app.setup";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { uniqueRun } from "./helpers";
+import { markVerified, uniqueRun } from "./helpers";
 
 const run = uniqueRun();
 const email = (name: string) => `${name}.${run}@mcq-e2e.test`;
@@ -37,6 +37,7 @@ describe("Skill tests (e2e)", () => {
       .post("/api/auth/register")
       .send({ fullName: `${name} T`, email: email(name), password, role })
       .expect(201);
+    await markVerified(app, email(name));
     return agent;
   };
   const seekerWhoApplied = async (name: string, toJob = jobId) => {

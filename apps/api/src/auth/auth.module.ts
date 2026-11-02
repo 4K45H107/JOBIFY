@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import type { Env } from "../config/env";
+import { AccountService } from "./account.service";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
@@ -23,6 +24,7 @@ import { TokensService } from "./tokens.service";
   controllers: [AuthController],
   providers: [
     AuthService,
+    AccountService,
     TokensService,
     // Order matters: authenticate first, then check roles.
     { provide: APP_GUARD, useClass: JwtAuthGuard },

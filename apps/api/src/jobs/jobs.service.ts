@@ -18,6 +18,7 @@ import type {
 } from "@jobify/shared";
 import type { Prisma } from "@jobify/db";
 import { CompanyAccessService } from "../companies/company-access.service";
+import { assertEmailVerified } from "../common/verified";
 import { PrismaService } from "../prisma/prisma.service";
 import { summaryInclude, toSummary } from "./job-summary";
 import { ageOn, scoreJob } from "./recommend";
@@ -264,6 +265,7 @@ export class JobsService {
   // ─── employer ────────────────────────────────────────────────────────────
 
   async create(employerId: string, input: JobCreate): Promise<JobDetail> {
+    await assertEmailVerified(this.prisma, employerId);
     const { companyId } = await this.access.activeMembership(employerId);
     const { skills, screeningQuestions, deadline, ...fields } = input;
     const skillIds = await this.skillIds(skills);

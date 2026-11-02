@@ -1,6 +1,13 @@
 import { Inject, Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { EMAIL_JOB_NAME, EMAIL_QUEUE, emailJobOptions } from "@jobify/shared";
+import {
+  ACCOUNT_EMAIL_JOB_NAME,
+  type AccountEmailJob,
+  accountEmailJobOptions,
+  EMAIL_JOB_NAME,
+  EMAIL_QUEUE,
+  emailJobOptions,
+} from "@jobify/shared";
 import { Queue } from "bullmq";
 import type { Env } from "../config/env";
 
@@ -34,6 +41,16 @@ export class EmailQueueService implements OnModuleDestroy {
       );
     } catch (error) {
       this.logger.warn(`Couldn't queue emails: ${(error as Error).message}`);
+    }
+  }
+
+  /** Verify / reset / password-changed emails. Never throws, like enqueue(). */
+  async enqueueAccount(job: AccountEmailJob): Promise<void> {
+    if (!this.queue) return;
+    try {
+      await this.queue.add(ACCOUNT_EMAIL_JOB_NAME, job, accountEmailJobOptions);
+    } catch (error) {
+      this.logger.warn(`Couldn't queue a ${job.kind} email: ${(error as Error).message}`);
     }
   }
 
