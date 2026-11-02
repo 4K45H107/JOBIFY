@@ -13,6 +13,7 @@ import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { GoogleButton, OrDivider } from "./GoogleButton";
 import { useAuthRedirect } from "./useAuthRedirect";
+import { useGoogleSignIn } from "./useGoogleSignIn";
 
 const GOOGLE_ERRORS: Record<string, string> = {
   google: "Google sign-in didn't work. Please try again.",
@@ -20,7 +21,9 @@ const GOOGLE_ERRORS: Record<string, string> = {
   "google-off": "Google sign-in isn't available right now. Use your email and password.",
 };
 
-export function LoginForm({ google }: { google: boolean }) {
+/** `google` overrides asking the API (tests). */
+export function LoginForm({ google: known }: { google?: boolean } = {}) {
+  const google = useGoogleSignIn(known);
   const redirect = useAuthRedirect();
   const searchParams = useSearchParams();
   const [formError, setFormError] = useState<string | null>(
