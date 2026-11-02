@@ -348,7 +348,7 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 - [x] Google sign-in (direct OAuth with state, PKCE and nonce; links to existing accounts by verified email)
 - [x] Profile dashboard stats + weekly activity chart (Settings › Dashboard: stat pills, 7/30-day chart in the viewer's time zone)
 - [x] Global header search (live job + company suggestions, keyboard combobox, `/` shortcut)
-- [ ] Empty/loading/error states, accessibility pass, responsive layouts
+- [x] Empty/loading/error states, accessibility pass, responsive layouts (branded 404/error pages, loading skeletons with a cold-start note, axe-clean in light and dark, checked at 390px and 768px)
 - [ ] Playwright e2e of the golden path (seeker applies → test → interview scheduled)
 
 ### Phase 6: Stretch (P2)
