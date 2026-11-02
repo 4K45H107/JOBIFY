@@ -22,17 +22,17 @@ flowchart LR
     Render -. "emails (worker)" .-> Brevo["Brevo<br/>email"]
 ```
 
-| Stage                      | Service                        | Why this one                                                                                                      | Status                    |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done                   |
-| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done                   |
-| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done                   |
-| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done                   |
-| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done                   |
-| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done                   |
-| Email                      | **Brevo** (free plan)          | About 300 emails a day for free, and needs no domain: a verified Gmail sender is enough                           | ✅ Done                   |
-| Google sign-in             | **Google Cloud** OAuth client  | Free; Jobify's API talks to Google directly, without an extra service in between                                  | ⏳ Needs the OAuth client |
-| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 7                | ➖ Not used               |
+| Stage                      | Service                        | Why this one                                                                                                      | Status      |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------- |
+| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done     |
+| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done     |
+| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done     |
+| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done     |
+| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done     |
+| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done     |
+| Email                      | **Brevo** (free plan)          | About 300 emails a day for free, and needs no domain: a verified Gmail sender is enough                           | ✅ Done     |
+| Google sign-in             | **Google Cloud** OAuth client  | Free; Jobify's API talks to Google directly, without an extra service in between                                  | ✅ Done     |
+| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 7                | ➖ Not used |
 
 ---
 
@@ -476,7 +476,9 @@ In [Google Cloud Console](https://console.cloud.google.com) (free):
 2. **Google Auth Platform › Get started** (the OAuth consent screen): app name `Jobify`, your email
    as support and contact email, audience **External**.
 3. **Audience:** while the app is in **Testing**, only the test users you list can sign in. To let
-   anyone sign in, **Publish app**. Jobify only asks for the basic `openid`, `email` and `profile`
+   anyone sign in, **Publish app**. Publishing needs, on the **Branding** page: app name, support email, homepage
+   (`https://jobify-hire.vercel.app`) and privacy policy (`https://jobify-hire.vercel.app/privacy`),
+   plus the authorized domain `jobify-hire.vercel.app`. Jobify only asks for the basic `openid`, `email` and `profile`
    scopes, which don't need Google's review.
 4. **Clients › Create client** › type **Web application**:
 
@@ -494,7 +496,7 @@ In [Google Cloud Console](https://console.cloud.google.com) (free):
 The redirect URI must match exactly (`https`, no trailing slash); a mismatch shows Google's
 `redirect_uri_mismatch` error.
 
-_Status: built; waiting for the OAuth client on Render._
+_Status: on since 2 Nov 2026. The app is published (anyone can sign in), with the homepage and privacy policy (`/privacy`) set on Google's Branding page, and the client ID and secret on Render. Checked live: Google's sign-in screen opens for jobify-hire.vercel.app._
 
 ## 7. Known limitations: sleeping on the free tier
 
