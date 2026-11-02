@@ -2,6 +2,7 @@ export * from "./application";
 export * from "./assessment";
 export * from "./auth";
 export * from "./company";
+export * from "./dashboard";
 export * from "./email";
 export * from "./interview";
 export * from "./job";

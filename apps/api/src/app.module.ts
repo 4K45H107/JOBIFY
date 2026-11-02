@@ -10,6 +10,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
 import { CompaniesModule } from "./companies/companies.module";
+import { DashboardModule } from "./dashboard/dashboard.module";
 import { EmailModule } from "./email/email.module";
 import { FilesModule } from "./files/files.module";
 import { InterviewsModule } from "./interviews/interviews.module";
@@ -48,6 +49,7 @@ import { StorageModule } from "./storage/storage.module";
     ApplicationsModule,
     AssessmentsModule,
     InterviewsModule,
+    DashboardModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

@@ -157,6 +157,8 @@ export type RecommendedJob = z.infer<typeof recommendedJobSchema>;
 
 export const employerJobsQuerySchema = z.object({
   scope: z.enum(["mine", "company"]).default("company"),
+  /** Title contains (case-insensitive). */
+  q: z.string().trim().max(100).optional(),
   status: JobStatus.optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(20),
