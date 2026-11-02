@@ -2,8 +2,10 @@ import { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { TokenVerifier } from "livekit-server-sdk";
 import request from "supertest";
+import { vi } from "vitest";
 import { AppModule } from "../src/app.module";
 import { setupApp } from "../src/app.setup";
+import { VideoRoomsService } from "../src/interviews/video-rooms.service";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { markVerified, uniqueRun } from "./helpers";
 
@@ -174,7 +176,11 @@ describe("Interviews (e2e)", () => {
     });
     expect(notes.some((n) => (n.payload as { rescheduled?: boolean }).rescheduled)).toBe(true);
 
+    const close = vi.spyOn(app.get(VideoRoomsService), "close");
     await boss.patch(`/api/interviews/${later.id}`).send({ status: "CANCELLED" }).expect(200);
+    const { roomName } = await prisma.interview.findUniqueOrThrow({ where: { id: later.id } });
+    expect(close).toHaveBeenCalledWith(roomName);
+    close.mockRestore();
     await seeker.post(`/api/interviews/${later.id}/join`).expect(403);
     await boss.patch(`/api/interviews/${later.id}`).send({ status: "CANCELLED" }).expect(409);
     await seeker.patch(`/api/interviews/${later.id}`).send({ status: "CANCELLED" }).expect(403);
@@ -183,11 +189,21 @@ describe("Interviews (e2e)", () => {
     expect(past.body.map((i: { id: string }) => i.id)).toContain(later.id);
   });
 
-  it("completes an interview", async () => {
+  it("completes an interview and closes its room, so the seeker isn't left in the call", async () => {
+    const close = vi.spyOn(app.get(VideoRoomsService), "close");
     const res = await boss
       .patch(`/api/interviews/${interviewId}`)
       .send({ status: "COMPLETED" })
       .expect(200);
     expect(res.body).toMatchObject({ status: "COMPLETED", canJoin: false });
+    const { roomName } = await prisma.interview.findUniqueOrThrow({ where: { id: interviewId } });
+    expect(close).toHaveBeenCalledWith(roomName);
+    close.mockRestore();
+  });
+
+  it("still ends the interview when the video service can't be reached", async () => {
+    const rooms = app.get(VideoRoomsService);
+    // The real close() against a room LiveKit has never seen: it must not throw.
+    await expect(rooms.close(`never-opened-${run}`)).resolves.toBeUndefined();
   });
 });

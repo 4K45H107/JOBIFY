@@ -2,9 +2,10 @@
 
 import "@livekit/components-styles";
 import { LiveKitRoom, VideoConference } from "@livekit/components-react";
+import { DisconnectReason } from "livekit-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Interview, JoinToken } from "@jobify/shared";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -23,6 +24,10 @@ export function InterviewRoom({
   const back = viewer === "EMPLOYER" ? "/employer/interviews" : "/interviews";
   const [join, setJoin] = useState<JoinToken | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /** The other side closed the room (the interviewer pressed End interview). */
+  const [ended, setEnded] = useState(false);
+  /** Set while this person is ending it, so their own disconnect isn't shown as "ended". */
+  const ending = useRef(false);
 
   useEffect(() => {
     api<JoinToken>(`/interviews/${interview.id}/join`, { method: "POST" })
@@ -32,6 +37,7 @@ export function InterviewRoom({
 
   const end = async () => {
     if (!confirm("End the interview for everyone?")) return;
+    ending.current = true;
     await api(`/interviews/${interview.id}`, {
       method: "PATCH",
       json: { status: "COMPLETED" },
@@ -60,7 +66,29 @@ export function InterviewRoom({
           </Link>
         </div>
       </header>
-      {error ? (
+      {ended ? (
+        <section
+          role="status"
+          className="flex flex-1 flex-col items-center justify-center gap-4 rounded-[10px] bg-surface-grey p-8 text-center"
+        >
+          <p className="text-2xl font-medium">
+            {viewer === "SEEKER"
+              ? "The interviewer ended the interview"
+              : "This interview has ended"}
+          </p>
+          {viewer === "SEEKER" && (
+            <p className="text-fg-subtle">
+              Thanks for joining. You&apos;ll hear back from them here.
+            </p>
+          )}
+          <Link
+            href={back}
+            className="inline-flex h-10 items-center rounded-full bg-primary px-8 font-medium tracking-label text-primary-fg uppercase hover:opacity-90"
+          >
+            Back to interviews
+          </Link>
+        </section>
+      ) : error ? (
         <Alert>{error}</Alert>
       ) : !join ? (
         <div
@@ -75,7 +103,13 @@ export function InterviewRoom({
           connect
           video
           audio
-          onDisconnected={() => router.push(back)}
+          onDisconnected={(reason) => {
+            // Closed from the server: tell the person rather than drop them silently.
+            // The person ending it is already on their way back (see end()).
+            if (ending.current) return;
+            if (reason === DisconnectReason.ROOM_DELETED) setEnded(true);
+            else router.push(back);
+          }}
           className="flex-1 overflow-hidden rounded-[10px]"
         >
           <VideoConference />
