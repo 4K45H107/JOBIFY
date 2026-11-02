@@ -166,15 +166,15 @@ Checking it:
 
 ## Troubleshooting
 
-| Problem                             | Check                                                                                                             |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| No email in Mailpit                 | Is the worker running (`pnpm dev`)? Is Mailpit up (`pnpm services:up`)? Look at `EmailLog` for a `SKIPPED` reason |
-| Production sends nothing            | Worker log says `off: BREVO_API_KEY not set`? Set the key and `MAIL_FROM` on Render                               |
-| Email to a demo account wasn't sent | Expected in production: demo accounts are skipped. Use an account you registered                                  |
-| `FAILED` with "Brevo 401"           | Wrong or revoked API key                                                                                          |
-| `FAILED` with "Brevo 400 … sender"  | `MAIL_FROM` isn't a sender verified in Brevo                                                                      |
-| Emails land in spam                 | Expected with a Gmail sender (see below)                                                                          |
-| An email came twice                 | Shouldn't happen: `EmailLog` is unique per notification. Check for two notification rows                          |
+| Problem                             | Check                                                                                                                   |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| No email in Mailpit                 | Is the worker running (`pnpm dev`)? Is Mailpit up (`pnpm services:up`)? Look at `EmailLog` for a `SKIPPED` reason       |
+| Production sends nothing            | Worker log says `off: BREVO_API_KEY not set`? Set the key and `MAIL_FROM` on Render                                     |
+| Email to a demo account wasn't sent | Expected in production: demo accounts are skipped. Use an account you registered                                        |
+| `FAILED` with "Brevo 401"           | Wrong, revoked or **expired** API key (see Known limitations). Generate a new one and replace `BREVO_API_KEY` on Render |
+| `FAILED` with "Brevo 400 … sender"  | `MAIL_FROM` isn't a sender verified in Brevo                                                                            |
+| Emails land in spam                 | Expected with a Gmail sender (see below)                                                                                |
+| An email came twice                 | Shouldn't happen: `EmailLog` is unique per notification. Check for two notification rows                                |
 
 ## Known limitations
 
@@ -186,16 +186,21 @@ Checking it:
   nobody uses the site isn't sent then. See
   [Known limitations](DEPLOYMENT.md#6-known-limitations-sleeping-on-the-free-tier).
 - **300 emails a day** on Brevo's free plan; plenty for a demo.
+- **The API key expires:** the current one on **2 Nov 2027**, and Brevo also expires keys after
+  **90 days without use**. If the demo sends no email for three months, emails start failing with
+  "Brevo 401": generate a new key (Restricted, _Transactional email: All_, everything else _None_)
+  and replace `BREVO_API_KEY` on Render.
 
 ## What's left
 
 **Owner (to turn real email on):**
 
 - [x] **Mark the seeded accounts as demo on Neon** (done 2 Nov 2026: 38 demo accounts, 1 real).
-- [ ] **Brevo account** (free plan) at brevo.com.
-- [ ] **Verify a sender:** _Settings › Senders, domains & dedicated IPs › Senders › Add a sender_
+- [x] **Brevo account** (free plan) at brevo.com.
+- [x] **Verify a sender:** _Settings › Senders, domains & dedicated IPs › Senders › Add a sender_
       (name `Jobify`, your Gmail), then click the confirmation link Brevo emails you.
-- [ ] **API key:** _Settings › SMTP & API › API keys › Generate a new API key_. Copy it right away.
+- [x] **API key** (Restricted: _Transactional email: All_, everything else _None_; a test email
+      through it was accepted on 2 Nov 2026): _Settings › SMTP & API › API keys › Generate a new API key_. Copy it right away.
 - [ ] **Render** (`jobify-api` › Environment): `BREVO_API_KEY` = the key,
       `MAIL_FROM` = `Jobify <your-gmail-address>`. Save and deploy.
 - [ ] **Check the log** shows `emails via brevo`.
