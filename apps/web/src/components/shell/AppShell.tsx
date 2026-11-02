@@ -3,6 +3,7 @@ import { MobileNav } from "./MobileNav";
 import type { NavItem } from "./nav";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { VerifyEmailBanner } from "./VerifyEmailBanner";
 
 /** Signed-in layout shared by the seeker and employer areas. */
 export function AppShell({
@@ -19,6 +20,7 @@ export function AppShell({
   return (
     <div className="flex h-dvh flex-col">
       <TopBar homeHref={homeHref} user={user} />
+      {!user.emailVerified && <VerifyEmailBanner email={user.email} />}
       <div className="flex min-h-0 flex-1">
         <Sidebar items={nav} />
         {/* relative: absolutely positioned children (e.g. sr-only labels) stay inside the scroll area

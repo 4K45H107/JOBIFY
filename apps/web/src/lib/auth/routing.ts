@@ -1,9 +1,9 @@
 import type { UserRole } from "@jobify/shared";
 
-export const AUTH_PAGES = ["/login", "/register"];
+export const AUTH_PAGES = ["/login", "/register", "/forgot-password"];
 
 /** Open to everyone, signed in or not (links from emails). */
-export const PUBLIC_PAGES = ["/unsubscribe"];
+export const PUBLIC_PAGES = ["/unsubscribe", "/reset-password", "/verify-email"];
 
 /** Request header the middleware sets with the current pathname. */
 export const PATHNAME_HEADER = "x-jobify-pathname";

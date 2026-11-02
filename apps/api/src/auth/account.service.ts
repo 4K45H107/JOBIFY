@@ -71,7 +71,11 @@ export class AccountService {
     await this.send("PASSWORD_CHANGED", row.userId);
   }
 
-  /** Needs the current password. Signs out every other device; this one stays signed in. */
+  /**
+   * Needs the current password. Revokes every other session; this one stays signed in. Other
+   * devices keep working until their access token expires (ACCESS_TOKEN_TTL_SECONDS, 15 min),
+   * because refreshing then fails: checking sessions on every request would cost a query each.
+   */
   async changePassword(
     userId: string,
     currentPassword: string,

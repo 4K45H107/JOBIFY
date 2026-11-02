@@ -3,8 +3,8 @@
 import { type EmailPreference, type SeekerProfile, UPLOAD_LIMITS } from "@jobify/shared";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Card, CardHeader } from "@/components/ui/Card";
 import { FileButton } from "@/components/ui/FileButton";
+import { AccountSection } from "./AccountSection";
 import { EmailPreferencesSection } from "./EmailPreferencesSection";
 import { SeekerCvSection } from "./SeekerCvSection";
 import { SeekerInfoSection } from "./SeekerInfoSection";
@@ -16,9 +16,11 @@ export function SeekerSettings({
   initial,
   section,
   emailPreferences,
+  emailVerified,
 }: {
   initial: SeekerProfile;
   section: SeekerSectionId;
+  emailVerified: boolean;
   /** Loaded by the page only for the email section. */
   emailPreferences?: EmailPreference[];
 }) {
@@ -60,22 +62,11 @@ export function SeekerSettings({
         <EmailPreferencesSection initial={emailPreferences} />
       )}
       {section === "account" && (
-        <Card>
-          <CardHeader title="Account settings" />
-          <dl className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-sm text-fg-subtle">Email</dt>
-              <dd className="text-lg">{profile.email}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-fg-subtle">Account type</dt>
-              <dd className="text-lg">Job seeker</dd>
-            </div>
-          </dl>
-          <p className="mt-6 text-sm text-fg-subtle">
-            Password change and email verification come with the account security update.
-          </p>
-        </Card>
+        <AccountSection
+          email={profile.email}
+          accountType="Job seeker"
+          emailVerified={emailVerified}
+        />
       )}
     </SettingsLayout>
   );

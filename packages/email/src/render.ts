@@ -127,7 +127,7 @@ export async function renderAccountEmail(input: {
       subject: "Your Jobify password was changed",
       title: "Your password was changed",
       body: [
-        "The password for your Jobify account was just changed, and other devices were signed out.",
+        "The password for your Jobify account was just changed. Other devices are signed out within 15 minutes.",
         "If this wasn't you, reset your password now.",
       ],
       actionLabel: "Reset my password",
