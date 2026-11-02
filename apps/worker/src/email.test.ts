@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createPrismaClient, type NotificationType } from "@jobify/db";
 import { type Mailer, type OutgoingEmail, smtpMailer } from "@jobify/email";
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { enqueueEmails, markEmailFailed, sendNotificationEmail } from "./email";
+import { enqueueEmails, markEmailFailed, sendAccountEmail, sendNotificationEmail } from "./email";
 import { env } from "./env";
 
 const prisma = createPrismaClient(env.DATABASE_URL);
@@ -154,6 +154,40 @@ describe("sendNotificationEmail", () => {
   it("ignores notifications that no longer exist", async () => {
     expect(
       await sendNotificationEmail({ prisma, mailer: fakeMailer().mailer, config }, "missing-id"),
+    ).toEqual({ outcome: "missing" });
+  });
+});
+
+describe("sendAccountEmail", () => {
+  it("sends the account email with its link, ignoring email preferences", async () => {
+    const n = await notificationFor();
+    // Turning off every notification type doesn't stop account emails.
+    await prisma.emailPreference.create({
+      data: { userId: n.userId, type: "ASSESSMENT_ASSIGNED", enabled: false },
+    });
+    const { mailer, sent } = fakeMailer();
+    const result = await sendAccountEmail(
+      { prisma, mailer, config },
+      { kind: "PASSWORD_RESET", userId: n.userId, token: "tok_abc" },
+    );
+    expect(result).toMatchObject({ outcome: "sent" });
+    expect(sent[0]!.subject).toBe("Reset your Jobify password");
+    expect(sent[0]!.html).toContain("https://jobify.test/reset-password?token=tok_abc");
+  });
+
+  it("never sends account emails to demo accounts through a real provider", async () => {
+    const n = await notificationFor({ isDemo: true });
+    expect(
+      await sendAccountEmail(
+        { prisma, mailer: fakeMailer("brevo").mailer, config },
+        { kind: "VERIFY_EMAIL", userId: n.userId, token: "t" },
+      ),
+    ).toMatchObject({ outcome: "skipped", reason: "Demo account (made-up address)" });
+    expect(
+      await sendAccountEmail(
+        { prisma, mailer: fakeMailer().mailer, config },
+        { kind: "PASSWORD_CHANGED", userId: "missing-user" },
+      ),
     ).toEqual({ outcome: "missing" });
   });
 });

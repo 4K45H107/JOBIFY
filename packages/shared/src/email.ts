@@ -24,6 +24,14 @@ export const accountEmailJobSchema = z.object({
 });
 export type AccountEmailJob = z.infer<typeof accountEmailJobSchema>;
 
+/** Like emailJobOptions, but the job (which holds a raw link token) is deleted once done. */
+export const accountEmailJobOptions = {
+  attempts: 3,
+  backoff: { type: "exponential" as const, delay: 30_000 },
+  removeOnComplete: true,
+  removeOnFail: true,
+};
+
 /**
  * BullMQ options for an email job (plain data, so this package doesn't depend on BullMQ).
  * The notification id as job id drops duplicates while a job is queued; three tries in all

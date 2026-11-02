@@ -1,9 +1,14 @@
 import { createPrismaClient } from "@jobify/db";
 import { createMailer } from "@jobify/email";
-import { EMAIL_QUEUE, emailJobSchema } from "@jobify/shared";
+import {
+  ACCOUNT_EMAIL_JOB_NAME,
+  accountEmailJobSchema,
+  EMAIL_QUEUE,
+  emailJobSchema,
+} from "@jobify/shared";
 import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
-import { enqueueEmails, markEmailFailed, sendNotificationEmail } from "./email";
+import { enqueueEmails, markEmailFailed, sendAccountEmail, sendNotificationEmail } from "./email";
 import { env } from "./env";
 import { publishNotifications } from "./publish";
 import { sendInterviewReminders } from "./reminders";
@@ -64,18 +69,27 @@ async function main() {
   const emailWorker = new Worker(
     EMAIL_QUEUE,
     async (job) => {
+      if (job.name === ACCOUNT_EMAIL_JOB_NAME) {
+        return sendAccountEmail(emailDeps, accountEmailJobSchema.parse(job.data));
+      }
       const { notificationId } = emailJobSchema.parse(job.data);
       return sendNotificationEmail(emailDeps, notificationId, { retry: job.attemptsMade > 0 });
     },
     { connection, concurrency: 5 },
   );
+  // Account jobs hold a raw link token: log the kind, never the job data.
+  const label = (job: { name: string; data: { notificationId?: string; kind?: string } }) =>
+    job.name === ACCOUNT_EMAIL_JOB_NAME
+      ? `${job.data.kind} email`
+      : `email for ${job.data.notificationId}`;
   emailWorker.on("completed", (job, result) => {
-    if (result.outcome === "sent")
-      console.log(`[worker] email sent for ${job.data.notificationId}`);
+    if (result.outcome === "sent") console.log(`[worker] sent ${label(job)}`);
   });
   emailWorker.on("failed", (job, error) => {
-    console.error(`[worker] email for ${job?.data.notificationId} failed:`, error.message);
-    if (job && job.attemptsMade >= (job.opts.attempts ?? 1)) {
+    if (!job) return;
+    console.error(`[worker] ${label(job)} failed:`, error.message);
+    const final = job.attemptsMade >= (job.opts.attempts ?? 1);
+    if (final && job.name !== ACCOUNT_EMAIL_JOB_NAME) {
       void markEmailFailed(prisma, job.data.notificationId, error.message);
     }
   });
