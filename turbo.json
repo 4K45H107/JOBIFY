@@ -47,6 +47,8 @@
     "SMTP_URL",
     "MAIL_FROM",
     "BREVO_API_KEY",
-    "EMAIL_TIME_ZONE"
+    "EMAIL_TIME_ZONE",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET"
   ]
 }

@@ -67,3 +67,8 @@ services:
         sync: false
       - key: EMAIL_TIME_ZONE
         value: Asia/Dhaka
+      # Google sign-in (optional; unset hides the button)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false

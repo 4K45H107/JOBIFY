@@ -44,11 +44,11 @@ export class AccountService {
 
   /**
    * Always succeeds, whether or not the address has an account, so the response can't be used
-   * to find out who is registered. Accounts without a password (none today) are skipped.
+   * to find out who is registered. Google-only accounts use this to set a first password.
    */
   async forgotPassword(email: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user?.passwordHash) return;
+    if (!user) return;
     const token = await this.issue(user.id, "PASSWORD_RESET");
     await this.send("PASSWORD_RESET", user.id, token);
   }
@@ -83,7 +83,12 @@ export class AccountService {
     currentRefreshToken: string | undefined,
   ): Promise<void> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
-    const valid = user.passwordHash && (await argon2.verify(user.passwordHash, currentPassword));
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        'This account signs in with Google. Set a password with "Forgot password" first.',
+      );
+    }
+    const valid = await argon2.verify(user.passwordHash, currentPassword);
     if (!valid) throw new BadRequestException("Your current password isn't right");
 
     const keep = currentRefreshToken ? TokensService.hash(currentRefreshToken) : undefined;

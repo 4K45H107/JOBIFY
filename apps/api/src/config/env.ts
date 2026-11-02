@@ -24,6 +24,9 @@ export const envSchema = z.object({
   LIVEKIT_URL: z.string().default("ws://localhost:7880"),
   LIVEKIT_API_KEY: z.string().default("devkey"),
   LIVEKIT_API_SECRET: z.string().default("secret"),
+  /** Google sign-in (OAuth client from Google Cloud Console). Unset: the button is hidden. */
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
   S3_ENDPOINT: z.url().optional(),
   S3_REGION: z.string().default("us-east-1"),
   S3_BUCKET: z.string().min(1).default("jobify"),
