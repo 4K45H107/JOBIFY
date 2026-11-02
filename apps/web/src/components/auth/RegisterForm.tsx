@@ -13,6 +13,7 @@ import { ApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
 import { GoogleButton, OrDivider } from "./GoogleButton";
 import { useAuthRedirect } from "./useAuthRedirect";
+import { useGoogleSignIn } from "./useGoogleSignIn";
 
 export const ROLES: { value: SignupRole; title: string; description: string }[] = [
   {
@@ -23,7 +24,9 @@ export const ROLES: { value: SignupRole; title: string; description: string }[] 
   { value: "EMPLOYER", title: "I'm hiring", description: "Post jobs and review applicants" },
 ];
 
-export function RegisterForm({ google }: { google: boolean }) {
+/** `google` overrides asking the API (tests). */
+export function RegisterForm({ google: known }: { google?: boolean } = {}) {
+  const google = useGoogleSignIn(known);
   const redirect = useAuthRedirect();
   const [formError, setFormError] = useState<string | null>(null);
   const {

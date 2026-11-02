@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { googleSignInEnabled } from "@/lib/api/providers";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default async function LoginPage() {
-  const google = await googleSignInEnabled();
+export default function LoginPage() {
   return (
     <Suspense>
-      <LoginForm google={google} />
+      <LoginForm />
     </Suspense>
   );
 }

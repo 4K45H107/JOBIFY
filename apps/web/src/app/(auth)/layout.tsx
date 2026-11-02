@@ -18,7 +18,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             interview, all in one place.
           </p>
         </div>
-        <p className="hidden text-sm text-chrome-fg/50 md:block">Dive into the realm of jobs.</p>
+        <p className="hidden text-sm text-chrome-fg/50 md:block">
+          Dive into the realm of jobs. ·{" "}
+          <Link href="/privacy" className="underline hover:text-chrome-fg">
+            Privacy
+          </Link>
+        </p>
       </aside>
       <main className="flex items-start justify-center px-4 py-8 md:items-center md:px-10 md:py-10">
         <div className="w-full max-w-md">{children}</div>

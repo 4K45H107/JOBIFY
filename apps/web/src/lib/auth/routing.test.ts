@@ -12,7 +12,13 @@ describe("decideRoute", () => {
   });
 
   it("opens emailed-link pages to everyone, signed in or not", () => {
-    for (const path of ["/unsubscribe", "/reset-password", "/verify-email", "/signing-in"]) {
+    for (const path of [
+      "/unsubscribe",
+      "/reset-password",
+      "/verify-email",
+      "/signing-in",
+      "/privacy",
+    ]) {
       for (const role of [null, "SEEKER", "EMPLOYER"] as const) {
         expect(decideRoute(path, "?token=x", role)).toEqual({ type: "allow" });
       }
