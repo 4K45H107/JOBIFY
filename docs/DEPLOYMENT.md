@@ -22,16 +22,16 @@ flowchart LR
     Render -. "emails (worker)" .-> Brevo["Brevo<br/>email"]
 ```
 
-| Stage                      | Service                        | Why this one                                                                                                      | Status                 |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done                |
-| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done                |
-| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done                |
-| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done                |
-| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done                |
-| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done                |
-| Email                      | **Brevo** (free plan)          | About 300 emails a day for free, and needs no domain: a verified Gmail sender is enough                           | ⏳ Needs the Brevo key |
-| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 6                | ➖ Not used            |
+| Stage                      | Service                        | Why this one                                                                                                      | Status      |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------- |
+| Database                   | **Neon** Postgres              | Managed Postgres with a free plan; pauses when idle; branches for safe experiments                                | ✅ Done     |
+| File storage (CVs, photos) | **Neon** Object Storage        | S3-compatible, so the app's storage code works unchanged; same account as the database; no card needed            | ✅ Done     |
+| API + background worker    | **Render** (free web service)  | Runs long-lived Node servers, which the API needs for live notifications (Server-Sent Events)                     | ✅ Done     |
+| Web app                    | **Vercel** (Hobby)             | Made by the Next.js team; free for personal projects                                                              | ✅ Done     |
+| Redis (BullMQ + pub/sub)   | **Render Key Value** (free)    | Same account and region as the API, over Render's private network; no command limit (BullMQ checks Redis all day) | ✅ Done     |
+| Video interviews           | **LiveKit Cloud** (Build plan) | Same LiveKit the app uses locally, without the local UDP limits                                                   | ✅ Done     |
+| Email                      | **Brevo** (free plan)          | About 300 emails a day for free, and needs no domain: a verified Gmail sender is enough                           | ✅ Done     |
+| Keep the API awake         | **cron-job.org** (optional)    | **Not used.** Pinging all day would keep Neon awake too and use up its free compute; see section 6                | ➖ Not used |
 
 ---
 
@@ -393,6 +393,8 @@ Nothing else is needed from LiveKit: no Agents, telephony, Egress or recording.
 
 ## 5. Brevo: email
 
+The full email guide (what's sent, the code, settings, troubleshooting) is [EMAIL.md](EMAIL.md).
+
 ### Why Brevo
 
 The worker emails people about their applications, tests, interviews and join requests. Brevo's
@@ -431,9 +433,10 @@ flowchart LR
 5. Check the worker's log line: `emails via brevo`. Without the key it says
    `(off: BREVO_API_KEY not set)` and no email is attempted.
 
-**Deliverability:** sending "from" a free address such as `@gmail.com` through another service
-fails Gmail's sender authentication (SPF/DKIM/DMARC), so some emails may land in spam. A domain
-of your own, verified in Brevo, fixes that; it's optional for a demo.
+**Deliverability:** for a free sender such as `@gmail.com`, Brevo sends from an address on its own
+domain (e.g. `…@12650113.brevosend.com`) so that Gmail's sender checks (SPF/DKIM/DMARC) pass; the
+name "Jobify" still shows. The first test landed in the inbox. A domain of your own, verified in
+Brevo, would make the sender address match exactly; it's optional for a demo.
 
 ### How to test it
 
@@ -441,7 +444,7 @@ Register a new account with an address you own (demo accounts are skipped), then
 for example apply to a job as a seeker (the employer gets "New applicant"), or ask to join a
 company. Brevo's _Transactional › Logs_ shows what was sent.
 
-_Status: waiting for the Brevo key on Render._
+_Status: on since 2 Nov 2026 (key and sender set on Render; checked live)._
 
 ## 6. Known limitations: sleeping on the free tier
 

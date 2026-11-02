@@ -67,6 +67,11 @@ Open http://localhost:3000 and sign in with one of the demo accounts below.
 The seed always produces the same data, so these emails stay the same every time you run
 `pnpm db:seed`. Running it again resets everything to the demo state.
 
+These are **seeded (demo) accounts**: made-up people, so the app has data to show. They're marked
+as demo and never get real email (locally their emails go to Mailpit). `pnpm db:seed` **deletes
+everything** first, so only run it locally, never against the live database, where real people's
+accounts live next to the demo ones.
+
 You can also create your own accounts on the **Create account** page. Pick "I'm looking for a job"
 or "I'm hiring".
 
