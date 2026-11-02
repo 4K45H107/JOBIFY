@@ -386,6 +386,8 @@ model Assessment {
   kind         AssessmentKind
   title        String
   timeLimitMin Int?
+  /// CODING: the problem from the built-in library (apps/api/src/coding/library).
+  problemSlug  String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
@@ -393,7 +395,8 @@ model Assessment {
   mcqQuestions McqQuestion[]
   attempts     Attempt[]
 
-  @@unique([jobId, kind])
+  /// One skill test per job: multiple choice or coding.
+  @@unique([jobId])
 }
 
 model McqQuestion {
@@ -419,6 +422,9 @@ model Attempt {
   /// Percentage 0–100, set when graded.
   score         Float?
   answers       Json?
+  /// CODING: the language and code, autosaved while working and final once submitted.
+  language      String?
+  code          String?
 
   assessment  Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)

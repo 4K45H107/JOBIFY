@@ -1,4 +1,9 @@
 import { z } from "zod";
+import { CodingLanguage, codingDraftSchema, codingProblemSchema, MAX_CODE_LENGTH } from "./coding";
+
+/** A job has at most one skill test: multiple choice or a coding problem. */
+export const AssessmentKind = z.enum(["MCQ", "CODING"]);
+export type AssessmentKind = z.infer<typeof AssessmentKind>;
 
 export const mcqQuestionInput = z
   .object({
@@ -19,20 +24,41 @@ export const mcqQuestionInput = z
   });
 export type McqQuestionInput = z.infer<typeof mcqQuestionInput>;
 
-export const assessmentInput = z.object({
+const testBasics = {
   title: z.string().trim().min(3, "Give the test a title").max(100),
   timeLimitMin: z.number().int().min(1, "At least 1 minute").max(180, "At most 3 hours"),
+};
+
+export const mcqAssessmentInput = z.object({
+  kind: z.literal("MCQ"),
+  ...testBasics,
   questions: z
     .array(mcqQuestionInput)
     .min(1, "Add at least one question")
     .max(50, "Use at most 50 questions"),
 });
+export type McqAssessmentInput = z.infer<typeof mcqAssessmentInput>;
+
+export const codingAssessmentInput = z.object({
+  kind: z.literal("CODING"),
+  ...testBasics,
+  /** A problem from the built-in library. */
+  problemSlug: z.string().trim().min(1, "Pick a problem").max(80),
+});
+export type CodingAssessmentInput = z.infer<typeof codingAssessmentInput>;
+
+export const assessmentInput = z.preprocess(
+  // Before coding tests every test was MCQ, so a body without a kind still means MCQ.
+  (v) => (v && typeof v === "object" && !("kind" in v) ? { ...v, kind: "MCQ" } : v),
+  z.discriminatedUnion("kind", [mcqAssessmentInput, codingAssessmentInput]),
+);
 export type AssessmentInput = z.infer<typeof assessmentInput>;
 
 /** The full test, answer key included. Only ever sent to the hiring team. */
 export const teamAssessmentSchema = z.object({
   id: z.string(),
   jobId: z.string(),
+  kind: AssessmentKind,
   title: z.string(),
   timeLimitMin: z.number(),
   questions: z.array(
@@ -43,6 +69,8 @@ export const teamAssessmentSchema = z.object({
       correctIndex: z.number(),
     }),
   ),
+  /** Coding tests: the library problem (empty questions). */
+  problem: codingProblemSchema.nullable(),
   /** True once anyone has submitted; questions can't change after that. */
   locked: z.boolean(),
   stats: z.object({
@@ -57,6 +85,7 @@ export type TeamAssessment = z.infer<typeof teamAssessmentSchema>;
 export const attemptSchema = z.object({
   id: z.string(),
   applicationId: z.string(),
+  kind: AssessmentKind,
   title: z.string(),
   timeLimitMin: z.number(),
   startedAt: z.string(),
@@ -68,14 +97,29 @@ export const attemptSchema = z.object({
   ),
   /** The seeker's chosen option per question, once submitted. */
   answers: z.record(z.string(), z.number().nullable()).nullable(),
+  /** Coding tests: the problem (samples only) and the saved or submitted code. */
+  problem: codingProblemSchema.nullable(),
+  code: codingDraftSchema.nullable(),
 });
 export type Attempt = z.infer<typeof attemptSchema>;
 
-export const submitAttemptSchema = z.object({
-  answers: z
-    .array(
-      z.object({ questionId: z.string().min(1), optionIndex: z.number().int().min(0).nullable() }),
-    )
-    .max(50),
-});
+export const submitAttemptSchema = z.union([
+  z.object({
+    answers: z
+      .array(
+        z.object({
+          questionId: z.string().min(1),
+          optionIndex: z.number().int().min(0).nullable(),
+        }),
+      )
+      .max(50),
+  }),
+  z.object({
+    language: CodingLanguage,
+    code: z
+      .string()
+      .max(MAX_CODE_LENGTH, "Your code is too long")
+      .refine((c) => c.trim().length > 0, "Write some code before submitting"),
+  }),
+]);
 export type SubmitAttempt = z.infer<typeof submitAttemptSchema>;

@@ -7,7 +7,7 @@ export const summaryInclude = (viewerId: string) =>
   ({
     company: { select: { id: true, name: true, slug: true, logoKey: true } },
     skills: { include: { skill: true } },
-    assessments: { select: { id: true } },
+    assessments: { select: { id: true, kind: true } },
     savedBy: { where: { userId: viewerId }, select: { userId: true } },
     _count: { select: { applications: true } },
   }) satisfies Prisma.JobInclude;
@@ -36,6 +36,7 @@ export function toSummary(job: JobWithSummary): JobSummary {
     },
     skills: job.skills.map((s) => s.skill.name).sort(),
     hasAssessment: job.assessments.length > 0,
+    assessmentKind: job.assessments[0]?.kind ?? null,
     saved: job.savedBy.length > 0,
     applicants: job._count.applications,
   };

@@ -65,7 +65,9 @@ export const stageEventSchema = z.object({
 const testStatusSchema = z.object({
   /** null when the job has no test. */
   state: z.enum(["NOT_STARTED", "IN_PROGRESS", "SUBMITTED"]).nullable(),
+  /** null for coding tests until they're graded automatically. */
   score: z.number().nullable(),
+  kind: z.enum(["MCQ", "CODING"]).nullable(),
 });
 
 /** A seeker's own application, as listed in Activities > Applications. */

@@ -36,14 +36,14 @@ const historyInclude = {
 type AttemptLite = { submittedAt: Date | null; score: number | null };
 
 function testStatus(
-  hasAssessment: boolean,
+  kind: "MCQ" | "CODING" | null,
   attempt: AttemptLite | undefined,
 ): MyApplication["test"] {
-  if (!hasAssessment) return { state: null, score: null };
-  if (!attempt) return { state: "NOT_STARTED", score: null };
+  if (!kind) return { state: null, score: null, kind: null };
+  if (!attempt) return { state: "NOT_STARTED", score: null, kind };
   return attempt.submittedAt
-    ? { state: "SUBMITTED", score: attempt.score }
-    : { state: "IN_PROGRESS", score: null };
+    ? { state: "SUBMITTED", score: attempt.score, kind }
+    : { state: "IN_PROGRESS", score: null, kind };
 }
 
 const toHistory = (
@@ -90,7 +90,7 @@ export class ApplicationsService {
       where: { AND: [{ id: jobId }, openJobs()] },
       include: {
         screeningQuestions: true,
-        assessments: { where: { kind: "MCQ" }, select: { id: true } },
+        assessments: { select: { id: true } },
       },
     });
     if (!job) throw new NotFoundException("This job isn't accepting applications");
@@ -226,7 +226,7 @@ export class ApplicationsService {
   ): Promise<Applicant[]> {
     const job = await this.prisma.job.findUnique({
       where: { id: jobId },
-      include: { assessments: { select: { id: true } }, screeningQuestions: true },
+      include: { assessments: { select: { id: true, kind: true } }, screeningQuestions: true },
     });
     if (!job) throw new NotFoundException("Job not found");
     await this.access.assertMember(employerId, job.companyId);
@@ -269,7 +269,7 @@ export class ApplicationsService {
           prompt: prompts.get(ans.questionId) ?? "",
           answer: ans.answer,
         })),
-        test: testStatus(job.assessments.length > 0, a.attempts[0]),
+        test: testStatus(job.assessments[0]?.kind ?? null, a.attempts[0]),
         history: toHistory(a.stageChanges),
       };
     });
@@ -373,7 +373,7 @@ export class ApplicationsService {
       appliedAt: a.createdAt.toISOString(),
       updatedAt: a.updatedAt.toISOString(),
       job,
-      test: testStatus(job.hasAssessment, a.attempts[0]),
+      test: testStatus(job.assessmentKind, a.attempts[0]),
       history: toHistory(a.stageChanges),
     };
   }

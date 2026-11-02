@@ -160,7 +160,7 @@ describe("Skill tests (e2e)", () => {
 
     it("shows the score to the team and locks the test", async () => {
       const applicants = await boss.get(`/api/jobs/${jobId}/applications?sort=score`).expect(200);
-      expect(applicants.body[0].test).toEqual({ state: "SUBMITTED", score: 50 });
+      expect(applicants.body[0].test).toEqual({ state: "SUBMITTED", score: 50, kind: "MCQ" });
       await boss.put(`/api/jobs/${jobId}/assessment`).send(test).expect(409);
       const team = await boss.get(`/api/jobs/${jobId}/assessment`).expect(200);
       expect(team.body).toMatchObject({
