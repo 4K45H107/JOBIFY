@@ -82,8 +82,8 @@ export default function PrivacyPage() {
             </li>
             <li>
               To email you about your account (verification, password reset) and, if you leave them
-              on, updates such as interview reminders. You can turn update emails off in Settings or
-              with the link in each email.
+              on, updates such as interview reminders. You can turn update emails off in your
+              Profile or with the link in each email.
             </li>
           </ul>
           <p>
