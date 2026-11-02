@@ -433,9 +433,10 @@ flowchart LR
 5. Check the worker's log line: `emails via brevo`. Without the key it says
    `(off: BREVO_API_KEY not set)` and no email is attempted.
 
-**Deliverability:** sending "from" a free address such as `@gmail.com` through another service
-fails Gmail's sender authentication (SPF/DKIM/DMARC), so some emails may land in spam. A domain
-of your own, verified in Brevo, fixes that; it's optional for a demo.
+**Deliverability:** for a free sender such as `@gmail.com`, Brevo sends from an address on its own
+domain (e.g. `…@12650113.brevosend.com`) so that Gmail's sender checks (SPF/DKIM/DMARC) pass; the
+name "Jobify" still shows. The first test landed in the inbox. A domain of your own, verified in
+Brevo, would make the sender address match exactly; it's optional for a demo.
 
 ### How to test it
 

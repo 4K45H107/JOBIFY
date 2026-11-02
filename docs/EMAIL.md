@@ -166,21 +166,22 @@ Checking it:
 
 ## Troubleshooting
 
-| Problem                             | Check                                                                                                                   |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| No email in Mailpit                 | Is the worker running (`pnpm dev`)? Is Mailpit up (`pnpm services:up`)? Look at `EmailLog` for a `SKIPPED` reason       |
-| Production sends nothing            | Worker log says `off: BREVO_API_KEY not set`? Set the key and `MAIL_FROM` on Render                                     |
-| Email to a demo account wasn't sent | Expected in production: demo accounts are skipped. Use an account you registered                                        |
-| `FAILED` with "Brevo 401"           | Wrong, revoked or **expired** API key (see Known limitations). Generate a new one and replace `BREVO_API_KEY` on Render |
-| `FAILED` with "Brevo 400 … sender"  | `MAIL_FROM` isn't a sender verified in Brevo                                                                            |
-| Emails land in spam                 | Expected with a Gmail sender (see below)                                                                                |
-| An email came twice                 | Shouldn't happen: `EmailLog` is unique per notification. Check for two notification rows                                |
+| Problem                             | Check                                                                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| No email in Mailpit                 | Is the worker running (`pnpm dev`)? Is Mailpit up (`pnpm services:up`)? Look at `EmailLog` for a `SKIPPED` reason        |
+| Production sends nothing            | Worker log says `off: BREVO_API_KEY not set`? Set the key and `MAIL_FROM` on Render                                      |
+| Email to a demo account wasn't sent | Expected in production: demo accounts are skipped. Use an account you registered                                         |
+| `FAILED` with "Brevo 401"           | Wrong, revoked or **expired** API key (see Known limitations). Generate a new one and replace `BREVO_API_KEY` on Render  |
+| `FAILED` with "Brevo 400 … sender"  | `MAIL_FROM` isn't a sender verified in Brevo                                                                             |
+| Emails land in spam                 | Mark one "Not spam". Brevo already sends a Gmail sender from its own domain (see below); a domain of your own helps most |
+| An email came twice                 | Shouldn't happen: `EmailLog` is unique per notification. Check for two notification rows                                 |
 
 ## Known limitations
 
-- **Spam folder:** sending "from" a free address such as `@gmail.com` through Brevo fails Gmail's
-  sender checks (SPF/DKIM/DMARC), so some emails may land in spam. A domain of your own, verified in
-  Brevo, fixes it.
+- **Sender address:** Gmail is a free provider, so Brevo rewrites the sender onto its own domain
+  (e.g. `fahad11.ahmed11@12650113.brevosend.com`) to pass Gmail's sender checks
+  (SPF/DKIM/DMARC). The name "Jobify" still shows, and the first real test landed in the inbox. A
+  domain of your own, verified in Brevo, would make the address match exactly.
 - **One time zone:** everyone sees interview times in `EMAIL_TIME_ZONE`, with the zone named.
 - **Free-tier sleep:** the worker sleeps with the API after 15 idle minutes; a reminder due while
   nobody uses the site isn't sent then. See
