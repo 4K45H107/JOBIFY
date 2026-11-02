@@ -25,6 +25,7 @@ import type { Env } from "../config/env";
 import { fileUrl } from "../files/file-keys";
 import { NotificationsService } from "../notifications/notifications.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { VideoRoomsService } from "./video-rooms.service";
 
 const include = {
   application: {
@@ -52,6 +53,7 @@ export class InterviewsService {
     private readonly applications: ApplicationsService,
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService<Env, true>,
+    private readonly videoRooms: VideoRoomsService,
   ) {}
 
   async schedule(
@@ -155,6 +157,9 @@ export class InterviewsService {
       },
       include,
     });
+    // Ending or cancelling closes the video room, so nobody is left in the call.
+    if (status === "COMPLETED" || status === "CANCELLED")
+      await this.videoRooms.close(updated.roomName);
     if (status === "CANCELLED")
       await this.notifyParties(updated, "INTERVIEW_SCHEDULED", { cancelled: true });
     else if (rescheduled)
