@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { InterviewNotes } from "@jobify/shared";
+import { CODING_LANGUAGE_LABELS, type InterviewNotes } from "@jobify/shared";
+import { CodeEditor } from "@/components/coding/CodeEditor";
 import { api } from "@/lib/api/client";
 import { formatWhen } from "@/lib/time";
 
@@ -27,14 +28,25 @@ export function CallNotes({ interviewId }: { interviewId: string }) {
           <p className="text-fg-subtle">Loading…</p>
         ) : (
           <>
-            <p
-              className="mt-1 max-h-64 overflow-y-auto rounded-[8px] bg-bg p-3 whitespace-pre-wrap"
-              tabIndex={0}
-            >
-              {notes.notes}
-            </p>
+            {notes.language ? (
+              <CodeEditor
+                readOnly
+                label={`Code from the call (${CODING_LANGUAGE_LABELS[notes.language]})`}
+                language={notes.language}
+                value={notes.notes}
+                className="mt-1 h-64"
+              />
+            ) : (
+              <p
+                className="mt-1 max-h-64 overflow-y-auto rounded-[8px] bg-bg p-3 whitespace-pre-wrap"
+                tabIndex={0}
+              >
+                {notes.notes}
+              </p>
+            )}
             {notes.updatedAt && (
               <p className="mt-1 text-xs text-fg-subtle">
+                {notes.language && `${CODING_LANGUAGE_LABELS[notes.language]} · `}
                 Last saved {formatWhen(notes.updatedAt)}
               </p>
             )}

@@ -166,6 +166,15 @@ body {
   }
 }
 
+/* LiveKit's call controls: when the notepad leaves the video little room, show icons only. The
+   labels stay in the page (zero-size text), so the buttons keep their accessible names. */
+@container call (max-width: 760px) {
+  .lk-control-bar .lk-button:not(.lk-button-menu) {
+    gap: 0;
+    font-size: 0;
+  }
+}
+
 /* Black line-art icons from Figma; inverted in dark mode. */
 .icon-themed {
   filter: var(--icon-filter);

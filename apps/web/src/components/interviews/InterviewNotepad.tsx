@@ -3,7 +3,14 @@
 import { useRoomContext } from "@livekit/components-react";
 import { RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { type InterviewNotes, MAX_INTERVIEW_NOTES, NOTES_TOPIC } from "@jobify/shared";
+import {
+  CODING_LANGUAGE_LABELS,
+  CodingLanguage,
+  type InterviewNotes,
+  MAX_INTERVIEW_NOTES,
+  NOTES_TOPIC,
+} from "@jobify/shared";
+import { CodeEditor } from "@/components/coding/CodeEditor";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
@@ -14,10 +21,31 @@ const SAVE_AFTER_MS = 1500;
 
 type SaveState = "idle" | "saving" | "saved" | "failed" | "locked";
 
+/** What goes over the room: the text and its mode (a language for code, null for plain text). */
+interface NotepadMessage {
+  notes: string;
+  language: CodingLanguage | null;
+}
+
+const encode = (m: NotepadMessage) => JSON.stringify(m);
+
+function decode(raw: string): NotepadMessage {
+  try {
+    const m = JSON.parse(raw) as Partial<NotepadMessage>;
+    if (typeof m.notes === "string") {
+      const language = CodingLanguage.safeParse(m.language);
+      return { notes: m.notes, language: language.success ? language.data : null };
+    }
+  } catch {
+    // Not JSON: treat it as plain text.
+  }
+  return { notes: raw, language: null };
+}
+
 /**
- * The call's notepad. The candidate types; the interviewer sees it live (over the LiveKit room's
- * text streams) and read-only. The candidate's text is autosaved, so the interviewer sees it on
- * joining late, and both can read it after the interview.
+ * The call's notepad. The candidate types plain text, or code with syntax highlighting; the
+ * interviewer sees it live (over the LiveKit room's text streams) and read-only. It's autosaved,
+ * so the interviewer sees it on joining late, and both can read it after the interview.
  */
 export function InterviewNotepad({
   interviewId,
@@ -34,11 +62,12 @@ export function InterviewNotepad({
   const room = useRoomContext();
   const writer = viewer === "SEEKER";
   const [text, setText] = useState("");
+  const [language, setLanguage] = useState<CodingLanguage | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [editable, setEditable] = useState(false);
   const [save, setSave] = useState<SaveState>("idle");
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
-  const latest = useRef("");
+  const latest = useRef<NotepadMessage>({ notes: "", language: null });
   const dirty = useRef(false);
   const onActivityRef = useRef(onActivity);
   onActivityRef.current = onActivity;
@@ -47,8 +76,9 @@ export function InterviewNotepad({
   useEffect(() => {
     api<InterviewNotes>(`/interviews/${interviewId}/notes`)
       .then((n) => {
-        latest.current = n.notes;
+        latest.current = { notes: n.notes, language: n.language };
         setText(n.notes);
+        setLanguage(n.language);
         setEditable(n.editable);
         setUpdatedAt(n.updatedAt ? new Date(n.updatedAt) : null);
       })
@@ -64,9 +94,10 @@ export function InterviewNotepad({
       from: { identity: string },
     ) => {
       if (from.identity !== seekerId) return;
-      const next = await reader.readAll();
+      const next = decode(await reader.readAll());
       latest.current = next;
-      setText(next);
+      setText(next.notes);
+      setLanguage(next.language);
       setUpdatedAt(new Date());
       onActivityRef.current?.();
     };
@@ -80,16 +111,20 @@ export function InterviewNotepad({
   useEffect(() => {
     if (!writer || !dirty.current) return;
     const timer = setTimeout(() => {
-      void room.localParticipant.sendText(latest.current, { topic: NOTES_TOPIC }).catch(() => {});
+      void room.localParticipant
+        .sendText(encode(latest.current), { topic: NOTES_TOPIC })
+        .catch(() => {});
     }, SEND_EVERY_MS);
     return () => clearTimeout(timer);
-  }, [room, writer, text]);
+  }, [room, writer, text, language]);
 
   useEffect(() => {
     if (!writer) return;
     const resend = () => {
-      if (latest.current)
-        void room.localParticipant.sendText(latest.current, { topic: NOTES_TOPIC }).catch(() => {});
+      if (latest.current.notes || latest.current.language)
+        void room.localParticipant
+          .sendText(encode(latest.current), { topic: NOTES_TOPIC })
+          .catch(() => {});
     };
     room.on(RoomEvent.ParticipantConnected, resend);
     return () => {
@@ -105,7 +140,7 @@ export function InterviewNotepad({
       try {
         await api(`/interviews/${interviewId}/notes`, {
           method: "PUT",
-          json: { notes: latest.current },
+          json: latest.current,
         });
         setSave("saved");
         setUpdatedAt(new Date());
@@ -119,12 +154,19 @@ export function InterviewNotepad({
     }, SAVE_AFTER_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [writer, interviewId, text]);
+  }, [writer, interviewId, text, language]);
 
   const edit = (next: string) => {
     dirty.current = true;
-    latest.current = next;
+    latest.current = { ...latest.current, notes: next };
     setText(next);
+  };
+
+  /** Plain text or code in a language; the text itself is kept either way. */
+  const switchMode = (next: CodingLanguage | null) => {
+    dirty.current = true;
+    latest.current = { ...latest.current, language: next };
+    setLanguage(next);
   };
 
   const status = writer
@@ -148,14 +190,44 @@ export function InterviewNotepad({
         <h2 id="notepad-title" className="font-medium">
           Notepad
         </h2>
-        {!writer && (
+        {writer ? (
+          <label className="flex items-center gap-2 text-xs">
+            <span className="text-fg-subtle">Mode</span>
+            <select
+              value={language ?? "text"}
+              disabled={!editable || !loaded}
+              onChange={(e) =>
+                switchMode(e.target.value === "text" ? null : CodingLanguage.parse(e.target.value))
+              }
+              className="h-8 rounded-[6px] border border-border bg-bg px-2 text-sm"
+            >
+              <option value="text">Plain text</option>
+              {CodingLanguage.options.map((l) => (
+                <option key={l} value={l}>
+                  Code · {CODING_LANGUAGE_LABELS[l]}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
           <span className="flex items-center gap-1.5 text-xs text-fg-subtle">
             <span aria-hidden className="size-2 rounded-full bg-success" />
             Live from the candidate
+            {language && <> · {CODING_LANGUAGE_LABELS[language]}</>}
           </span>
         )}
       </header>
-      {writer ? (
+      {language ? (
+        // Code mode: highlighted for both; read-only for the interviewer.
+        <CodeEditor
+          label={writer ? "Your code" : "The candidate's code"}
+          language={language}
+          value={text}
+          onChange={writer ? edit : undefined}
+          readOnly={!writer || !editable || !loaded}
+          className="min-h-40 flex-1"
+        />
+      ) : writer ? (
         <textarea
           aria-label="Your notes"
           value={text}

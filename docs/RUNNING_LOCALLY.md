@@ -117,7 +117,8 @@ or "I'm hiring".
 3. The room opens 10 minutes before the start. Both people click **Join** under _Interviews_ to
    meet in the LiveKit room. The employer can **End interview**.
 4. In the call, the seeker opens **Notepad** and types an answer: it appears live in the
-   interviewer's **Notepad** (their button shows a dot while it's closed). After the interview, both
+   interviewer's **Notepad** (their button shows a dot while it's closed). **Mode** switches it to
+   code with highlighting (Python, JavaScript, C++, Java). After the interview, both
    find the notes under _Interviews › Past › Details_.
 
 **See the emails (Mailpit)**

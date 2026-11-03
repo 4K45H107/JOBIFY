@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CodingLanguage } from "./coding";
 
 export const InterviewStatus = z.enum(["SCHEDULED", "LIVE", "COMPLETED", "CANCELLED"]);
 export type InterviewStatus = z.infer<typeof InterviewStatus>;
@@ -47,6 +48,8 @@ export const NOTES_TOPIC = "jobify-notes";
 
 export const interviewNotesSchema = z.object({
   notes: z.string(),
+  /** Code mode's language (highlighted); null for plain text. */
+  language: CodingLanguage.nullable(),
   updatedAt: z.string().nullable(),
   /** True for the candidate while the interview is open; read-only for everyone else. */
   editable: z.boolean(),
@@ -55,6 +58,7 @@ export type InterviewNotes = z.infer<typeof interviewNotesSchema>;
 
 export const interviewNotesInput = z.object({
   notes: z.string().max(MAX_INTERVIEW_NOTES, "The notepad is full"),
+  language: CodingLanguage.nullable().default(null),
 });
 export type InterviewNotesInput = z.infer<typeof interviewNotesInput>;
 
