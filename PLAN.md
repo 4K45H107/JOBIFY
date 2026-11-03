@@ -363,9 +363,9 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 ### Phase 7: Showcase
 
-- [ ] README: pitch, GIF, live demo + demo logins, architecture diagram, tech stack, run locally
-- [ ] `docs/adr/` short decision records (monolith vs microservices, Postgres vs Mongo, LiveKit)
-- [ ] Credit the original 2024 team and link the original repo
+- [x] README: pitch, GIF, live demo + demo logins, screenshots, architecture diagram, tech stack, run locally
+- [x] `docs/adr/` short decision records (monolith, Postgres, LiveKit, free hosting, auth, coding problems, search, live notepad)
+- [x] Credit the original 2024 team and link the original repo
 
 ---
 
