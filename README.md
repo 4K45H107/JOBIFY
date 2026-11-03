@@ -176,13 +176,9 @@ packages/tsconfig Shared TypeScript configs
 
 ## Credits
 
-Jobify started as our team project for **CSE408** at **BUET** in 2024: [4K45H107/CSE408_JOBIFY](https://github.com/4K45H107/CSE408_JOBIFY).
+Jobify started as a team project for **CSE408** at **BUET** in 2024:
+[4K45H107/CSE408_JOBIFY](https://github.com/4K45H107/CSE408_JOBIFY). The original team shaped the
+idea, the features and the Figma design that this interface still follows.
 
-|                                                                        | Original project (2024)                                                                      |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **Fahad Ahmed** ([@4K45H107](https://github.com/4K45H107))             | Frontend: pages, UI, registration, profile, MCQ and interview screens                        |
-| **Rayan Islam** ([@rayan-islam](https://github.com/rayan-islam))       | Backend: data models, auth routes, jobs, companies, MCQ, notifications, video call           |
-| **Md. Sayeeduzzaman** ([@sayeedzaman](https://github.com/sayeedzaman)) | Backend: explore, recommendations, search and filters, bookmarks, applications, similar jobs |
-
-This rebuild (new architecture, backend, deployment, and the features above) is by Fahad Ahmed. The
-interface follows the team's original Figma design.
+This repository is a from-scratch rebuild of that project: a new architecture, backend and
+database, deployment, tests, and the features above.
