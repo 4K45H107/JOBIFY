@@ -96,6 +96,6 @@ export class InterviewsController {
     @Param("id") id: string,
     @Body() body: NotesInputDto,
   ) {
-    return this.interviews.saveNotes(user.id, id, body.notes);
+    return this.interviews.saveNotes(user.id, id, body);
   }
 }

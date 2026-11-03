@@ -11,7 +11,9 @@ import {
   type Interview,
   type InterviewListQuery,
   type InterviewSchedule,
+  CodingLanguage,
   type InterviewNotes,
+  type InterviewNotesInput,
   type InterviewUpdate,
   isJoinable,
   JOIN_LATE_MIN,
@@ -217,8 +219,10 @@ export class InterviewsService {
   /** The call's notepad, for either person. Only the candidate edits it, while the room is open. */
   async notes(viewer: Viewer, id: string): Promise<InterviewNotes> {
     const interview = await this.loadForParty(viewer, id);
+    const language = CodingLanguage.safeParse(interview.notesLanguage);
     return {
       notes: interview.notes ?? "",
+      language: language.success ? language.data : null,
       updatedAt: interview.notesUpdatedAt?.toISOString() ?? null,
       editable:
         viewer.role === "SEEKER" &&
@@ -227,7 +231,11 @@ export class InterviewsService {
   }
 
   /** Autosave from the candidate's notepad. Locked once the interview ends or the room closes. */
-  async saveNotes(seekerId: string, id: string, notes: string): Promise<void> {
+  async saveNotes(
+    seekerId: string,
+    id: string,
+    { notes, language }: InterviewNotesInput,
+  ): Promise<void> {
     const interview = await this.loadForParty({ id: seekerId, role: "SEEKER" }, id);
     if (interview.status === "COMPLETED" || interview.status === "CANCELLED")
       throw new ConflictException("This interview has ended, so its notes can't change");
@@ -236,7 +244,7 @@ export class InterviewsService {
     // Only while still open: an End interview racing this save wins.
     await this.prisma.interview.updateMany({
       where: { id, status: { in: ["SCHEDULED", "LIVE"] } },
-      data: { notes, notesUpdatedAt: new Date() },
+      data: { notes, notesLanguage: language, notesUpdatedAt: new Date() },
     });
   }
 

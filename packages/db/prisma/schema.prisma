@@ -456,6 +456,8 @@ model Interview {
   /// The candidate's notepad from the call, autosaved while it's open and kept afterwards.
   notes          String?
   notesUpdatedAt DateTime?
+  /// Set when the notepad is in code mode (python, javascript, cpp, java); plain text otherwise.
+  notesLanguage  String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 

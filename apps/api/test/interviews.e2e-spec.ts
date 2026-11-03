@@ -180,6 +180,21 @@ describe("Interviews (e2e)", () => {
       .send({ notes: "x".repeat(20_001) })
       .expect(400);
 
+    // Code mode: the language is kept with the text, and only known languages are accepted.
+    const code = "def answer():\n    return 42\n";
+    await seeker
+      .put(`/api/interviews/${interviewId}/notes`)
+      .send({ notes: code, language: "python" })
+      .expect(204);
+    const coded = await boss.get(`/api/interviews/${interviewId}/notes`).expect(200);
+    expect(coded.body).toMatchObject({ notes: code, language: "python" });
+    await seeker
+      .put(`/api/interviews/${interviewId}/notes`)
+      .send({ notes: code, language: "cobol" })
+      .expect(400);
+    await seeker.put(`/api/interviews/${interviewId}/notes`).send({ notes: answer }).expect(204);
+    expect((await boss.get(`/api/interviews/${interviewId}/notes`)).body.language).toBeNull();
+
     const list = await boss.get(`/api/interviews?jobId=${jobId}`).expect(200);
     expect(list.body.find((i: { id: string }) => i.id === interviewId).hasNotes).toBe(true);
   });
@@ -190,7 +205,7 @@ describe("Interviews (e2e)", () => {
     );
     await seeker.put(`/api/interviews/${later.id}/notes`).send({ notes: "early" }).expect(403);
     const res = await seeker.get(`/api/interviews/${later.id}/notes`).expect(200);
-    expect(res.body).toMatchObject({ notes: "", editable: false, updatedAt: null });
+    expect(res.body).toMatchObject({ notes: "", language: null, editable: false, updatedAt: null });
   });
 
   it("reschedules and cancels, notifying the seeker, and closes the room", async () => {

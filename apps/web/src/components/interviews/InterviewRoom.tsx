@@ -139,12 +139,12 @@ export function InterviewRoom({
           {/* Video beside the notepad on wide screens, above it on phones. The notepad stays
               mounted while hidden, so the interviewer keeps receiving what's written. */}
           <div className="flex h-full min-h-0 flex-col gap-3 lg:flex-row">
-            <div className="min-h-[320px] min-w-0 flex-1">
+            <div className="@container/call min-h-[320px] min-w-0 flex-1 overflow-hidden">
               <VideoConference />
             </div>
             <div
               id="interview-notepad"
-              className={cn("h-72 shrink-0 lg:h-auto lg:w-[380px]", !notepadOpen && "hidden")}
+              className={cn("h-80 shrink-0 lg:h-auto lg:w-[420px]", !notepadOpen && "hidden")}
             >
               <InterviewNotepad
                 interviewId={interview.id}
