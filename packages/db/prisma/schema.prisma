@@ -453,6 +453,9 @@ model Interview {
   roomName       String          @unique
   /// Set by the worker once the "starting soon" reminder has gone out.
   reminderSentAt DateTime?
+  /// The candidate's notepad from the call, autosaved while it's open and kept afterwards.
+  notes          String?
+  notesUpdatedAt DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 

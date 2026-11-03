@@ -34,8 +34,29 @@ export const interviewSchema = z.object({
   interviewer: z.object({ id: z.string(), fullName: z.string() }),
   /** True while the room is open for this viewer. */
   canJoin: z.boolean(),
+  /** The candidate wrote something on the call's notepad. */
+  hasNotes: z.boolean(),
 });
 export type Interview = z.infer<typeof interviewSchema>;
+
+/** The notepad holds plain text; generous for written answers, small enough to stream live. */
+export const MAX_INTERVIEW_NOTES = 20_000;
+
+/** LiveKit text-stream topic the candidate's notepad is sent on during the call. */
+export const NOTES_TOPIC = "jobify-notes";
+
+export const interviewNotesSchema = z.object({
+  notes: z.string(),
+  updatedAt: z.string().nullable(),
+  /** True for the candidate while the interview is open; read-only for everyone else. */
+  editable: z.boolean(),
+});
+export type InterviewNotes = z.infer<typeof interviewNotesSchema>;
+
+export const interviewNotesInput = z.object({
+  notes: z.string().max(MAX_INTERVIEW_NOTES, "The notepad is full"),
+});
+export type InterviewNotesInput = z.infer<typeof interviewNotesInput>;
 
 export const interviewListQuerySchema = z.object({
   scope: z.enum(["upcoming", "past"]).default("upcoming"),
