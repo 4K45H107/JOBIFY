@@ -84,7 +84,7 @@ async function Search({ params }: { params: Params }) {
         location: q.location ?? "",
         company: q.company ?? "",
         salary: q.salary?.toString() ?? "",
-        sort: q.sort,
+        sort: q.sort ?? (q.q ? "relevance" : "latest"),
       }}
     />
   );
@@ -130,6 +130,11 @@ async function Search({ params }: { params: Params }) {
         <SectionHeading id="results">
           {results.total} {results.total === 1 ? "job" : "jobs"} found
         </SectionHeading>
+        {results.partialMatch && (
+          <p className="text-sm text-fg-subtle">
+            No job matches all of your words, so these match some of them, closest first.
+          </p>
+        )}
         <JobCardList
           jobs={results.items}
           emptyMessage="No jobs match these filters. Try removing some."

@@ -22,7 +22,14 @@ export interface FilterValues {
 export function SearchFilters({ initial }: { initial: FilterValues }) {
   const router = useRouter();
   const [values, setValues] = useState(initial);
-  const set = (patch: Partial<FilterValues>) => setValues((v) => ({ ...v, ...patch }));
+  /** Until the person picks a sort, it follows the keyword: Best match with one, Latest without. */
+  const [sortChosen, setSortChosen] = useState(false);
+  const set = (patch: Partial<FilterValues>) =>
+    setValues((v) => {
+      const next = { ...v, ...patch };
+      if (!sortChosen && patch.q !== undefined) next.sort = next.q.trim() ? "relevance" : "latest";
+      return next;
+    });
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -33,7 +40,10 @@ export function SearchFilters({ initial }: { initial: FilterValues }) {
     if (values.location.trim()) params.set("location", values.location.trim());
     if (values.company.trim()) params.set("company", values.company.trim());
     if (values.salary) params.set("salary", values.salary);
-    if (values.sort !== "latest") params.set("sort", values.sort);
+    // The API defaults to Best match with keywords and Latest without; only send a real choice.
+    const defaultSort = values.q.trim() ? "relevance" : "latest";
+    if (values.sort !== defaultSort && !(values.sort === "relevance" && !values.q.trim()))
+      params.set("sort", values.sort);
     router.push(`/explore/jobs?${params}`);
   };
 
@@ -87,9 +97,15 @@ export function SearchFilters({ initial }: { initial: FilterValues }) {
         Sort by
         <select
           value={values.sort}
-          onChange={(e) => set({ sort: e.target.value })}
+          onChange={(e) => {
+            setSortChosen(true);
+            set({ sort: e.target.value });
+          }}
           className="h-11 rounded-[10px] border border-border bg-bg px-3 text-base text-fg"
         >
+          <option value="relevance" disabled={!values.q.trim()}>
+            Best match
+          </option>
           <option value="latest">Latest</option>
           <option value="trending">Trending</option>
           <option value="salary">Highest salary</option>
@@ -113,7 +129,7 @@ export function SearchFilters({ initial }: { initial: FilterValues }) {
               location: "",
               company: "",
               salary: "",
-              sort: "latest",
+              sort: values.q.trim() ? "relevance" : "latest",
             })
           }
         >
