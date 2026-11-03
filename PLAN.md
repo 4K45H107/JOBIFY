@@ -356,7 +356,8 @@ Rough estimates are for one developer working part-time. Every phase ends with s
 
 - [x] Coding test, part 1: a library of 30 problems (easy/medium/hard, at most 10 tests each), chosen instead of an MCQ; candidates write code in Monaco (Python, JavaScript, C++, Java) with autosave and submit it; the hiring team reads the code
 - [ ] Coding test, part 2: run against sample tests and grade on submit with a code runner (Judge0 or similar, isolated service). Design and hosting options: `docs/CODE_RUNNER.md`
-- [ ] Whiteboard (tldraw + Yjs) and shared code pad inside the interview room
+- [x] Interview notepad: the candidate writes answers in a panel beside the video, the interviewer watches it live (LiveKit text streams), and the notes are saved with the interview for both to read afterwards
+- [ ] Whiteboard (tldraw + Yjs) and shared code pad inside the interview room (both people editing)
 - [ ] Company reviews & ratings, platform admin panel
 - [ ] Meilisearch, if Postgres search isn't enough
 

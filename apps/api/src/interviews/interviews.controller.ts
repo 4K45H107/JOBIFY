@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Put, Query } from "@nestjs/common";
+import { ApiNoContentResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 import {
   interviewListQuerySchema,
+  interviewNotesInput,
+  interviewNotesSchema,
   interviewScheduleSchema,
   interviewSchema,
   interviewUpdateSchema,
@@ -19,6 +21,8 @@ class ListQueryDto extends createZodDto(interviewListQuerySchema) {}
 class InterviewDto extends createZodDto(interviewSchema) {}
 class InterviewListDto extends createZodDto(z.array(interviewSchema)) {}
 class JoinTokenDto extends createZodDto(joinTokenSchema) {}
+class NotesDto extends createZodDto(interviewNotesSchema) {}
+class NotesInputDto extends createZodDto(interviewNotesInput) {}
 
 @ApiTags("interviews")
 @Controller()
@@ -73,5 +77,25 @@ export class InterviewsController {
   @ApiOkResponse({ type: JoinTokenDto, description: "LiveKit token for the room while it's open." })
   join(@CurrentUser() user: RequestUser, @Param("id") id: string) {
     return this.interviews.join(user, id);
+  }
+
+  @Roles("SEEKER", "EMPLOYER")
+  @Get("interviews/:id/notes")
+  @ZodSerializerDto(NotesDto)
+  @ApiOkResponse({ type: NotesDto, description: "The candidate's notepad from the call." })
+  notes(@CurrentUser() user: RequestUser, @Param("id") id: string) {
+    return this.interviews.notes(user, id);
+  }
+
+  @Roles("SEEKER")
+  @Put("interviews/:id/notes")
+  @HttpCode(204)
+  @ApiNoContentResponse({ description: "Autosave from the candidate's notepad during the call." })
+  saveNotes(
+    @CurrentUser() user: RequestUser,
+    @Param("id") id: string,
+    @Body() body: NotesInputDto,
+  ) {
+    return this.interviews.saveNotes(user.id, id, body.notes);
   }
 }

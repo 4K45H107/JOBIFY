@@ -11,6 +11,7 @@ import {
   type Interview,
   type InterviewListQuery,
   type InterviewSchedule,
+  type InterviewNotes,
   type InterviewUpdate,
   isJoinable,
   JOIN_LATE_MIN,
@@ -211,6 +212,34 @@ export class InterviewsService {
     };
   }
 
+  // ─── notepad ─────────────────────────────────────────────────────────────
+
+  /** The call's notepad, for either person. Only the candidate edits it, while the room is open. */
+  async notes(viewer: Viewer, id: string): Promise<InterviewNotes> {
+    const interview = await this.loadForParty(viewer, id);
+    return {
+      notes: interview.notes ?? "",
+      updatedAt: interview.notesUpdatedAt?.toISOString() ?? null,
+      editable:
+        viewer.role === "SEEKER" &&
+        isJoinable(interview.scheduledAt, interview.durationMin, interview.status),
+    };
+  }
+
+  /** Autosave from the candidate's notepad. Locked once the interview ends or the room closes. */
+  async saveNotes(seekerId: string, id: string, notes: string): Promise<void> {
+    const interview = await this.loadForParty({ id: seekerId, role: "SEEKER" }, id);
+    if (interview.status === "COMPLETED" || interview.status === "CANCELLED")
+      throw new ConflictException("This interview has ended, so its notes can't change");
+    if (!isJoinable(interview.scheduledAt, interview.durationMin, interview.status))
+      throw new ForbiddenException("The notepad is only open during the interview");
+    // Only while still open: an End interview racing this save wins.
+    await this.prisma.interview.updateMany({
+      where: { id, status: { in: ["SCHEDULED", "LIVE"] } },
+      data: { notes, notesUpdatedAt: new Date() },
+    });
+  }
+
   // ─── helpers ─────────────────────────────────────────────────────────────
 
   /** The seeker of the application, or an active member of the hiring company; otherwise 404. */
@@ -286,6 +315,7 @@ export class InterviewsService {
         fullName: r.createdBy.employerProfile?.fullName ?? "Interviewer",
       },
       canJoin: viewer.role !== "ADMIN" && isJoinable(r.scheduledAt, r.durationMin, r.status),
+      hasNotes: Boolean(r.notes?.trim()),
     };
   }
 }

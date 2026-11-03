@@ -9,6 +9,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Interview, JoinToken } from "@jobify/shared";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/cn";
+import { InterviewNotepad } from "./InterviewNotepad";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 
@@ -28,6 +30,9 @@ export function InterviewRoom({
   const [ended, setEnded] = useState(false);
   /** Set while this person is ending it, so their own disconnect isn't shown as "ended". */
   const ending = useRef(false);
+  const [notepadOpen, setNotepadOpen] = useState(false);
+  /** The interviewer hasn't seen the candidate's latest writing yet. */
+  const [unseen, setUnseen] = useState(false);
 
   useEffect(() => {
     api<JoinToken>(`/interviews/${interview.id}/join`, { method: "POST" })
@@ -53,6 +58,25 @@ export function InterviewRoom({
           {interview.job.title} interview ({interview.stage})
         </h1>
         <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant={notepadOpen ? "primary" : "outline"}
+            aria-expanded={notepadOpen}
+            aria-controls="interview-notepad"
+            onClick={() => {
+              setNotepadOpen((v) => !v);
+              setUnseen(false);
+            }}
+            className="relative"
+          >
+            Notepad
+            {unseen && !notepadOpen && (
+              <span
+                aria-label="new writing"
+                className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-bg bg-heading-accent"
+              />
+            )}
+          </Button>
           {viewer === "EMPLOYER" && (
             <Button size="sm" variant="outline" onClick={end}>
               End interview
@@ -112,7 +136,24 @@ export function InterviewRoom({
           }}
           className="flex-1 overflow-hidden rounded-[10px]"
         >
-          <VideoConference />
+          {/* Video beside the notepad on wide screens, above it on phones. The notepad stays
+              mounted while hidden, so the interviewer keeps receiving what's written. */}
+          <div className="flex h-full min-h-0 flex-col gap-3 lg:flex-row">
+            <div className="min-h-[320px] min-w-0 flex-1">
+              <VideoConference />
+            </div>
+            <div
+              id="interview-notepad"
+              className={cn("h-72 shrink-0 lg:h-auto lg:w-[380px]", !notepadOpen && "hidden")}
+            >
+              <InterviewNotepad
+                interviewId={interview.id}
+                viewer={viewer}
+                seekerId={interview.seeker.id}
+                onActivity={() => !notepadOpen && setUnseen(true)}
+              />
+            </div>
+          </div>
         </LiveKitRoom>
       )}
     </div>

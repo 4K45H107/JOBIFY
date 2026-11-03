@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { Interview } from "@jobify/shared";
 import { CompanyLogo } from "@/components/company/CompanyLogo";
 import { cn } from "@/lib/cn";
+import { CallNotes } from "./CallNotes";
 import { untilLabel } from "@/lib/time";
 import { useHydrated } from "@/lib/use-hydrated";
 import { ClientTime } from "@/components/ui/ClientTime";
@@ -106,6 +107,7 @@ export function InterviewCard({
             <dt className="text-fg-subtle">Room</dt>
             <dd>Opens 10 minutes before the start</dd>
           </div>
+          {i.hasNotes && <CallNotes interviewId={i.id} />}
         </dl>
       )}
       {actions && (

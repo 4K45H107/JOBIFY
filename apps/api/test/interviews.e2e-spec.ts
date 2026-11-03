@@ -162,6 +162,37 @@ describe("Interviews (e2e)", () => {
     await seeker.post(`/api/interviews/${later.id}/join`).expect(403);
   });
 
+  it("lets the candidate write on the notepad during the call, and the interviewer read it", async () => {
+    const answer = "Q1: REST uses resources and verbs.\nQ2: I'd add an index.";
+    await seeker.put(`/api/interviews/${interviewId}/notes`).send({ notes: answer }).expect(204);
+
+    const mine = await seeker.get(`/api/interviews/${interviewId}/notes`).expect(200);
+    expect(mine.body).toMatchObject({ notes: answer, editable: true });
+    expect(mine.body.updatedAt).not.toBeNull();
+    const theirs = await boss.get(`/api/interviews/${interviewId}/notes`).expect(200);
+    expect(theirs.body).toMatchObject({ notes: answer, editable: false });
+
+    // Only the candidate types, only the two parties read, and it's capped.
+    await boss.put(`/api/interviews/${interviewId}/notes`).send({ notes: "x" }).expect(403);
+    await outsider.get(`/api/interviews/${interviewId}/notes`).expect(404);
+    await seeker
+      .put(`/api/interviews/${interviewId}/notes`)
+      .send({ notes: "x".repeat(20_001) })
+      .expect(400);
+
+    const list = await boss.get(`/api/interviews?jobId=${jobId}`).expect(200);
+    expect(list.body.find((i: { id: string }) => i.id === interviewId).hasNotes).toBe(true);
+  });
+
+  it("keeps the notepad closed until the room opens", async () => {
+    const later = (await boss.get(`/api/interviews?jobId=${jobId}`).expect(200)).body.find(
+      (i: { id: string }) => i.id !== interviewId,
+    );
+    await seeker.put(`/api/interviews/${later.id}/notes`).send({ notes: "early" }).expect(403);
+    const res = await seeker.get(`/api/interviews/${later.id}/notes`).expect(200);
+    expect(res.body).toMatchObject({ notes: "", editable: false, updatedAt: null });
+  });
+
   it("reschedules and cancels, notifying the seeker, and closes the room", async () => {
     const later = (await boss.get(`/api/interviews?jobId=${jobId}`).expect(200)).body.find(
       (i: { id: string }) => i.id !== interviewId,
@@ -199,6 +230,16 @@ describe("Interviews (e2e)", () => {
     const { roomName } = await prisma.interview.findUniqueOrThrow({ where: { id: interviewId } });
     expect(close).toHaveBeenCalledWith(roomName);
     close.mockRestore();
+  });
+
+  it("locks the notes when the interview ends, and keeps them to read", async () => {
+    await seeker
+      .put(`/api/interviews/${interviewId}/notes`)
+      .send({ notes: "too late" })
+      .expect(409);
+    const res = await seeker.get(`/api/interviews/${interviewId}/notes`).expect(200);
+    expect(res.body).toMatchObject({ editable: false });
+    expect(res.body.notes).toContain("Q1: REST");
   });
 
   it("still ends the interview when the video service can't be reached", async () => {
