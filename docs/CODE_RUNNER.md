@@ -137,8 +137,3 @@ On a Linux server you control (x86, at least 2 GB of RAM):
 
 The server then needs the usual care: security updates, restarts and disk space. That upkeep is the
 real cost of the free option.
-
-## Effort
-
-About a week of work, mostly the Run endpoint, grading with retries, the results panel and tests.
-The problems, test cases and screens already exist.
