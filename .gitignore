@@ -35,7 +35,10 @@ yarn-error.log*
 # generated Prisma client
 packages/db/src/generated
 
-# Neon CLI: linked project/branch IDs, and agent skills it installs (also installed user-wide)
+# Neon CLI: linked project/branch IDs, and the agent skills it installs (also installed user-wide)
 .neon
-.claude/skills
 skills-lock.json
+
+# Local AI assistant notes and settings (not part of the project)
+CLAUDE.md
+.claude/
