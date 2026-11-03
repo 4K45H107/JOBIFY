@@ -22,6 +22,8 @@ import { assertEmailVerified } from "../common/verified";
 import { PrismaService } from "../prisma/prisma.service";
 import { summaryInclude, toSummary } from "./job-summary";
 import { ageOn, scoreJob } from "./recommend";
+import { matchJobs } from "./search/match";
+import { parseSearch } from "./search/query";
 
 interface Viewer {
   id: string;
@@ -49,19 +51,16 @@ export class JobsService {
   async search(viewer: Viewer, query: JobSearchQuery): Promise<JobList> {
     const { q, type, workplace, location, company, companySlug, salary, sort, page, pageSize } =
       query;
+    // Keywords: full-text search with word forms, prefixes, synonyms and typo tolerance, ranked.
+    const terms = q ? parseSearch(q) : [];
+    const matches = terms.length ? await matchJobs(this.prisma, terms, startOfTodayUtc()) : null;
+    const scores = matches?.scores ?? null;
+    const partialMatch = matches?.partial || undefined;
+    const order = sort ?? (scores ? "relevance" : "latest");
     const where: Prisma.JobWhereInput = {
       AND: [
         openJobs(),
-        q
-          ? {
-              OR: [
-                { title: { contains: q, mode: "insensitive" } },
-                { description: { contains: q, mode: "insensitive" } },
-                { company: { name: { contains: q, mode: "insensitive" } } },
-                { skills: { some: { skill: { name: { equals: q, mode: "insensitive" } } } } },
-              ],
-            }
-          : {},
+        scores ? { id: { in: [...scores.keys()] } } : {},
         type.length ? { type: { in: type } } : {},
         workplace.length ? { workplace: { in: workplace } } : {},
         location
@@ -78,14 +77,34 @@ export class JobsService {
       ],
     };
 
+    if (scores && order === "relevance") {
+      // Best match: the other filters narrow the matches, then the score orders them.
+      const ids = (await this.prisma.job.findMany({ where, select: { id: true } }))
+        .map((j) => j.id)
+        .sort((a, b) => scores.get(b)! - scores.get(a)!);
+      const pageIds = ids.slice((page - 1) * pageSize, page * pageSize);
+      const jobs = await this.prisma.job.findMany({
+        where: { id: { in: pageIds } },
+        include: summaryInclude(viewer.id),
+      });
+      const byId = new Map(jobs.map((j) => [j.id, j]));
+      return {
+        items: pageIds.map((id) => toSummary(byId.get(id)!)),
+        total: ids.length,
+        page,
+        pageSize,
+        partialMatch,
+      };
+    }
+
     const orderBy: Prisma.JobOrderByWithRelationInput[] =
-      sort === "trending"
+      order === "trending"
         ? [
             { applications: { _count: "desc" } },
             { savedBy: { _count: "desc" } },
             { createdAt: "desc" },
           ]
-        : sort === "salary"
+        : order === "salary"
           ? [{ salaryMax: "desc" }, { createdAt: "desc" }]
           : [{ createdAt: "desc" }];
 
@@ -99,7 +118,7 @@ export class JobsService {
         take: pageSize,
       }),
     ]);
-    return { items: jobs.map(toSummary), total, page, pageSize };
+    return { items: jobs.map(toSummary), total, page, pageSize, partialMatch };
   }
 
   /** Scores recent open jobs against the seeker's preferences and skills. */

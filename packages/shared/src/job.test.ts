@@ -46,10 +46,16 @@ describe("jobSearchQuerySchema", () => {
     expect(jobSearchQuerySchema.parse({ type: "FULL_TIME,CONTRACT", page: "2" })).toMatchObject({
       type: ["FULL_TIME", "CONTRACT"],
       workplace: [],
-      sort: "latest",
       page: 2,
       pageSize: 10,
     });
+  });
+
+  it("leaves the sort to the API unless one is chosen, and accepts Best match", () => {
+    // The API uses relevance with keywords and latest without.
+    expect(jobSearchQuerySchema.parse({}).sort).toBeUndefined();
+    expect(jobSearchQuerySchema.parse({ q: "react", sort: "relevance" }).sort).toBe("relevance");
+    expect(jobSearchQuerySchema.safeParse({ sort: "random" }).success).toBe(false);
   });
 
   it("rejects unknown filter values", () => {

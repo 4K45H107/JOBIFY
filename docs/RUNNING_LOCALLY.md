@@ -95,6 +95,12 @@ or "I'm hiring".
 3. Back as the employer, the applicant shows "Submitted a coding solution" and **View code** opens
    it. Nothing runs the code yet; grading with a code runner comes later.
 
+**Search that forgives**
+
+_Explore › Jobs › Search_ (or the header box) understands word forms, common abbreviations and typos:
+try `front end developers`, `ML`, `wfh designer` or `reakt devloper`. Results are ranked best match
+first; when no job has every word, it shows the closest ones and says so.
+
 **Dashboard and search (either role)**
 
 1. _Profile_ opens on the **Dashboard**: your counts and a chart of the last 7 or 30 days. Hover

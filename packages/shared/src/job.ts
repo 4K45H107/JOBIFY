@@ -122,7 +122,8 @@ export const jobDetailSchema = jobSummarySchema.extend({
 });
 export type JobDetail = z.infer<typeof jobDetailSchema>;
 
-export const JobSort = z.enum(["latest", "trending", "salary"]);
+/** relevance ("Best match") ranks by how well a job matches the keywords; it's the default with q. */
+export const JobSort = z.enum(["relevance", "latest", "trending", "salary"]);
 export type JobSort = z.infer<typeof JobSort>;
 
 const csv = <T extends z.ZodType<string, string>>(item: T) =>
@@ -142,13 +143,17 @@ export const jobSearchQuerySchema = z.object({
   companySlug: z.string().trim().max(80).optional(),
   /** Jobs whose range reaches at least this salary. */
   salary: z.coerce.number().int().min(0).optional(),
-  sort: JobSort.default("latest"),
+  /** Defaults to relevance when there are keywords, latest otherwise. */
+  sort: JobSort.optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(10),
 });
 export type JobSearchQuery = z.infer<typeof jobSearchQuerySchema>;
 
-export const jobListSchema = paginated(jobSummarySchema);
+export const jobListSchema = paginated(jobSummarySchema).extend({
+  /** Keyword search: no job matched every word, so these match some of them. */
+  partialMatch: z.boolean().optional(),
+});
 export type JobList = z.infer<typeof jobListSchema>;
 
 export const recommendedJobSchema = jobSummarySchema.extend({
