@@ -8,7 +8,7 @@ import { passwordSchema } from "@jobify/shared";
 import { z } from "zod";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
-import { TextField } from "@/components/ui/TextField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { api } from "@/lib/api/client";
 import { errorMessage } from "@/lib/api/messages";
 
@@ -73,16 +73,14 @@ export function ResetPasswordForm({ token }: { token: string }) {
           </Link>
         </Alert>
       )}
-      <TextField
+      <PasswordField
         label="New password"
-        type="password"
         autoComplete="new-password"
         error={errors.password?.message}
         {...register("password")}
       />
-      <TextField
+      <PasswordField
         label="Confirm new password"
-        type="password"
         autoComplete="new-password"
         error={errors.confirm?.message}
         {...register("confirm")}

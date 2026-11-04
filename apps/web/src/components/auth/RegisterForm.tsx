@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { type AuthUser, registerSchema, type RegisterInput, type SignupRole } from "@jobify/shared";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
@@ -114,9 +115,8 @@ export function RegisterForm({ google: known }: { google?: boolean } = {}) {
         error={errors.email?.message}
         {...register("email")}
       />
-      <TextField
+      <PasswordField
         label="Password"
-        type="password"
         autoComplete="new-password"
         hint="At least 8 characters, with a letter and a number."
         error={errors.password?.message}

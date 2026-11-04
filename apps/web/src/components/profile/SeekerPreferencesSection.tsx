@@ -1,6 +1,12 @@
 "use client";
 
-import { type JobPreference, jobPreferenceSchema, type SeekerProfile } from "@jobify/shared";
+import {
+  JOB_TITLES,
+  type JobPreference,
+  jobPreferenceSchema,
+  LOCATIONS,
+  type SeekerProfile,
+} from "@jobify/shared";
 import { useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -60,6 +66,7 @@ export function SeekerPreferencesSection({
           onChange={(titles) => set({ titles })}
           max={10}
           placeholder="e.g. Frontend Developer"
+          suggestions={JOB_TITLES}
         />
         <ChipsInput
           label="Locations"
@@ -67,6 +74,7 @@ export function SeekerPreferencesSection({
           onChange={(locations) => set({ locations })}
           max={10}
           placeholder="e.g. Dhaka"
+          suggestions={LOCATIONS}
         />
         <CheckboxGroup
           legend="Job type"

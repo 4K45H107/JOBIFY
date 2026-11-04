@@ -4,15 +4,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { type SeekerProfile, seekerProfileUpdateSchema } from "@jobify/shared";
+import {
+  JOB_TITLES,
+  LOCATIONS,
+  type SeekerProfile,
+  seekerProfileUpdateSchema,
+  SKILLS,
+} from "@jobify/shared";
 import { z } from "zod";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { ChipsInput } from "@/components/ui/ChipsInput";
 import { SelectField, TextAreaField } from "@/components/ui/Field";
+import { SuggestField } from "@/components/ui/SuggestField";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
+import { searchSkills } from "@/lib/api/skills";
 import { EMPLOYMENT_LABELS, options } from "@/lib/labels";
 
 /** Form values are strings; the shared schema turns them into the API shape. */
@@ -161,8 +169,9 @@ export function SeekerInfoSection({
                 </option>
               ))}
             </SelectField>
-            <TextField
+            <SuggestField
               label="Current position"
+              suggestions={JOB_TITLES}
               error={errors.currentPosition?.message}
               {...register("currentPosition")}
             />
@@ -174,8 +183,9 @@ export function SeekerInfoSection({
               error={errors.experienceYears?.message}
               {...register("experienceYears")}
             />
-            <TextField
+            <SuggestField
               label="Location"
+              suggestions={LOCATIONS}
               error={errors.location?.message}
               {...register("location")}
             />
@@ -233,7 +243,6 @@ function SkillsCard({
   onSaved: (p: SeekerProfile) => void;
 }) {
   const [skills, setSkills] = useState(profile.skills);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const dirty = skills.join("|") !== profile.skills.join("|");
 
@@ -252,15 +261,7 @@ function SkillsCard({
   return (
     <Card>
       <CardHeader title="Skills" description="Used to recommend jobs that fit you." />
-      <div
-        className="flex flex-col gap-4"
-        onFocus={() => {
-          if (suggestions.length === 0)
-            void api<string[]>("/skills")
-              .then(setSuggestions)
-              .catch(() => {});
-        }}
-      >
+      <div className="flex flex-col gap-4">
         <ChipsInput
           label="Your skills"
           value={skills}
@@ -270,7 +271,8 @@ function SkillsCard({
           }}
           max={30}
           placeholder="Type a skill and press Enter"
-          suggestions={suggestions}
+          suggestions={SKILLS}
+          loadSuggestions={searchSkills}
         />
         <div className="flex items-center gap-3">
           <Button onClick={save} disabled={!dirty || status === "saving"}>

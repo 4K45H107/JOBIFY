@@ -9,11 +9,14 @@ import {
   type CompanyMember,
   COMPANY_SIZE_LABELS,
   UPLOAD_LIMITS,
+  cityOptions,
+  COUNTRIES,
 } from "@jobify/shared";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { FileButton } from "@/components/ui/FileButton";
+import { SuggestField } from "@/components/ui/SuggestField";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
 import { CompanyForm } from "./CompanyForm";
@@ -269,13 +272,15 @@ function BranchesCard({
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
           />
           <div className="grid grid-cols-2 gap-3">
-            <TextField
+            <SuggestField
               label="City"
+              suggestions={cityOptions(draft.country)}
               value={draft.city}
               onChange={(e) => setDraft({ ...draft, city: e.target.value })}
             />
-            <TextField
+            <SuggestField
               label="Country"
+              suggestions={COUNTRIES}
               value={draft.country}
               onChange={(e) => setDraft({ ...draft, country: e.target.value })}
             />

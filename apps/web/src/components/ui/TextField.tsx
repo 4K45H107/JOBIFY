@@ -5,10 +5,14 @@ export interface TextFieldProps extends React.InputHTMLAttributes<HTMLInputEleme
   label: string;
   error?: string;
   hint?: string;
+  /** Extra classes for the input itself (className styles the wrapper). */
+  inputClassName?: string;
+  /** Shown over or under the input: a button inside it, or a suggestion list. */
+  addon?: React.ReactNode;
 }
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, error, hint, className, id, ...props },
+  { label, error, hint, className, inputClassName, addon, id, ...props },
   ref,
 ) {
   const autoId = useId();
@@ -20,18 +24,22 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
       <label htmlFor={inputId} className="text-sm font-medium tracking-label text-fg-muted">
         {label}
       </label>
-      <input
-        ref={ref}
-        id={inputId}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        className={cn(
-          "h-11 rounded-[10px] border bg-bg px-3 text-base text-fg outline-none transition",
-          "placeholder:text-fg-subtle focus:border-outline focus:ring-2 focus:ring-chip/60",
-          error ? "border-heading-accent" : "border-border",
-        )}
-        {...props}
-      />
+      <div className="relative">
+        <input
+          ref={ref}
+          id={inputId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          className={cn(
+            "h-11 w-full rounded-[10px] border bg-bg px-3 text-base text-fg outline-none transition",
+            "placeholder:text-fg-subtle focus:border-outline focus:ring-2 focus:ring-chip/60",
+            error ? "border-heading-accent" : "border-border",
+            inputClassName,
+          )}
+          {...props}
+        />
+        {addon}
+      </div>
       {error ? (
         <p id={`${inputId}-error`} className="text-sm text-heading-accent">
           {error}
