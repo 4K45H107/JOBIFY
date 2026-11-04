@@ -10,3 +10,4 @@ export * from "./job";
 export * from "./notification";
 export * from "./profile";
 export * from "./roles";
+export * from "./suggestions";

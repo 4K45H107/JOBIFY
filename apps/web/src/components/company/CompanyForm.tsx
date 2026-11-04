@@ -9,11 +9,13 @@ import {
   type CompanyDetail,
   COMPANY_SIZE_LABELS,
   CompanySize,
+  LOCATIONS,
 } from "@jobify/shared";
 import { z } from "zod";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { SelectField, TextAreaField } from "@/components/ui/Field";
+import { SuggestField } from "@/components/ui/SuggestField";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
@@ -108,8 +110,9 @@ export function CompanyForm({
         error={errors.website?.message}
         {...register("website")}
       />
-      <TextField
+      <SuggestField
         label="Headquarters"
+        suggestions={LOCATIONS}
         placeholder="e.g. Dhaka, Bangladesh"
         error={errors.headquarters?.message}
         {...register("headquarters")}

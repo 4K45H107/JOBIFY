@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { type JobType, type Workplace } from "@jobify/shared";
+import { type JobType, LOCATIONS, type Workplace } from "@jobify/shared";
 import { Button } from "@/components/ui/Button";
 import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
+import { SuggestField } from "@/components/ui/SuggestField";
 import { TextField } from "@/components/ui/TextField";
 import { JOB_TYPE_LABELS, options, WORKPLACE_LABELS } from "@/lib/labels";
 
@@ -82,8 +83,9 @@ export function SearchFilters({ initial }: { initial: FilterValues }) {
         value={values.salary}
         onChange={(e) => set({ salary: e.target.value })}
       />
-      <TextField
+      <SuggestField
         label="Location"
+        suggestions={LOCATIONS}
         placeholder="City or country"
         value={values.location}
         onChange={(e) => set({ location: e.target.value })}

@@ -12,6 +12,10 @@ import {
   jobUpdateSchema,
   QuestionKind,
   Workplace,
+  cityOptions,
+  COUNTRIES,
+  JOB_TITLES,
+  SKILLS,
 } from "@jobify/shared";
 import { z } from "zod";
 import { Alert } from "@/components/ui/Alert";
@@ -19,8 +23,10 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { ChipsInput } from "@/components/ui/ChipsInput";
 import { SelectField, TextAreaField } from "@/components/ui/Field";
+import { SuggestField } from "@/components/ui/SuggestField";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
+import { searchSkills } from "@/lib/api/skills";
 import { JOB_TYPE_LABELS, WORKPLACE_LABELS } from "@/lib/labels";
 import { JobCard } from "./JobCard";
 
@@ -29,17 +35,6 @@ const QUESTION_LABELS: Record<QuestionKind, string> = {
   NUMBER: "Number",
   TEXT: "Short answer",
 };
-const COUNTRIES = [
-  "Bangladesh",
-  "India",
-  "Singapore",
-  "Germany",
-  "United Kingdom",
-  "Canada",
-  "United States",
-  "Netherlands",
-];
-
 /** What the inputs hold: strings for numbers and dates, "" for empty. */
 interface FormValues {
   title: string;
@@ -182,8 +177,9 @@ export function JobForm({
         />
         <form onSubmit={submit("OPEN")} noValidate className="grid gap-4 sm:grid-cols-2">
           {error && <Alert className="sm:col-span-2">{error}</Alert>}
-          <TextField
+          <SuggestField
             label="Job title"
+            suggestions={JOB_TITLES}
             className="sm:col-span-2"
             error={errors.title?.message}
             {...register("title")}
@@ -202,19 +198,17 @@ export function JobForm({
               </option>
             ))}
           </SelectField>
-          <TextField
+          <SuggestField
             label="Country"
-            list="countries"
+            suggestions={COUNTRIES}
+            openOnFocus
             error={errors.country?.message}
             {...register("country")}
           />
-          <datalist id="countries">
-            {COUNTRIES.map((c) => (
-              <option key={c} value={c} />
-            ))}
-          </datalist>
-          <TextField
+          <SuggestField
             label="City"
+            suggestions={cityOptions(values.country)}
+            openOnFocus
             hint="Leave empty for country-wide"
             error={errors.city?.message}
             {...register("city")}
@@ -277,6 +271,8 @@ export function JobForm({
                   onChange={field.onChange}
                   max={15}
                   placeholder="e.g. React"
+                  suggestions={SKILLS}
+                  loadSuggestions={searchSkills}
                 />
               )}
             />
