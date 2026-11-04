@@ -8,7 +8,7 @@ import { z } from "zod";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
-import { TextField } from "@/components/ui/TextField";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { api } from "@/lib/api/client";
 import { errorMessage } from "@/lib/api/messages";
 
@@ -174,24 +174,21 @@ function ChangePasswordCard() {
           ) : (
             <Alert>{message.text}</Alert>
           ))}
-        <TextField
+        <PasswordField
           label="Current password"
-          type="password"
           autoComplete="current-password"
           error={errors.currentPassword?.message}
           {...register("currentPassword")}
         />
-        <TextField
+        <PasswordField
           label="New password"
-          type="password"
           autoComplete="new-password"
           hint="At least 8 characters, with a letter and a number."
           error={errors.newPassword?.message}
           {...register("newPassword")}
         />
-        <TextField
+        <PasswordField
           label="Confirm new password"
-          type="password"
           autoComplete="new-password"
           error={errors.confirm?.message}
           {...register("confirm")}

@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { type AuthUser, loginSchema, type LoginInput } from "@jobify/shared";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { TextField } from "@/components/ui/TextField";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
@@ -76,9 +77,8 @@ export function LoginForm({ google: known }: { google?: boolean } = {}) {
         {...register("email")}
       />
       <div className="flex flex-col gap-1.5">
-        <TextField
+        <PasswordField
           label="Password"
-          type="password"
           autoComplete="current-password"
           error={errors.password?.message}
           {...register("password")}
